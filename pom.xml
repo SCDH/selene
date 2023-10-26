@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.wwu.scdh.annotations.selections</groupId>
+    <artifactId>selection-engine</artifactId>
+    <version>${revision}${changelist}</version>
+
+    <name>Selection Engine</name>
+    <url>https://zivgitlab.uni-muenster.de/SCDH/selectors/selection-engine</url>
+
+    <packaging>pom</packaging>
+
+    <developers>
+        <developer>
+            <name>Christian Lück</name>
+            <organization>SCDH, University of Münster</organization>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:${project.url}.git</connection>
+        <developerConnection>scm:git:${project.url}.git</developerConnection>
+        <url>scm:git:${project.url}.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
+
+    <properties>
+       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+       <compiler-plugin.version>3.8.1</compiler-plugin.version>
+       <failsafe.useModulePath>false</failsafe.useModulePath>
+       <maven.compiler.source>11</maven.compiler.source>
+       <maven.compiler.target>11</maven.compiler.target>
+       <maven.compiler.source>1.8</maven.compiler.source>
+       <maven.compiler.target>1.8</maven.compiler.target>
+       <antlr.version>4.12.0</antlr.version>
+       <antlr.test.version>1.21</antlr.test.version>
+       <slf4j.version>2.0.6</slf4j.version>
+       <saxon.version>10.2</saxon.version>
+       <xmlresolver.version>4.5.1</xmlresolver.version>
+       <xml-apis.version>1.4.01</xml-apis.version>
+       <junit.version>5.7.2</junit.version>
+    </properties>
+
+    <!-- dependencies needed everywhere -->
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>${saxon.version}</version>
+        </dependency>
+	<dependency>
+           <!-- required by Saxon >= 11 -->
+           <groupId>org.xmlresolver</groupId>
+           <artifactId>xmlresolver</artifactId>
+           <version>${xmlresolver.version}</version>
+	</dependency>
+	<dependency>
+	    <!-- a HTML parser -->
+	    <groupId>nu.validator</groupId>
+	    <artifactId>htmlparser</artifactId>
+	    <version>1.4.16</version>
+	</dependency>
+	<dependency>
+	   <groupId>xml-apis</groupId>
+	   <artifactId>xml-apis</artifactId>
+	   <version>${xml-apis.version}</version>
+	</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <modules>
+       <module>core</module>
+       <module>mapping</module>
+    </modules>
+
+    <build>
+       <plugins>
+	  <plugin>
+             <groupId>org.codehaus.mojo</groupId>
+             <artifactId>flatten-maven-plugin</artifactId>
+             <version>1.5.0</version>
+             <configuration>
+             </configuration>
+             <executions>
+		<!-- pom flattening -->
+		<execution>
+		   <id>flatten</id>
+		   <phase>process-resources</phase>
+		   <goals>
+		      <goal>flatten</goal>
+		   </goals>
+		</execution>
+		<!-- ensure proper cleanup -->
+		<execution>
+		   <id>flatten.clean</id>
+		   <phase>clean</phase>
+		   <goals>
+		      <goal>clean</goal>
+		   </goals>
+		</execution>
+             </executions>
+	  </plugin>
+       </plugins>
+    </build>
+
+</project>

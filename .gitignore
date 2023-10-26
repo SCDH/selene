@@ -1,0 +1,11 @@
+# editor backup files
+*~
+
+# maven build artifacts and automatically set up files
+target
+.settings
+.classpath
+.project
+*.xpr
+*.flattened-pom.xml
+xspec

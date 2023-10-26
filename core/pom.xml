@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+       <groupId>de.wwu.scdh.annotations.selections</groupId>
+       <artifactId>selection-engine</artifactId>
+       <version>${revision}${changelist}</version>
+    </parent>
+
+    <artifactId>selection-engine-core</artifactId>
+    <name>Selection Engine Core</name>
+
+    <build>
+       <plugins>
+
+          <!-- configure test reporter for JUnit 5 -->
+          <plugin>
+             <artifactId>maven-surefire-plugin</artifactId>
+             <version>2.22.2</version>
+             <configuration>
+                <!-- set to false for debugging! -->
+                <trimStackTrace>true</trimStackTrace>
+             </configuration>
+          </plugin>
+
+	 <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>flatten-maven-plugin</artifactId>
+            <version>1.5.0</version>
+            <configuration>
+            </configuration>
+            <executions>
+	       <!-- pom flattening -->
+	       <execution>
+		  <id>flatten</id>
+		  <phase>process-resources</phase>
+		  <goals>
+		     <goal>flatten</goal>
+		  </goals>
+	       </execution>
+	       <!-- ensure proper cleanup -->
+	       <execution>
+		  <id>flatten.clean</id>
+		  <phase>clean</phase>
+		  <goals>
+		     <goal>clean</goal>
+		  </goals>
+	       </execution>
+            </executions>
+	 </plugin>
+
+       </plugins>
+    </build>
+
+</project>
