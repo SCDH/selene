@@ -47,4 +47,12 @@ public class TestDOMResource {
 	assertThrows(Exception.class, () -> DOMResource.fromXML(GESANG_HTML, null, PROC));
     }
 
+    @Test
+    void testGetPreImage() throws IOException, SaxonApiException {
+	// without any validation: test the getPreImage() getter
+	DOMResource preimage = DOMResource.fromXML(GESANG_XML, null, PROC);
+	DOMResource resource = DOMResource.fromHTML(GESANG_HTML, preimage, PROC);
+	assertEquals(preimage, resource.getPreImage());
+    }
+
 }
