@@ -110,6 +110,39 @@ public class DOMResource implements Resource {
 
 
     /**
+     * Make a {@link DOMResource} from XML input given as an {@link
+     * InputStream}.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param input  {@link InputStream} with the XML document
+     * @param preimage  the preimage of the resource if it is a projection of a preimage
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
+     */
+    public static DOMResource fromXML(URI uri, InputStream inputStream, Resource preimage, Processor processor) throws SaxonApiException {
+	Source source = new StreamSource(inputStream);
+	source.setSystemId(uri.toString());
+	return new DOMResource(uri, source, preimage, processor);
+    }
+
+    /**
+     * Same as {@link DOMResource.fromXML(URI, InputStream,
+     * Processor)}, but gets the input from the URI.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param preimage  the preimage of the resource if it is a projection of a preimage
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
+     */
+    public static DOMResource fromXML(URI uri, Resource preimage, Processor processor) throws IOException, SaxonApiException {
+	InputStream in = uri.toURL().openStream();
+	return fromXML(uri, in, preimage, processor);
+    }
+
+
+    /**
      * {@inheritDoc}
      */
     @Override

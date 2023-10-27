@@ -34,4 +34,17 @@ public class TestDOMResource {
 	assertThrows(Exception.class, () -> DOMResource.fromHTML(GESANG_XML, null, PROC));
     }
 
+    @Test
+    void testFromXMLonGesangHtml() throws IOException, SaxonApiException {
+	// parsing XML with the XML parser does not fail
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	assertEquals(resource.getUri(), GESANG_XML);
+    }
+
+    @Test
+    void testFromXMLonGesangXml() throws IOException, SaxonApiException {
+	// XML parser is not suitable for HTML
+	assertThrows(Exception.class, () -> DOMResource.fromXML(GESANG_HTML, null, PROC));
+    }
+
 }
