@@ -7,13 +7,13 @@ import java.net.URI;
  * normalizing selections and testing if a selection is normalized.
  *
  * For a normalizable selection, a unique URI can be generated. This
- * URI may components of the normalized form of the selector and the
- * URI of the web resource.
+ * URI may contain components of the normalized form of the selector
+ * and the URI of the web resource.
  */
 public interface NormalizableSelection<S extends Selector> {
 
     /**
-     * Returns the normalized form of the selection.
+     * Returns the normalized form of the selector.
      *
      */
     S normalize();
