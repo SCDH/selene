@@ -33,7 +33,7 @@ public class DOMResource implements Resource {
     private final Processor processor;
 
     /**
-     * Create a new {@link HTMLResource}.
+     * Create a new {@link DOMResource}.
      *
      * @param uri a {@link URI} identifying the resource
      * @param document  the document node (root node)
@@ -48,11 +48,14 @@ public class DOMResource implements Resource {
     }
 
     /**
-     * Create a new {@link DOMResource} from a parsed JAXP {@link
-     * Source}. The source is fed to Saxon's {@link
-     * DocumentBuilder}. Please notice the information on JAXP source
-     * types in the Saxon documentation: {@link
-     * https://www.saxonica.com/html/documentation10/sourcedocs/jaxpsources.html}.
+     * Create a new {@link DOMResource} from a parsed JAXP
+     *
+     * {@link Source}. The source is fed to Saxon's
+     *
+     * {@link DocumentBuilder}. Please notice the information on JAXP
+     * source types in the <a
+     * href="https://www.saxonica.com/html/documentation10/sourcedocs/jaxpsources.html">Saxon
+     * documentation</a>.
      *
      * @param uri a {@link URI} identifying the resource
      * @param source  the document as a JAXP {@link Source}
@@ -77,7 +80,7 @@ public class DOMResource implements Resource {
      * HTML input, which may be tag soup.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param input  {@link InputStream} with the HTML document
+     * @param inputStream  {@link InputStream} with the HTML document
      * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
@@ -94,8 +97,11 @@ public class DOMResource implements Resource {
     }
 
     /**
-     * Same as {@link DOMResource.fromHTML(URI, InputStream,
-     * Processor)}, but gets the input from the URI.
+     * Same as
+     *
+     * {@link DOMResource#fromHTML(URI, InputStream, Resource, Processor)},
+     *
+     * but gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
      * @param preimage  the preimage of the resource if it is a projection of a preimage
@@ -110,11 +116,12 @@ public class DOMResource implements Resource {
 
 
     /**
-     * Make a {@link DOMResource} from XML input given as an {@link
-     * InputStream}.
+     * Make a {@link DOMResource} from XML input given as an
+     *
+     * {@link InputStream}.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param input  {@link InputStream} with the XML document
+     * @param inputStream  {@link InputStream} with the XML document
      * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
@@ -127,8 +134,10 @@ public class DOMResource implements Resource {
     }
 
     /**
-     * Same as {@link DOMResource.fromXML(URI, InputStream,
-     * Processor)}, but gets the input from the URI.
+     * Same as
+     *
+     * {@link DOMResource#fromXML(URI, InputStream, Resource, Processor)}, but
+     * gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
      * @param preimage  the preimage of the resource if it is a projection of a preimage
