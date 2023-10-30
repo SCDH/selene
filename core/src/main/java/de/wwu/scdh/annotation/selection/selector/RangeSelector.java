@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import de.wwu.scdh.annotation.selection.Selector;
 import de.wwu.scdh.annotation.selection.Point;
 import de.wwu.scdh.annotation.selection.Range;
-import de.wwu.scdh.annotation.selection.Resource;
 import de.wwu.scdh.annotation.selection.IsomorphicallyNormalizable;
 import de.wwu.scdh.annotation.selection.SelectorException;
 
@@ -23,23 +22,15 @@ public class RangeSelector<S1 extends Selector & Point & IsomorphicallyNormaliza
 
     protected final S2 end;
 
-    protected final Resource resource;
-
     protected boolean hasNormalizedForm = false;
 
     protected boolean isNormalizedChecked = false;
 
     protected RangeSelector<S1, S2> normalizedRange = null;
 
-    public RangeSelector(S1 start, S2 end, Resource resource) {
-	this.resource = resource;
+    public RangeSelector(S1 start, S2 end) {
 	this.start = start;
 	this.end = end;
-    }
-
-    @Override
-    public Resource getResource() {
-	return resource;
     }
 
     @Override
@@ -57,7 +48,7 @@ public class RangeSelector<S1 extends Selector & Point & IsomorphicallyNormaliza
 	S1 normalizedStart = this.start.normalize();
 	S2 normalizedEnd = this.end.normalize();
 	this.normalizedRange = new RangeSelector<S1, S2>
-	    (normalizedStart, normalizedEnd, this.resource);
+	    (normalizedStart, normalizedEnd);
 	return this.normalizedRange;
     }
 

@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import de.wwu.scdh.annotation.selection.Selector;
 import de.wwu.scdh.annotation.selection.Point;
-import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.IsomorphicallyNormalizable;
 import de.wwu.scdh.annotation.selection.SelectorException;
 
@@ -21,20 +21,19 @@ public class XPathRefinedByCharScheme implements Selector, Point, Isomorphically
 
     protected final int position;
 
-    protected final Resource resource;
+    protected final DOMResource resource;
 
     protected boolean hasNormalizedForm = false;
 
     protected boolean isNormalizedChecked = false;
 
-    public XPathRefinedByCharScheme(String xpath, int position, Resource resource) {
+    public XPathRefinedByCharScheme(String xpath, int position, DOMResource resource) {
 	this.xpath = xpath;
 	this.position = position;
 	this.resource = resource;
     }
 
-    @Override
-    public Resource getResource() {
+    public DOMResource getResource() {
 	return resource;
     }
 

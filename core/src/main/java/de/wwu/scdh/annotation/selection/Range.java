@@ -8,11 +8,6 @@ package de.wwu.scdh.annotation.selection;
 public interface Range {
 
     /**
-     * Returns the web {@link Resource}.
-     */
-    Resource getResource();
-
-    /**
      * Returns the start {@link Point}.
      */
     Point getStart();

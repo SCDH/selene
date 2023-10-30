@@ -8,11 +8,6 @@ package de.wwu.scdh.annotation.selection;
 public interface Point {
 
     /**
-     * Returns the web resource.
-     */
-    Resource getResource();
-
-    /**
      * Returns the path selecting a fragment.
      */
     String getPath();
