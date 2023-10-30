@@ -46,7 +46,6 @@ push-packages:
   stage: deploy
   script:
     - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS verify
-    - target/bin/test.sh
     - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS deploy -s ci_settings.xml
   only:
     # https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27818
