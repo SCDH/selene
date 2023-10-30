@@ -1,0 +1,70 @@
+variables:
+  JAVA_DOCKER_IMAGE: "$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/eclipse-temurin:17-alpine"
+  MAVEN_OPTS: >-
+    -Dhttps.protocols=TLSv1.2
+    -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository
+    -Dorg.slf4j.simpleLogger.showDateTime=true
+    -Djava.awt.headless=true
+  MAVEN_CLI_OPTS: >-
+    --batch-mode
+    --errors
+    --fail-at-end
+    --show-version
+    --no-transfer-progress
+    -DinstallAtEnd=true
+    -DdeployAtEnd=true
+
+# image: openjdk:17 # openjdk:* is deprecated! See https://hub.docker.com/_/openjdk
+image: $JAVA_DOCKER_IMAGE
+
+cache:
+  paths:
+    - $CI_PROJECT_DIR/.m2/repository
+
+stages:
+  - build
+  - test
+  - deploy
+
+# Verify merge requests
+test:
+  stage: test
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS clean verify
+
+javadocs:
+  stage: build
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS javadoc:aggregate
+  artifacts:
+    paths:
+      - target/site/apidocs
+
+# deploy using ci_settings.xml as maven settings
+# see https://gitlab.com/help/user/packages/maven_repository/index.md#creating-maven-packages-with-gitlab-cicd-using-maven
+push-packages:
+  stage: deploy
+  script:
+    - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS verify
+    - target/bin/test.sh
+    - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS deploy -s ci_settings.xml
+  only:
+    # https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27818
+    variables:
+      - $CI_COMMIT_TAG =~ /^\d+.\d+.\d+$/
+
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - ls -la
+    - cp -rv target/site/* public/
+  needs:
+    - javadocs
+  artifacts:
+    paths:
+      - public
+  only:
+    # https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27818
+    variables:
+      - $CI_COMMIT_TAG =~ /^\d+.\d+.\d+$/
