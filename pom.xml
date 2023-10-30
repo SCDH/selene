@@ -50,6 +50,7 @@
        <xmlresolver.version>4.5.1</xmlresolver.version>
        <xml-apis.version>1.4.01</xml-apis.version>
        <junit.version>5.7.2</junit.version>
+       <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
     </properties>
 
     <!-- dependencies needed everywhere -->
@@ -99,6 +100,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+       <repository>
+	  <id>gitlab-maven</id>
+	  <url>${distribution.url}</url>
+       </repository>
+    </repositories>
+
+    <!-- get the build artifacts into the gitlab maven package registry -->
+    <distributionManagement>
+       <repository>
+	  <id>gitlab-maven</id>
+	  <url>${distribution.url}</url>
+       </repository>
+       <snapshotRepository>
+	  <id>gitlab-maven</id>
+	  <url>${distribution.url}</url>
+       </snapshotRepository>
+    </distributionManagement>
 
     <modules>
        <module>core</module>
