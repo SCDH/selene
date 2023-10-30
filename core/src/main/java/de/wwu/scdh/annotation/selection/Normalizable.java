@@ -19,18 +19,18 @@ public interface Normalizable {
      * Returns the normalized form of the component.
      *
      */
-    Selector normalize();
+    Selector normalize() throws SelectorException;
 
     /**
      * A predicate to test whether the component is in normalized
      * form.
      */
-    boolean isNormalized();
+    boolean isNormalized() throws SelectorException;
 
     /**
      * Returns a URI based on the normalized form.
      *
      */
-    URI toUri();
+    URI toUri() throws SelectorException;
 
 }
