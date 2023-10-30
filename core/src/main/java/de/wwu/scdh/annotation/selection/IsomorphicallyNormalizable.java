@@ -16,23 +16,14 @@ import java.net.URI;
  *
  * @see Normalizable
  */
-public interface IsomorphicallyNormalizable<S extends Selector> {
+public interface IsomorphicallyNormalizable<S extends Selector> extends Normalizable {
 
     /**
      * Returns the normalized form.
      *
      */
+    //@Override
     S normalize() throws SelectorException;
 
-    /**
-     * A predicate to test whether the component is in normalized
-     * form.
-     */
-    boolean isNormalized() throws SelectorException;
-
-    /**
-     * Returns a {@link URI} (part) for the normalized component.
-     */
-    URI toUri() throws SelectorException;
 
 }
