@@ -15,3 +15,5 @@ Generating Java Docs, which will be in `target/site/apidocs`:
 ```{shell}
 ./mvnw javadoc:aggregate
 ```
+
+[Javadocs are online](https://scdh.zivgitlabpages.uni-muenster.de/selectors/selection-engine/apidocs/) for the latest release.
