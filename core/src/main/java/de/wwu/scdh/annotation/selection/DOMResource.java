@@ -167,4 +167,21 @@ public class DOMResource implements Resource {
 	return this.uri;
     }
 
+    /**
+     * Returns the document node of the DOM resource.
+     * @return an {@link XdmNode}
+     */
+    public XdmNode getDOM() {
+	return this.document;
+    }
+
+    /**
+     * Returns the Saxon {@link Processor} the resource was parsed
+     * with.
+     * @return a Saxon {@link Processor}
+     */
+    public Processor getProcessor() {
+	return this.processor;
+    }
+
 }
