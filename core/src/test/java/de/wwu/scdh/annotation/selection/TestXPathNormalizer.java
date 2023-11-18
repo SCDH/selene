@@ -74,4 +74,65 @@ public class TestXPathNormalizer {
 	assertEquals(6, result.position());
     }
 
+    @Test
+    public void testPathExpressionXPathVerse1() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	String xpath;
+	xpath = "id('v2')/text()[2]";
+	NodePositionPair result = normalizer.getTextNodeAtPosition(xpath, 6);
+	// this selects a text node
+	assertEquals("TEXT", result.node().getNodeKind().name());
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]", getXPath(result.node()));
+	assertEquals("l", result.node().getParent().getNodeName().getLocalName());
+	assertEquals(6, result.position());
+    }
+
+    @Test
+    public void testPathExpressionXPathVerse1Char10() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	String xpath;
+	xpath = "id('v2')";
+	NodePositionPair result = normalizer.getTextNodeAtPosition(xpath, 10);
+	// this selects a text node
+	assertEquals("TEXT", result.node().getNodeKind().name());
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", getXPath(result.node()));
+	assertEquals("rdg", result.node().getParent().getNodeName().getLocalName());
+	assertEquals(1, result.position());
+    }
+
+    @Test
+    public void testPathExpressionXPathVerse1Char16() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	String xpath;
+	xpath = "id('v2')";
+	NodePositionPair result = normalizer.getTextNodeAtPosition(xpath, 16);
+	// this selects a text node
+	assertEquals("TEXT", result.node().getNodeKind().name());
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]", getXPath(result.node()));
+	assertEquals("l", result.node().getParent().getNodeName().getLocalName());
+	assertEquals(3, result.position());
+    }
+
+    @Test
+    public void testPathExpressionXPathVerse1CaesuraThrows() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	String xpath;
+	xpath = "id('v1')/*:caesura[1]";
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(xpath, 0));
+    }
+
+    @Test
+    public void testPathExpressionXPathVerse1Char100Throws() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	String xpath;
+	xpath = "id('v1')";
+	// NodePositionPair result = normalizer.getTextNodeAtPosition(xpath, 100);
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(xpath, 100));
+    }
+
 }
