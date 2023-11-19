@@ -20,27 +20,54 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An {@link XPathNormalizer} offers methods for normalizing an XPath
- * selector which may be refined by the RFC5147 character scheme.
+ * selectors. The constructor takes a {@link DOMResource} on the base
+ * of which the normalization of subsequent calls of normalization
+ * methods is performed.<P>
  *
+ * XPath expressions to be normalized may be arbitrary XPath 4.0
+ * expressions which select a single node from the
+ * {@link DOMResource}. Expressions selecting not exactly one node
+ *  result in an {@link SelectorException}.
  */
 public abstract class XPathNormalizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizer.class);
 
-    // public record XPathPositionPair(String xpath, int position) {};
-    // public record NodePositionPair(XdmNode node, int position) {};
-    
     protected final DOMResource resource;
 
+    /**
+     * Make a new {@link XPathNormalizer} for a {@link DOMResource}.
+     * @param resource  the {@link DOMResource} on the base of which the normalization is done
+     */
     public XPathNormalizer(DOMResource resource) {
 	this.resource = resource;
     }
 
+    /**
+     * Same as
+     * {@link #normalizeXPathRefinedByCharScheme(String,int,boolean)},
+     * but returns an escaped string.
+     */
     public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position)
 	throws SelectorException {
 	return normalizeXPathRefinedByCharScheme(xpath, position, true);
     }
 
+    /**
+     * Normalize an XPath Selector refined by an RFC5147 character
+     * scheme. The position must be a valid character position
+     * *inside* the fragment selected by the XPath expression. If the
+     * fragment's text (its concatenated text nodes) is shorter than
+     * the position's value, a {@link SelectorException} is thrown.<P>
+     *
+     * In general, this method will result in a recalculated pair of
+     * XPath *and* position.
+     *
+     * @param xpath  a XPath expression selecting a single node
+     * @param position  the inter-character position following the character scheme from RFC5147
+     * @param escaped   whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
+     * @return a {@link Pair} of XPath expression and character scheme position
+     */
     public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean escaped)
 	throws SelectorException {
 	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position);
@@ -49,8 +76,33 @@ public abstract class XPathNormalizer {
 	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
     }
 
+    /**
+     * This abstract method must be implemented by normalizers. It
+     * returns the normalized path to the node given as argument.
+     *
+     * @param node  an {@link XdmNode} to which the normlized path must be generated to
+     * @param escaped  whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
+     * @return the normalized XPath expression as a String
+     */
     protected abstract String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException;
 
+
+    /**
+     * This method gets the node where the position of an
+     * character-scheme-refined XPath selector points to. Either this
+     * node is a text node, or the selector is invalid in the context
+     * of the current document. In general, the resulting position is
+     * not the same as the input position.<P>
+     *
+     * A {@link SelectorException} is thrown if the xpath does not
+     * select exactly one node or if the position is not inside
+     * the fragment (subtree) selected by the xpath.<P>
+
+     * @param xpath  the XPath part of the XPath selector
+     * @param position  the position following the character scheme of RFC5147
+     * @throws {@link SelectorException}
+     * @return a pair of node and position
+     */
     protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();

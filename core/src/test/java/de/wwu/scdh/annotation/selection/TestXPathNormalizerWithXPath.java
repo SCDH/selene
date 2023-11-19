@@ -76,7 +76,7 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testPathExpressionClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.PATH_EXPRESSION_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
@@ -90,7 +90,7 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testPathExpressionClarkXPathOnVerse2AppChar6() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.PATH_EXPRESSION_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
