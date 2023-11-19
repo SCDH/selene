@@ -33,7 +33,7 @@ public class TestXPathNormalizer {
 	    super(resource);
 	}
 	@Override
-	protected String getNormalizedXPath(XdmNode node) throws SelectorException {
+	protected String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException {
 	    return "";
 	}
     }
