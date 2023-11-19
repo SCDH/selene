@@ -1,6 +1,8 @@
 package de.wwu.scdh.annotation.selection;
 
 import java.io.IOException;
+import java.util.Iterator;
+
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +13,8 @@ import java.nio.file.Paths;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 
+import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.Axis;
 
 public class TestDOMResource {
 
@@ -53,6 +57,22 @@ public class TestDOMResource {
 	DOMResource preimage = DOMResource.fromXML(GESANG_XML, null, PROC);
 	DOMResource resource = DOMResource.fromHTML(GESANG_HTML, preimage, PROC);
 	assertEquals(preimage, resource.getPreImage());
+    }
+
+    @Test
+    void testHTMLParserOnGesangHtml() throws IOException, SaxonApiException {
+	// assert that the HTML parser provides a correct DOM
+	DOMResource resource = DOMResource.fromHTML(GESANG_HTML, null, PROC);
+	assertEquals(resource.getUri(), GESANG_HTML);
+	// correct document node
+	assertEquals("DOCUMENT", resource.getDOM().getNodeKind().name());
+	// test other nodes
+	Iterator<XdmNode> nodes = resource.getDOM().axisIterator(Axis.DESCENDANT);
+	XdmNode node;
+	// html root node
+	node = nodes.next();
+	assertEquals("ELEMENT", node.getNodeKind().name());
+	assertEquals("html", node.getNodeName().getLocalName());
     }
 
 }
