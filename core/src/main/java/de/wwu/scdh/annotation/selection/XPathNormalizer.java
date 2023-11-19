@@ -12,6 +12,9 @@ import net.sf.saxon.s9api.Axis;
 import net.sf.saxon.s9api.XdmNodeKind;
 import net.sf.saxon.s9api.XPathSelector;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,17 +36,17 @@ public abstract class XPathNormalizer {
 	this.resource = resource;
     }
 
-    public XPathPositionPair normalizeXPathRefinedByCharScheme(String xpath, int position)
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position)
 	throws SelectorException {
-	NodePositionPair textNode = getTextNodeAtPosition(xpath, position);
+	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position);
 	// call the normalization function
-	String normalizedXPath = getNormalizedXPath(textNode.node());
-	return new XPathPositionPair(normalizedXPath, textNode.position());
+	String normalizedXPath = getNormalizedXPath(textNode.getLeft());
+	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
     }
 
     protected abstract String getNormalizedXPath(XdmNode node) throws SelectorException;
 
-    protected NodePositionPair getTextNodeAtPosition(String xpath, int position) throws SelectorException {
+    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();
 	try {
@@ -91,7 +94,7 @@ public abstract class XPathNormalizer {
 						"'");
 		} else {
 		    LOG.debug("found node containing position char={} in XPath '{}'", position, xpath);
-		    return new NodePositionPair(node, position - charsEaten);
+		    return new ImmutablePair<XdmNode, Integer>(node, position - charsEaten);
 		}
 	    }
 	} catch (SaxonApiException e) {
