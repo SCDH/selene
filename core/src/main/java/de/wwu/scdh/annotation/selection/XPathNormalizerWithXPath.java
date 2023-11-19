@@ -29,7 +29,7 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
     }
 
     @Override
-    protected String getNormalizedXPath(XdmNode node) throws SelectorException {
+    protected String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException {
 	XPathCompiler compiler = this.resource.getProcessor().newXPathCompiler();
 	XdmValue nodes;
 	try {
@@ -54,7 +54,11 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
 					xpath +
 					"' did not return an atomic value");
 	} else {
-	    return nodes.itemAt(0).getStringValue();
+	    if (escaped) {
+		return nodes.itemAt(0).getStringValue();
+	    } else {
+		return nodes.itemAt(0).getUnderlyingValue().getUnicodeStringValue().toString();
+	    }
 	}
     }
 

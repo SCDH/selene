@@ -38,13 +38,18 @@ public abstract class XPathNormalizer {
 
     public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position)
 	throws SelectorException {
+	return normalizeXPathRefinedByCharScheme(xpath, position, true);
+    }
+
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean escaped)
+	throws SelectorException {
 	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position);
 	// call the normalization function
-	String normalizedXPath = getNormalizedXPath(textNode.getLeft());
+	String normalizedXPath = getNormalizedXPath(textNode.getLeft(), escaped);
 	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
     }
 
-    protected abstract String getNormalizedXPath(XdmNode node) throws SelectorException;
+    protected abstract String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException;
 
     protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position) throws SelectorException {
 	Processor proc = resource.getProcessor();
