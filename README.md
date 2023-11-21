@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Java required: Java 1.8+ or OpenJDK 11+
+Java version required: OpenJDK 17+
 
 Tesing and building:
 
