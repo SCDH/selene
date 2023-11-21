@@ -10,6 +10,9 @@ Tesing and building:
 ./mvnw clean test package
 ```
 
+After building with Maven, there is a command line interface in
+`cli/target/bin/oasel`.
+
 Generating Java Docs, which will be in `target/site/apidocs`:
 
 ```{shell}
