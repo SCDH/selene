@@ -67,17 +67,31 @@ public class Normalize implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+	// make relative paths absolute by resolving against the URI of the current working director
+	URI resourceResolved;
+	if (resource.isAbsolute()) {
+	    resourceResolved = resource;
+	} else {
+	    try {
+		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+		resourceResolved = currentDir.resolve(resource);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		return 1;
+	    }
+	}
+	// parse the resource
 	DOMResource dom;
 	if (parser.equals(DOMParser.XML)) {
 	    try {
-		dom = DOMResource.fromXML(resource, null, PROC);
+		dom = DOMResource.fromXML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 1;
 	    }
 	} else if (parser.equals(DOMParser.HTML)) {
 	    try {
-		dom = DOMResource.fromHTML(resource, null, PROC);
+		dom = DOMResource.fromHTML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 1;
