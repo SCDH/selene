@@ -105,7 +105,7 @@ public class Normalize implements Callable<Integer> {
 	System.err.printf("normalizing %s refined by char=%s\n", xpath, character);
 
 	XPathNormalizerWithXPath xpathNormalizer;
-	if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
+	if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
 	    try {
 		xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	    } catch (Exception e) {
