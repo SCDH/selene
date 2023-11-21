@@ -18,16 +18,16 @@ import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
 
 
-@Command(name = "normalize", mixinStandardHelpOptions = true)
+@Command(name = "normalize",
+	 mixinStandardHelpOptions = true,
+	 description = "normalize an Open Annotations selector")
 public class Normalize implements Callable<Integer> {
 
     private static final Processor PROC = new Processor();
 
-
-
     enum DOMParser {
-	XML_PARSER,
-	HTML_PARSER
+	XML,
+	HTML
     }
 
     enum Normalizer {
@@ -67,9 +67,19 @@ public class Normalize implements Callable<Integer> {
     public Integer call() throws Exception {
 	DOMResource dom;
 	if (parser.equals(DOMParser.XML_PARSER)) {
-	    dom = DOMResource.fromXML(resource, null, PROC);
+	    try {
+		dom = DOMResource.fromXML(resource, null, PROC);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		return 1;
+	    }
 	} else if (parser.equals(DOMParser.HTML_PARSER)) {
-	    dom = DOMResource.fromHTML(resource, null, PROC);
+	    try {
+		dom = DOMResource.fromHTML(resource, null, PROC);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		return 1;
+	    }
 	} else {
 	    System.err.printf("unknown parser %s\n", parser.toString());
 	    return 1;
@@ -80,15 +90,30 @@ public class Normalize implements Callable<Integer> {
 
 	XPathNormalizerWithXPath xpathNormalizer;
 	if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
-	    xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+	    try {
+		xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		return 2;
+	    }
 	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
-	    xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+	    try {
+		xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		return 2;
+	    }
 	} else {
 	    System.err.printf("unknown normalizer %s\n", normalizer.name());
 	    return 2;
 	}
-	Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character);
-	System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
+	try {
+	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character);
+	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
+	} catch (Exception e) {
+	    System.err.println(e.getMessage());
+	    return 3;
+	}
 	return 0;
     }
 
