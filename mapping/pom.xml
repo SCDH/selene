@@ -12,6 +12,25 @@
     <artifactId>selection-engine-mapping</artifactId>
     <name>Selection Mapping</name>
 
+    <dependencies>
+      <dependency>
+	<groupId>${project.groupId}</groupId>
+	<artifactId>selection-engine-core</artifactId>
+	<version>${revision}${changelist}</version>
+      </dependency>
+      <dependency>
+	<groupId>com.fasterxml.jackson.core</groupId>
+	<artifactId>jackson-databind</artifactId>
+	<version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+	<groupId>com.google.guava</groupId>
+	<artifactId>guava</artifactId>
+	<version>${guava.version}</version>
+      </dependency>
+    </dependencies>
+
+
     <build>
        <plugins>
 
