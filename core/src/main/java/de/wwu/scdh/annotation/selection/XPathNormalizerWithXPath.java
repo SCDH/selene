@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * context node in question.<P>
  *
  * The context item on which the XPath will be evaluated, is
- * determined by {@link XPathNormalizer#getTextNodeAtPosition(String, int)}.
+ * determined by {@link XPathNormalizer#getTextNodeAtPosition(String, int,boolean)}.
  * This is generally a text node.
  */
 public class XPathNormalizerWithXPath extends XPathNormalizer {

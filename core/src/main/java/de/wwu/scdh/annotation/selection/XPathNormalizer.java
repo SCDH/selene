@@ -47,10 +47,15 @@ public abstract class XPathNormalizer {
      * Same as
      * {@link #normalizeXPathRefinedByCharScheme(String,int,boolean)},
      * but returns an escaped string.
+     * @param xpath  a XPath expression selecting a single node
+     * @param position  the inter-character position following the character scheme from RFC5147
+     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
+     * @return a {@link Pair} of XPath expression and character scheme position
+     * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
      */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position)
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean stepOverEnd)
 	throws SelectorException {
-	return normalizeXPathRefinedByCharScheme(xpath, position, true);
+	return normalizeXPathRefinedByCharScheme(xpath, position, stepOverEnd, true);
     }
 
     /**
@@ -66,11 +71,12 @@ public abstract class XPathNormalizer {
      * @param xpath  a XPath expression selecting a single node
      * @param position  the inter-character position following the character scheme from RFC5147
      * @param escaped   whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
+     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
      * @return a {@link Pair} of XPath expression and character scheme position
      */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean escaped)
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean stepOverEnd, boolean escaped)
 	throws SelectorException {
-	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position);
+	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position, stepOverEnd);
 	// call the normalization function
 	String normalizedXPath = getNormalizedXPath(textNode.getLeft(), escaped);
 	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
@@ -83,6 +89,7 @@ public abstract class XPathNormalizer {
      * @param node  an {@link XdmNode} to which the normlized path must be generated to
      * @param escaped  whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
      * @return the normalized XPath expression as a String
+     * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
      */
     protected abstract String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException;
 
@@ -97,13 +104,34 @@ public abstract class XPathNormalizer {
      * A {@link SelectorException} is thrown if the xpath does not
      * select exactly one node or if the position is not inside
      * the fragment (subtree) selected by the xpath.<P>
-
+     *
+     * At some positions, normalization is ambigous. E.g., for the
+     * simple, but wellformed XML document
+     * <code>&lt;r>Sol&lt;t>ar&lt;/t>!&lt;/r></code> the normalization of the
+     * XPath pointer `/r` refined by the character scheme `char=3` is
+     * ambigous:
+     *
+     * <pre>
+     *              &lt;r>|S|o|l|&lt;t>|a|r|&lt;/t>|!|&lt;/r>
+     * /r;char=        0 1 2 3   3 4 5    5 6
+     * /r/t[1];char=             0 1 2
+     * </pre>
+     *
+     * Valid normalization results would be
+     * <code>/r[1]/text()[1}</code> refined by <code>char=3</code>,
+     * and also <code>/r[1]/t[1]/text()[1]</code> refined by
+     * <code>char=0</code>. Setting <code>stepOverEnd</code> to
+     * <code>false</code> results in the first normalized selector,
+     * setting it to <code>true</code> results in the first.
+     *
+     *
      * @param xpath  the XPath part of the XPath selector
      * @param position  the position following the character scheme of RFC5147
+     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position) throws SelectorException {
+    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, boolean stepOverEnd) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();
 	try {
@@ -128,12 +156,18 @@ public abstract class XPathNormalizer {
 		boolean found = false;
 		int charsEaten = 0;
 		XdmNode node = fragment;
+		// int length = 0;
 		while (!found && axis.hasNext()) {
 		    node = axis.next();
 		    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
 		    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
 			int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
-			if (position - charsEaten <= length) {
+			int diff = position - charsEaten;
+			if (diff < length ||
+			    // we have to check <= (less or equal) if
+			    // a. we do not step over the end
+			    // b. we are investigating the last node
+			    (diff == length && (!stepOverEnd || !axis.hasNext()))) {
 			    // the position is in the current node
 			    found = true;
 			} else {
