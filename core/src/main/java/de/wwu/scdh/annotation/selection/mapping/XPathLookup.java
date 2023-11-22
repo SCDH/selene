@@ -19,6 +19,12 @@ class XPathLookup {
     @JsonProperty("html-src-mapping")
     protected Map<String,LookupSourceNode> htmlSourceMapping;
 
+    @JsonProperty("xml-xpath-generator")
+    protected String xmlXPathGenerator;
+
+    @JsonProperty("html-xpath-generator")
+    protected String htmlXPathGenerator;
+
     public static XPathLookup fromJson(URI lookupUri) throws LookupCreationException {
 	ObjectMapper mapper = new ObjectMapper();
 	try {
