@@ -131,7 +131,7 @@ public abstract class XPathNormalizer {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, boolean stepOverEnd) throws SelectorException {
+    public Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, boolean stepOverEnd) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();
 	try {
@@ -193,4 +193,7 @@ public abstract class XPathNormalizer {
 	}
     }
 
+    public DOMResource getResource() {
+	return resource;
+    }
 }
