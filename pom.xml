@@ -129,7 +129,6 @@
     <modules>
        <module>core</module>
        <module>cli</module>
-       <module>mapping</module>
     </modules>
 
     <build>
