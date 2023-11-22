@@ -65,6 +65,10 @@ public class Normalize implements Callable<Integer> {
 	    description = "The normalizer for XPath part of the selector. Valid values: ${COMPLETION-CANDIDATES}. Defaults to FROM_DEEPEST_ID_CLARK")
     Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
 
+    @Option(names = { "--step-over-end" },
+	    description = "If used, ambiguity is resolved by stepping over the end of a text node to the start of the next text node")
+    boolean stepOverEnd;
+
     @Override
     public Integer call() throws Exception {
 	// make relative paths absolute by resolving against the URI of the current working director
@@ -124,7 +128,7 @@ public class Normalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character);
+	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, stepOverEnd);
 	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
