@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:lang="de">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Trawr-Gesang von der endlosen noth eines, ach, des Mops</title>
+         </titleStmt>
+         <publicationStmt>
+            <p>1649</p>
+         </publicationStmt>
+         <sourceDesc>
+            <listWit>
+               <witness xml:id="W"/>
+            </listWit>
+         </sourceDesc>
+      </fileDesc>
+   </teiHeader>
+   <text>
+      <body>
+         <lg>
+            <l xml:id="jyj_wzy_dzb">Ein Mops kam in die Küche,</l>
+            <l xml:id="kyj_wzy_dzb">und stahl dem Koch ein Ei.</l>
+            <l xml:id="dmv_wzy_dzb">Da nahm der Koch den Löffel,</l>
+            <l xml:id="vtc_xzy_dzb">und schlug den Mops zu Brei.</l>
+            <l xml:id="mhj_xzy_dzb">Da kamen viele Möpse,</l>
+            <l xml:id="gzt_l1z_dzb">und <hi>gruben</hi> ihm ein Grab.</l>
+            <l xml:id="acx_xzy_dzb">Und setzten im ein'n Grabstein</l>
+            <l xml:id="q4b_m1z_dzb">wo draufgeschrieb'n ward:</l>
+         </lg>
+      </body>
+   </text>
+</TEI>

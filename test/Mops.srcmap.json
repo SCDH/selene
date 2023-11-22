@@ -1,0 +1,50 @@
+{
+  "html-src-mapping": {
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[6]\/Q{}span[1]": { "length":"4", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/text()[1]" },
+    "id('vtc_xzy_dzb')\/span[1]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[4]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[7]\/Q{}span[1]": { "length":"30", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[7]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[8]\/Q{}span[1]": { "length":"25", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[8]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]": { "length":"322", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]" },
+    "id('acx_xzy_dzb')": { "length":"30", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[7]" },
+    "id('jyj_wzy_dzb')": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[1]" },
+    "id('dmv_wzy_dzb')\/span[1]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[3]\/text()[1]" },
+    "id('kyj_wzy_dzb')": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[2]" },
+    "id('mhj_xzy_dzb')\/span[1]": { "length":"21", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[5]\/text()[1]" },
+    "id('q4b_m1z_dzb')": { "length":"25", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[8]" },
+    "id('gzt_l1z_dzb')": { "length":"24", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]" },
+    "id('acx_xzy_dzb')\/span[1]": { "length":"30", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[7]\/text()[1]" },
+    "id('vtc_xzy_dzb')": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[4]" },
+    "id('jyj_wzy_dzb')\/span[1]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[1]\/text()[1]" },
+    "id('kyj_wzy_dzb')\/span[1]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[2]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[8]": { "length":"25", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[8]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[7]": { "length":"30", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[7]" },
+    "id('gzt_l1z_dzb')\/span[3]": { "length":"14", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/text()[2]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[6]": { "length":"24", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]" },
+    "id('q4b_m1z_dzb')\/span[1]": { "length":"25", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[8]\/text()[1]" },
+    "id('gzt_l1z_dzb')\/span[2]": {
+      "length": "6",
+      "offset": "0",
+      "xpath": "\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/hi[1]\/text()[1]"
+    },
+    "id('dmv_wzy_dzb')": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[3]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[5]": { "length":"21", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[5]" },
+    "id('gzt_l1z_dzb')\/span[1]": { "length":"4", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[4]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[4]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[1]\/Q{}span[1]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[1]\/text()[1]" },
+    "id('mhj_xzy_dzb')": { "length":"21", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[5]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[2]\/Q{}span[1]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[2]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[3]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[3]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[2]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[2]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[3]\/Q{}span[1]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[3]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[1]": { "length":"26", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[4]\/Q{}span[1]": { "length":"28", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[4]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[6]\/Q{}span[3]": { "length":"14", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/text()[2]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[5]\/Q{}span[1]": { "length":"21", "offset":"0", "xpath":"\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[5]\/text()[1]" },
+    "\/Q{}html[1]\/Q{}body[1]\/Q{}div[1]\/Q{}p[6]\/Q{}span[2]": {
+      "length": "6",
+      "offset": "0",
+      "xpath": "\/TEI[1]\/text[1]\/body[1]\/lg[1]\/l[6]\/hi[1]\/text()[1]"
+    }
+  },
+  "html-base-uri": "file:\/home\/clueck\/src\/scdh\/selectors\/xml-html-lookup-generation\/mops.xhtml"
+}
