@@ -75,4 +75,22 @@ public class TestDOMResource {
 	assertEquals("html", node.getNodeName().getLocalName());
     }
 
+    @Test
+    void testBeforeHeadInsertionModeOnGesangHtml() throws IOException, SaxonApiException {
+	// assert that the HTML parser ignores white space nodes before <head>
+	// see https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
+	// see https://stackoverflow.com/questions/26800626/what-whitespaces-in-html-are-considered-whitespace-nodes
+	DOMResource resource = DOMResource.fromHTML(GESANG_HTML, null, PROC);
+	assertEquals(resource.getUri(), GESANG_HTML);
+	// correct document node
+	assertEquals("DOCUMENT", resource.getDOM().getNodeKind().name());
+	// test other nodes
+	Iterator<XdmNode> nodes = resource.getDOM().axisIterator(Axis.DESCENDANT);
+	XdmNode node;
+	node = nodes.next(); // html root node
+	node = nodes.next(); // ignore white space node before head
+	assertEquals("ELEMENT", node.getNodeKind().name());
+	assertEquals("head", node.getNodeName().getLocalName());
+    }
+
 }

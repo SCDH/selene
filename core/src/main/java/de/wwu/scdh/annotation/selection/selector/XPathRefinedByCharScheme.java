@@ -56,7 +56,7 @@ public class XPathRefinedByCharScheme implements Selector, Point, Isomorphically
 
     @Override
     public XPathRefinedByCharScheme normalize() throws SelectorException {
-	Pair<String, Integer> normalized = normalizer.normalizeXPathRefinedByCharScheme(xpath, position);
+	Pair<String, Integer> normalized = normalizer.normalizeXPathRefinedByCharScheme(xpath, position, false);
 	return new XPathRefinedByCharScheme(normalized.getLeft(), normalized.getRight(), this.resource, this.normalizer);
     }
 

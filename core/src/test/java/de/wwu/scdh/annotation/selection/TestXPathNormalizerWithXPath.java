@@ -34,13 +34,13 @@ public class TestXPathNormalizerWithXPath {
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, false);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, false);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }
@@ -54,7 +54,7 @@ public class TestXPathNormalizerWithXPath {
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, false);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
     }
@@ -68,7 +68,7 @@ public class TestXPathNormalizerWithXPath {
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, false);
 	assertEquals("id(&apos;v2&apos;)/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }
@@ -82,7 +82,7 @@ public class TestXPathNormalizerWithXPath {
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, false);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
     }
@@ -96,7 +96,7 @@ public class TestXPathNormalizerWithXPath {
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6);
+	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, false);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }
