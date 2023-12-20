@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+       <groupId>de.wwu.scdh.annotations.selections</groupId>
+       <artifactId>selection-engine</artifactId>
+       <version>${revision}${changelist}</version>
+    </parent>
+
+    <artifactId>selection-engine-cli</artifactId>
+    <name>Selection Engine Command Line Interface</name>
+
+    <dependencies>
+       <dependency>
+	  <groupId>${project.groupId}</groupId>
+	  <artifactId>selection-engine-core</artifactId>
+	  <version>${revision}${changelist}</version>
+       </dependency>
+       <dependency>
+	  <groupId>info.picocli</groupId>
+	  <artifactId>picocli</artifactId>
+	  <version>4.7.5</version>
+       </dependency>
+    </dependencies>
+
+    <properties>
+      <app.name>oasel</app.name>
+    </properties>
+
+    <build>
+       <plugins>
+
+          <!-- configure test reporter for JUnit 5 -->
+          <plugin>
+             <artifactId>maven-surefire-plugin</artifactId>
+             <version>2.22.2</version>
+             <configuration>
+                <!-- set to false for debugging! -->
+                <trimStackTrace>true</trimStackTrace>
+             </configuration>
+          </plugin>
+
+	 <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>flatten-maven-plugin</artifactId>
+            <version>1.5.0</version>
+            <configuration>
+            </configuration>
+            <executions>
+	       <!-- pom flattening -->
+	       <execution>
+		  <id>flatten</id>
+		  <phase>process-resources</phase>
+		  <goals>
+		     <goal>flatten</goal>
+		  </goals>
+	       </execution>
+	       <!-- ensure proper cleanup -->
+	       <execution>
+		  <id>flatten.clean</id>
+		  <phase>clean</phase>
+		  <goals>
+		     <goal>clean</goal>
+		  </goals>
+	       </execution>
+            </executions>
+	 </plugin>
+
+	 <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>templating-maven-plugin</artifactId>
+           <version>3.0.0</version>
+           <executions>
+             <execution>
+               <id>filter-src</id>
+               <goals>
+		 <goal>filter-sources</goal>
+               </goals>
+               <configuration>
+                 <!--
+                      Note the two following parameters are the default one.
+                      These are specified here just as a reminder.
+                      But as the Maven philosophy is strongly about conventions,
+                      it's better to just not specify them.
+                 -->
+                 <sourceDirectory>${basedir}/src/main/java-templates</sourceDirectory>
+                 <outputDirectory>${project.build.directory}/generated-sources/java-templates</outputDirectory>
+               </configuration>
+             </execution>
+           </executions>
+	 </plugin>
+
+         <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+	       <!-- copy jars to target/lib -->
+               <execution>
+                  <id>copy-jars</id>
+                  <phase>process-test-resources</phase>
+                  <goals>
+                     <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+
+	 <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.0.2</version>
+            <executions>
+	       <!-- generate shell wrapper -->
+               <execution>
+                  <id>properties-to-resources</id>
+                  <phase>generate-resources</phase>
+                  <goals>
+                     <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}/bin</outputDirectory>
+                     <resources>
+                        <resource>
+                           <directory>${project.basedir}</directory>
+                           <includes>
+                              <include>selection-engine.sh</include>
+                           </includes>
+                           <filtering>true</filtering>
+                        </resource>
+                     </resources>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+
+	 <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+	    <executions>
+	       <!-- set permissions on shell wrapper -->
+               <execution>
+                  <id>set-permissions</id>
+                  <phase>test</phase>
+                  <configuration>
+                     <target>
+                        <chmod file="${project.build.directory}/bin/selection-engine.sh" perm="755"/>
+                     </target>
+                  </configuration>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+               <execution>
+                  <id>move-to-app-name</id>
+                  <phase>test</phase>
+                  <configuration>
+                     <target>
+                       <move
+			   file="${project.build.directory}/bin/selection-engine.sh"
+			   tofile="${project.build.directory}/bin/${app.name}"/>
+                     </target>
+                  </configuration>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+	    </executions>
+         </plugin>
+
+
+       </plugins>
+    </build>
+
+</project>

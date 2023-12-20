@@ -2,13 +2,16 @@
 
 ## Getting Started
 
-Java required: Java 1.8+ or OpenJDK 11+
+Java version required: OpenJDK 17+
 
 Tesing and building:
 
 ```{shell}
 ./mvnw clean test package
 ```
+
+After building with Maven, there is a command line interface in
+`cli/target/bin/oasel`.
 
 Generating Java Docs, which will be in `target/site/apidocs`:
 
