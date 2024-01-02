@@ -35,18 +35,13 @@ public class Normalize implements Callable<Integer> {
 	FROM_DEEPEST_ID_CLARK
     }
 
-    public static final String DEFAULT_MODE = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END.name();
-
-    public static final String DEFAULT_NORMALIZER = Normalizer.FROM_DEEPEST_ID_CLARK.name();
-
     @Parameters(paramLabel = "RESOURCE",
 		description = "The file the selector selects from")
     URI resource;
 
     @Option(names = { "-p", "--parser" },
 	    paramLabel = "PARSER",
-	    defaultValue = "${DOM_PARSER:DOMParser.XML}",
-	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to XML.")
+	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
     DOMParser parser = DOMParser.XML;
 
     @Option(names = { "-x", "--xpath" },
@@ -63,14 +58,12 @@ public class Normalize implements Callable<Integer> {
 
     @Option(names = { "--mode" },
 	    paramLabel = "MODE",
-	    defaultValue = "${DEFAULT_MODE}",
-	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to DEEP_NODE_STOP_AT_END")
+	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
     XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
 
     @Option(names = { "-n", "--normalizer" },
 	    paramLabel = "NORMALIZER",
-	    defaultValue = "${DEFAULT_NORMALIZER}",
-	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to FROM_DEEPEST_ID_CLARK")
+	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
     Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
 
     @Override
