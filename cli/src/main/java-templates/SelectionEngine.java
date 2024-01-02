@@ -19,13 +19,7 @@ import java.util.concurrent.Callable;
 	 subcommands = {
 	     Normalize.class
 	 })
-public class SelectionEngine implements Callable<Integer> {
-
-    @Override
-    public Integer call() throws Exception {
-	System.out.printf("Hello");
-	return 0;
-    }
+public class SelectionEngine {
 
     public static void main(String... args) {
 	System.exit(new CommandLine(new SelectionEngine()).execute(args));
