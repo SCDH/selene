@@ -33,6 +33,15 @@ public abstract class XPathNormalizer {
 
     private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizer.class);
 
+    /**
+     * The {@link XPathNormalizer.Mode} is an enum type for selecting
+     * a normalization mode.
+     */
+    public enum Mode {
+	DEEP_NODE_STOP_AT_END,
+	DEEP_NODE_STEP_OVER_END
+    }
+
     protected final DOMResource resource;
 
     /**
@@ -53,9 +62,9 @@ public abstract class XPathNormalizer {
      * @return a {@link Pair} of XPath expression and character scheme position
      * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
      */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean stepOverEnd)
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, Mode mode)
 	throws SelectorException {
-	return normalizeXPathRefinedByCharScheme(xpath, position, stepOverEnd, true);
+	return normalizeXPathRefinedByCharScheme(xpath, position, mode, true);
     }
 
     /**
@@ -74,9 +83,9 @@ public abstract class XPathNormalizer {
      * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
      * @return a {@link Pair} of XPath expression and character scheme position
      */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, boolean stepOverEnd, boolean escaped)
+    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(String xpath, int position, Mode mode, boolean escaped)
 	throws SelectorException {
-	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position, stepOverEnd);
+	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(xpath, position, mode);
 	// call the normalization function
 	String normalizedXPath = getNormalizedXPath(textNode.getLeft(), escaped);
 	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
@@ -93,7 +102,6 @@ public abstract class XPathNormalizer {
      */
     protected abstract String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException;
 
-
     /**
      * This method gets the node where the position of an
      * character-scheme-refined XPath selector points to. Either this
@@ -105,7 +113,27 @@ public abstract class XPathNormalizer {
      * select exactly one node or if the position is not inside
      * the fragment (subtree) selected by the xpath.<P>
      *
-     * At some positions, normalization is ambigous. E.g., for the
+     *
+     * @param xpath  the XPath part of the XPath selector
+     * @param position  the position following the character scheme of RFC5147
+     * @param mode  an normalization algorithm selected from {@link Mode}
+     * @throws {@link SelectorException}
+     * @return a pair of node and position
+     */
+    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, Mode mode) throws SelectorException {
+	return switch(mode) {
+	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, false);
+	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, true);
+	};
+    }
+
+    /**
+     * This is an implementation of the normalization step 1 for the
+     * {@link Mode} <code>DEEP_NODE_STOP_AT_END</code> and
+     * <code>DEEP_NODE_STEP_OVER_END</code>, which both descend the
+     * DOM tree to the deepest text node possible.
+     *
+     * However, at some positions, normalization is ambigous. E.g., for the
      * simple, but wellformed XML document
      * <code>&lt;r>Sol&lt;t>ar&lt;/t>!&lt;/r></code> the normalization of the
      * XPath pointer `/r` refined by the character scheme `char=3` is
@@ -131,7 +159,7 @@ public abstract class XPathNormalizer {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, boolean stepOverEnd) throws SelectorException {
+    private Pair<XdmNode, Integer> getDeepTextNodeAtPositionWithEndParam(String xpath, int position, boolean stepOverEnd) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();
 	try {

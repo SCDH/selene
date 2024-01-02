@@ -35,6 +35,8 @@ public class Normalize implements Callable<Integer> {
 	FROM_DEEPEST_ID_CLARK
     }
 
+    public static final String DEFAULT_MODE = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END.name();
+
     public static final String DEFAULT_NORMALIZER = Normalizer.FROM_DEEPEST_ID_CLARK.name();
 
     @Parameters(paramLabel = "RESOURCE",
@@ -59,15 +61,17 @@ public class Normalize implements Callable<Integer> {
 	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
     int character;
 
+    @Option(names = { "--mode" },
+	    paramLabel = "MODE",
+	    defaultValue = "${DEFAULT_MODE}",
+	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to DEEP_NODE_STOP_AT_END")
+    XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
+
     @Option(names = { "-n", "--normalizer" },
 	    paramLabel = "NORMALIZER",
-	    defaultValue = "${NORMALIZER:DEFAULT_NORMALIZER}",
-	    description = "The normalizer for XPath part of the selector. Valid values: ${COMPLETION-CANDIDATES}. Defaults to FROM_DEEPEST_ID_CLARK")
+	    defaultValue = "${DEFAULT_NORMALIZER}",
+	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to FROM_DEEPEST_ID_CLARK")
     Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
-
-    @Option(names = { "--step-over-end" },
-	    description = "If used, ambiguity is resolved by stepping over the end of a text node to the start of the next text node")
-    boolean stepOverEnd;
 
     @Override
     public Integer call() throws Exception {
@@ -128,7 +132,7 @@ public class Normalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, stepOverEnd);
+	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, mode);
 	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
