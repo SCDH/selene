@@ -124,6 +124,10 @@ public abstract class XPathNormalizer {
 	return switch(mode) {
 	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, false);
 	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, true);
+	default -> {
+	    LOG.error("mode {} not implemented", mode.name());
+	    throw new SelectorException("mode " + mode.name() + " not implemented");
+	}
 	};
     }
 
