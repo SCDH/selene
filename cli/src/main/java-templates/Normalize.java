@@ -35,16 +35,13 @@ public class Normalize implements Callable<Integer> {
 	FROM_DEEPEST_ID_CLARK
     }
 
-    public static final String DEFAULT_NORMALIZER = Normalizer.FROM_DEEPEST_ID_CLARK.name();
-
     @Parameters(paramLabel = "RESOURCE",
 		description = "The file the selector selects from")
     URI resource;
 
     @Option(names = { "-p", "--parser" },
 	    paramLabel = "PARSER",
-	    defaultValue = "${DOM_PARSER:DOMParser.XML}",
-	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to XML.")
+	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
     DOMParser parser = DOMParser.XML;
 
     @Option(names = { "-x", "--xpath" },
@@ -59,15 +56,15 @@ public class Normalize implements Callable<Integer> {
 	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
     int character;
 
+    @Option(names = { "--mode" },
+	    paramLabel = "MODE",
+	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
+    XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
+
     @Option(names = { "-n", "--normalizer" },
 	    paramLabel = "NORMALIZER",
-	    defaultValue = "${NORMALIZER:DEFAULT_NORMALIZER}",
-	    description = "The normalizer for XPath part of the selector. Valid values: ${COMPLETION-CANDIDATES}. Defaults to FROM_DEEPEST_ID_CLARK")
+	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
     Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
-
-    @Option(names = { "--step-over-end" },
-	    description = "If used, ambiguity is resolved by stepping over the end of a text node to the start of the next text node")
-    boolean stepOverEnd;
 
     @Override
     public Integer call() throws Exception {
@@ -128,7 +125,7 @@ public class Normalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, stepOverEnd);
+	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, mode);
 	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
