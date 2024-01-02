@@ -1,6 +1,10 @@
 package de.wwu.scdh.annotation.selection;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XPathCompiler;
@@ -35,11 +39,12 @@ public abstract class XPathNormalizer {
 
     /**
      * The {@link XPathNormalizer.Mode} is an enum type for selecting
-     * a normalization mode.
+     * an algorithm for the first stage of the normalization.
      */
     public enum Mode {
 	DEEP_NODE_STOP_AT_END,
-	DEEP_NODE_STEP_OVER_END
+	DEEP_NODE_STEP_OVER_END,
+	DEEPEST_NODE
     }
 
     protected final DOMResource resource;
@@ -124,6 +129,7 @@ public abstract class XPathNormalizer {
 	return switch(mode) {
 	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, false);
 	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, true);
+	case DEEPEST_NODE -> getDeepestTextNodeAtPosition(xpath, position);
 	default -> {
 	    LOG.error("mode {} not implemented", mode.name());
 	    throw new SelectorException("mode " + mode.name() + " not implemented");
@@ -203,6 +209,55 @@ public abstract class XPathNormalizer {
     }
 
     /**
+     * The implementation of step 1 of the normalization algorithm in
+     * in mode {@link Mode#DEEPEST_NODE}.
+     */
+    private Pair<XdmNode, Integer> getDeepestTextNodeAtPosition(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
+	int charsEaten = 0;
+	XdmNode node = fragment;
+	List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
+	while (descendants.hasNext()) {
+	    node = descendants.next();
+	    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
+	    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
+		int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
+		if (position > charsEaten + length) {
+		    // position not yet reached
+		    charsEaten += length;
+		} else {
+		    // position is inside this text node or at its end
+		    nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
+		    if (position < charsEaten + length) {
+			// we can stop, since positions in all further text nodes will have greater positions
+			break;
+		    } else {
+			charsEaten += length;
+		    }
+		}
+	    }
+	}
+	if (nodesAtPosition.isEmpty()) {
+	    LOG.error("Position char={} is not in the fragment selected by the XPath '{}'", position, xpath);
+	    throw new SelectorException("Position char=" +
+					position +
+					" is not in the fragment selected by the XPath '" +
+					xpath +
+					"'");
+	} else if (nodesAtPosition.size() == 1) {
+	    return nodesAtPosition.get(0);
+	} else {
+	    // we still have to get the text node with the deepest path
+	    LOG.debug("found {} nodes, getting deepest", nodesAtPosition.size());
+	    // note, that Stream.max() returns the first of the items with the maximum value
+	    Optional<Pair<XdmNode, Integer>> deepest = nodesAtPosition.stream()
+		.max(Comparator.comparing(XPathNormalizer::getDepth));
+	    return deepest.get();
+	}
+    }
+
+    /**
      * Get the node from the DOM resource given by the the XPath
      * passed as argument. If the XPath does not evaluate to a single
      * node, this method raises an {@link SelectorException}.
@@ -238,5 +293,26 @@ public abstract class XPathNormalizer {
 	}
     }
 
+    /**
+     * A utility method that gets the depth of a node by counting
+     * its ancestors.
+     */
+    protected static int getDepth(XdmNode node) {
+	Iterator<XdmNode> ascendents = node.axisIterator(Axis.ANCESTOR_OR_SELF);
+	int depth = 0;
+	while (ascendents.hasNext()) {
+	    depth += 1;
+	    ascendents.next();
+	}
+	return depth;
+    }
+
+    /**
+     * A utiltity method that gets the depth of a node of a pair of
+     * node and position like used in this module.
+     */
+    protected static int getDepth(Pair<XdmNode, Integer> pair) {
+	return getDepth(pair.getLeft());
+    }
 
 }
