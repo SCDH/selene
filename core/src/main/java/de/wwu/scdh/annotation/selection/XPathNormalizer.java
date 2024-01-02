@@ -23,10 +23,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An {@link XPathNormalizer} offers methods for normalizing an XPath
- * selectors. The constructor takes a {@link DOMResource} on the base
- * of which the normalization of subsequent calls of normalization
- * methods is performed.<P>
+ * The same position (or range) in a {@link DOMResource} can be
+ * selected by different pairs of XPaths and RFC 5147 character
+ * schemes (or range schemes), i.e. *referentially equal* selectors
+ * may have different values. Normalization maps referentially equal
+ * selectors to the same selector.<P>
+ *
+ * Normalization of selectors is a 2-stage process: 1) In the first
+ * stage, the text position (or range) which is referenced by the
+ * selector, has to be found. A pair containing a text node and a RFC
+ * 5147 character scheme position is returned. 2) In the second stage,
+ * this position is expressed as a selector again, i.e., the node is
+ * referenced with an XPath, where the XPath may be written as a path
+ * expression descending from the root element, or from the deepest
+ * element with an XML-ID, etc., and even the character scheme
+ * component of the selector may be recalculated.<P>
+ *
+ * There is **not** the one and only normalization. Both stages of the
+ * normalization process may be implemented differently, leading to
+ * different results. For corner cases, even the first stage may lead
+ * to different results.<P>
+ *
+ * This class implements the first stage of the normalization
+ * process. The algorithm is selected by values of the {@link Mode}
+ * enum type, which is passed to the normalization methods. The second
+ * stage of the normalization process has to be implemented by
+ * subclasses of the abstract base class.<P>
  *
  * XPath expressions to be normalized may be arbitrary XPath 4.0
  * expressions which select a single node from the
@@ -39,11 +61,64 @@ public abstract class XPathNormalizer {
 
     /**
      * The {@link XPathNormalizer.Mode} is an enum type for selecting
-     * an algorithm for the first stage of the normalization.
+     * an algorithm for the first stage of the normalization.<P>
+     *
+     * For corner cases, normalization is ambigous.<P>
+     *
+     * Case 1: For the simple, but wellformed XML document
+     * <code>&lt;r>Sol&lt;t>ar&lt;/t>!&lt;/r></code> the normalization
+     * of the XPath pointer `/r` refined by the character scheme
+     * `char=3` is ambigous:
+     *
+     * <pre>
+     *              &lt;r>|S|o|l|&lt;t>|a|r|&lt;/t>|!|&lt;/r>
+     * /r;char=        0 1 2 3   3 4 5    5 6
+     * /r/t[1];char=             0 1 2
+     * </pre>
+     *
+     * Valid normalization results would be
+     * <code>/r[1]/text()[1}</code> refined by <code>char=3</code>,
+     * and also <code>/r[1]/t[1]/text()[1]</code> refined by
+     * <code>char=0</code>.<P>
+     *
+     * Case 2: For the XML document
+     * <code>&lt;r>Sol&lt;t>ar&lt;/t>&lt;g>pan&lt;/g>el!&lt;/r></code>,
+     * the selector <code>/r;char=5</code> may select the position
+     * after the character <code>r</code> in the node
+     * <code>/r/t[1]/text()[1]</code> <b>or</b> the position before the
+     * character <code>p</code> in the node
+     * <code>/r/g[1]/text()[1]</code>.
      */
     public enum Mode {
+
+	/**
+	 * Descend to the deepest text node. In corner cases, stop at
+	 * the first text node, that contains the position.<P>
+	 *
+	 * This will return <code>/r;char3</code> for the first corner
+	 * case described in {@link Mode}.
+	 */
 	DEEP_NODE_STOP_AT_END,
+
+	/**
+	 * Descend to the deepest text node. In corner cases, step
+	 * over the end of a text node and try to get the position
+	 * from the next text node.
+	 *
+	 * This will return <code>/r/t[1];char=0</code> for the first
+	 * corner case described in {@link Mode}.
+	 */
 	DEEP_NODE_STEP_OVER_END,
+
+	/**
+	 * Descend to the deepest text node. In corner cases, take the
+	 * deepest text node. If there are equally deep text nodes,
+	 * take the first one in document order.
+	 *
+	 * This will return <code>/r/t[1];char=0</code> for the first
+	 * corner case described in {@link Mode}. For case 2, it
+	 * selects the text node in the <code>t</code> element.
+	 */
 	DEEPEST_NODE
     }
 
@@ -108,11 +183,17 @@ public abstract class XPathNormalizer {
     protected abstract String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException;
 
     /**
-     * This method gets the node where the position of an
-     * character-scheme-refined XPath selector points to. Either this
-     * node is a text node, or the selector is invalid in the context
-     * of the current document. In general, the resulting position is
-     * not the same as the input position.<P>
+     * This method run the first stage of the normalization
+     * process. It gets the node where the pair of XPath and position
+     * of an character-scheme-refined XPath selector points to. Either
+     * this node is a text node, or the selector is invalid in the
+     * context of the current document. In general, the resulting
+     * position is not the same as the input position.<P>
+     *
+     * There are several algorithms for this first stage of the
+     * normalization process and their return values differ for corner
+     * cases. The algorithm is selected by the <code>mode</code>
+     * argument. See {@link Mode} for possible values.<P>
      *
      * A {@link SelectorException} is thrown if the xpath does not
      * select exactly one node or if the position is not inside
@@ -139,29 +220,9 @@ public abstract class XPathNormalizer {
 
     /**
      * This is an implementation of the normalization step 1 for the
-     * {@link Mode} <code>DEEP_NODE_STOP_AT_END</code> and
-     * <code>DEEP_NODE_STEP_OVER_END</code>, which both descend the
+     * modes {@link Mode#DEEP_NODE_STOP_AT_END} and
+     * {@link Mode#DEEP_NODE_STEP_OVER_END}, which both descend the
      * DOM tree to the deepest text node possible.
-     *
-     * However, at some positions, normalization is ambigous. E.g., for the
-     * simple, but wellformed XML document
-     * <code>&lt;r>Sol&lt;t>ar&lt;/t>!&lt;/r></code> the normalization of the
-     * XPath pointer `/r` refined by the character scheme `char=3` is
-     * ambigous:
-     *
-     * <pre>
-     *              &lt;r>|S|o|l|&lt;t>|a|r|&lt;/t>|!|&lt;/r>
-     * /r;char=        0 1 2 3   3 4 5    5 6
-     * /r/t[1];char=             0 1 2
-     * </pre>
-     *
-     * Valid normalization results would be
-     * <code>/r[1]/text()[1}</code> refined by <code>char=3</code>,
-     * and also <code>/r[1]/t[1]/text()[1]</code> refined by
-     * <code>char=0</code>. Setting <code>stepOverEnd</code> to
-     * <code>false</code> results in the first normalized selector,
-     * setting it to <code>true</code> results in the first.
-     *
      *
      * @param xpath  the XPath part of the XPath selector
      * @param position  the position following the character scheme of RFC5147
