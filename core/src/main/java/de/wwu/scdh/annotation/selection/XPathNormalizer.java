@@ -208,8 +208,8 @@ public abstract class XPathNormalizer {
      */
     protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, Mode mode) throws SelectorException {
 	return switch(mode) {
-	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, false);
-	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionWithEndParam(xpath, position, true);
+	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionStopAtEnd(xpath, position);
+	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionStepOverEnd(xpath, position);
 	case DEEPEST_NODE -> getDeepestTextNodeAtPosition(xpath, position);
 	default -> {
 	    LOG.error("mode {} not implemented", mode.name());
@@ -219,36 +219,10 @@ public abstract class XPathNormalizer {
     }
 
     /**
-     * This is an implementation of the normalization step 1 for the
-     * modes {@link Mode#DEEP_NODE_STOP_AT_END} and
-     * {@link Mode#DEEP_NODE_STEP_OVER_END}, which both descend the
-     * DOM tree to the deepest text node possible.
-     *
-     * @param xpath  the XPath part of the XPath selector
-     * @param position  the position following the character scheme of RFC5147
-     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
-     * @throws {@link SelectorException}
-     * @return a pair of node and position
-     */
-    private Pair<XdmNode, Integer> getDeepTextNodeAtPositionWithEndParam(String xpath, int position, boolean stepOverEnd) throws SelectorException {
-	XdmNode fragment = getNode(xpath);
-	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
-	if (nodesAtPosition.isEmpty()) {
-	    return reportNotFound(xpath, position);
-	} else if (nodesAtPosition.size() == 1) {
-	    return nodesAtPosition.get(0);
-	} else if (stepOverEnd) {
-	    return nodesAtPosition.get(1);
-	} else {
-	    return nodesAtPosition.get(0);
-	}
-    }
-
-    /**
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#DEEPEST_NODE}.
      */
-    private Pair<XdmNode, Integer> getDeepestTextNodeAtPosition(String xpath, int position) throws SelectorException {
+    protected final Pair<XdmNode, Integer> getDeepestTextNodeAtPosition(String xpath, int position) throws SelectorException {
 	XdmNode fragment = getNode(xpath);
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
@@ -266,6 +240,46 @@ public abstract class XPathNormalizer {
     }
 
     /**
+     * This is an implementation of the normalization step 1 for the
+     * mode {@link Mode#DEEP_NODE_STOP_AT_END}.
+     *
+     * @param xpath  the XPath part of the XPath selector
+     * @param position  the position following the character scheme of RFC5147
+     * @throws {@link SelectorException}
+     * @return a pair of node and position
+     */
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else {
+	    return nodesAtPosition.get(0);
+	}
+    }
+
+    /**
+     * This is an implementation of the normalization step 1 for the
+     * mode {@link Mode#DEEP_NODE_STEP_OVER_END}.
+     *
+     * @param xpath  the XPath part of the XPath selector
+     * @param position  the position following the character scheme of RFC5147
+     * @throws {@link SelectorException}
+     * @return a pair of node and position
+     */
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else if (nodesAtPosition.size() == 1) {
+	    return nodesAtPosition.get(0);
+	} else {
+	    return nodesAtPosition.get(1);
+	}
+    }
+
+    /**
      * Get the node from the DOM resource given by the the XPath
      * passed as argument. If the XPath does not evaluate to a single
      * node, this method raises an {@link SelectorException}.
@@ -273,7 +287,7 @@ public abstract class XPathNormalizer {
      * @param xpath  the XPath as {@link String}
      * @return an {@link XdmNode} which the XPath points to
      */
-    protected XdmNode getNode(String xpath) throws SelectorException {
+    protected final XdmNode getNode(String xpath) throws SelectorException {
 	Processor proc = resource.getProcessor();
 	XPathCompiler compiler = proc.newXPathCompiler();
 	try {
@@ -305,12 +319,15 @@ public abstract class XPathNormalizer {
      * Helper method used by implementations of normalization stage 1,
      * that search deep text nodes. This return a list of all pairs of
      * a node and a position, that contain the character scheme
-     * position inside a given fragment.
+     * position inside a given fragment.<P>
+     *
+     * This method collects all canditates in case of referential
+     * ambiguity. See {@link Mode}.
      *
      * @param fragment  as {@link XdmNode} inside a {@link DOMResource}
      * @param position  the RFC 5147 character scheme position inside the fragment
      */
-    protected List<Pair<XdmNode, Integer>> getDescendantTextNodesWithPosition(XdmNode fragment, int position) {
+    protected final List<Pair<XdmNode, Integer>> getDescendantTextNodesWithPosition(XdmNode fragment, int position) {
 	Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
 	int charsEaten = 0;
 	XdmNode node = fragment;
