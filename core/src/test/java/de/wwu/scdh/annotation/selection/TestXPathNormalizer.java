@@ -228,35 +228,65 @@ public class TestXPathNormalizer {
     protected void assertLuminaryPanel(XPathNormalizer normalizer, String luminary) throws SelectorException {
 	Pair<XdmNode, Integer> result;
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals(luminary, result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("ar", result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(2, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.DEEPEST_NODE);
+	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.DEEPEST_NODE));
-    }
+	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.LAST_OF_DEEPEST_NODES);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.FIRST_OF_DEEPEST_NODES));
+
+    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.LAST_OF_DEEPEST_NODES));
+}
 
 }

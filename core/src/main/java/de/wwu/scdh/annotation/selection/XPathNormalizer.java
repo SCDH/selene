@@ -1,6 +1,7 @@
 package de.wwu.scdh.annotation.selection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -119,7 +120,19 @@ public abstract class XPathNormalizer {
 	 * corner case described in {@link Mode}. For case 2, it
 	 * selects the text node in the <code>t</code> element.
 	 */
-	DEEPEST_NODE
+	FIRST_OF_DEEPEST_NODES,
+
+	/**
+	 * Descend to the deepest text node. In corner cases, take the
+	 * deepest text node. If there are equally deep text nodes,
+	 * take the last one in document order.
+	 *
+	 * This will return <code>/r/t[1];char=0</code> for the first
+	 * corner case described in {@link Mode}. For case 2, it
+	 * selects the text node in the <code>g</code> element.
+	 */
+	LAST_OF_DEEPEST_NODES
+
     }
 
     protected final DOMResource resource;
@@ -208,9 +221,10 @@ public abstract class XPathNormalizer {
      */
     protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, Mode mode) throws SelectorException {
 	return switch(mode) {
+	case FIRST_OF_DEEPEST_NODES -> getFirstOfDeepestNodesAtPosition(xpath, position);
+	case LAST_OF_DEEPEST_NODES -> getLastOfDeepestNodesAtPosition(xpath, position);
 	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionStopAtEnd(xpath, position);
 	case DEEP_NODE_STEP_OVER_END -> getDeepTextNodeAtPositionStepOverEnd(xpath, position);
-	case DEEPEST_NODE -> getDeepestTextNodeAtPosition(xpath, position);
 	default -> {
 	    LOG.error("mode {} not implemented", mode.name());
 	    throw new SelectorException("mode " + mode.name() + " not implemented");
@@ -220,9 +234,9 @@ public abstract class XPathNormalizer {
 
     /**
      * The implementation of step 1 of the normalization algorithm in
-     * in mode {@link Mode#DEEPEST_NODE}.
+     * in mode {@link Mode#FIRST_OF_DEEPEST_NODES}.
      */
-    protected final Pair<XdmNode, Integer> getDeepestTextNodeAtPosition(String xpath, int position) throws SelectorException {
+    protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(String xpath, int position) throws SelectorException {
 	XdmNode fragment = getNode(xpath);
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
@@ -233,6 +247,28 @@ public abstract class XPathNormalizer {
 	    // we still have to get the text node with the deepest path
 	    LOG.debug("found {} nodes, getting deepest", nodesAtPosition.size());
 	    // note, that Stream.max() returns the first of the items with the maximum value
+	    Optional<Pair<XdmNode, Integer>> deepest = nodesAtPosition.stream()
+		.max(Comparator.comparing(XPathNormalizer::getDepth));
+	    return deepest.get();
+	}
+    }
+
+    /**
+     * The implementation of step 1 of the normalization algorithm in
+     * in mode {@link Mode#LAST_OF_DEEPEST_NODES}.
+     */
+    protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else if (nodesAtPosition.size() == 1) {
+	    return nodesAtPosition.get(0);
+	} else {
+	    // we still have to get the text node with the deepest path
+	    LOG.debug("found {} nodes, getting deepest", nodesAtPosition.size());
+	    // note, that Stream.max() returns the first of the items with the maximum value
+	    Collections.reverse(nodesAtPosition);
 	    Optional<Pair<XdmNode, Integer>> deepest = nodesAtPosition.stream()
 		.max(Comparator.comparing(XPathNormalizer::getDepth));
 	    return deepest.get();
