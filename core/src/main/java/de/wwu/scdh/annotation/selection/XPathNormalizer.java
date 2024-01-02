@@ -232,40 +232,15 @@ public abstract class XPathNormalizer {
      */
     private Pair<XdmNode, Integer> getDeepTextNodeAtPositionWithEndParam(String xpath, int position, boolean stepOverEnd) throws SelectorException {
 	XdmNode fragment = getNode(xpath);
-	Iterator<XdmNode> axis = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
-	boolean found = false;
-	int charsEaten = 0;
-	XdmNode node = fragment;
-	// int length = 0;
-	while (!found && axis.hasNext()) {
-	    node = axis.next();
-	    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
-	    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
-		int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
-		int diff = position - charsEaten;
-		if (diff < length ||
-		    // we have to check <= (less or equal) if
-		    // a. we do not step over the end
-		    // b. we are investigating the last node
-		    (diff == length && (!stepOverEnd || !axis.hasNext()))) {
-		    // the position is in the current node
-		    found = true;
-		} else {
-		    // we have seen a text node but position is not in it
-		    charsEaten += length;
-		}
-	    }
-	}
-	if (!found) {
-	    LOG.error("Position char={} is not in the fragment selected by the XPath '{}'", position, xpath);
-	    throw new SelectorException("Position char=" +
-					position +
-					" is not in the fragment selected by the XPath '" +
-					xpath +
-					"'");
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else if (nodesAtPosition.size() == 1) {
+	    return nodesAtPosition.get(0);
+	} else if (stepOverEnd) {
+	    return nodesAtPosition.get(1);
 	} else {
-	    LOG.debug("found node containing position char={} in XPath '{}'", position, xpath);
-	    return new ImmutablePair<XdmNode, Integer>(node, position - charsEaten);
+	    return nodesAtPosition.get(0);
 	}
     }
 
@@ -275,37 +250,9 @@ public abstract class XPathNormalizer {
      */
     private Pair<XdmNode, Integer> getDeepestTextNodeAtPosition(String xpath, int position) throws SelectorException {
 	XdmNode fragment = getNode(xpath);
-	Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
-	int charsEaten = 0;
-	XdmNode node = fragment;
-	List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
-	while (descendants.hasNext()) {
-	    node = descendants.next();
-	    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
-	    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
-		int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
-		if (position > charsEaten + length) {
-		    // position not yet reached
-		    charsEaten += length;
-		} else {
-		    // position is inside this text node or at its end
-		    nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
-		    if (position < charsEaten + length) {
-			// we can stop, since positions in all further text nodes will have greater positions
-			break;
-		    } else {
-			charsEaten += length;
-		    }
-		}
-	    }
-	}
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
-	    LOG.error("Position char={} is not in the fragment selected by the XPath '{}'", position, xpath);
-	    throw new SelectorException("Position char=" +
-					position +
-					" is not in the fragment selected by the XPath '" +
-					xpath +
-					"'");
+	    return reportNotFound(xpath, position);
 	} else if (nodesAtPosition.size() == 1) {
 	    return nodesAtPosition.get(0);
 	} else {
@@ -352,6 +299,54 @@ public abstract class XPathNormalizer {
 	    LOG.error(e.getMessage());
 	    throw new SelectorException(e);
 	}
+    }
+
+    /**
+     * Helper method used by implementations of normalization stage 1,
+     * that search deep text nodes. This return a list of all pairs of
+     * a node and a position, that contain the character scheme
+     * position inside a given fragment.
+     *
+     * @param fragment  as {@link XdmNode} inside a {@link DOMResource}
+     * @param position  the RFC 5147 character scheme position inside the fragment
+     */
+    protected List<Pair<XdmNode, Integer>> getDescendantTextNodesWithPosition(XdmNode fragment, int position) {
+	Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
+	int charsEaten = 0;
+	XdmNode node = fragment;
+	List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
+	while (descendants.hasNext()) {
+	    node = descendants.next();
+	    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
+	    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
+		int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
+		if (position > charsEaten + length) {
+		    // position not yet reached
+		    charsEaten += length;
+		} else {
+		    // position is inside this text node or at its end
+		    nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
+		    if (position < charsEaten + length) {
+			// we can stop, since positions in all further text nodes will have greater positions
+			break;
+		    } else {
+			charsEaten += length;
+		    }
+		}
+	    }
+	}
+	return nodesAtPosition;
+    }
+
+    /**
+     * Report that the position is not found inside the selected fragment.
+     * @param xpath  XPath expression selecting a fragment from a {@link DOMResource}
+     * @param position  the character scheme position inside the fragment
+     */
+    protected Pair<XdmNode, Integer> reportNotFound(String xpath, int position) throws SelectorException {
+	LOG.error("Position char={} is not in the fragment selected by the XPath '{}'", position, xpath);
+	throw new SelectorException
+	    ("position char=" + position + " is not in the fragment selected by the XPath '" + xpath + "'");
     }
 
     /**
