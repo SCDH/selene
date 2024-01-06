@@ -297,6 +297,87 @@ public class TestXPathNormalizer {
     }
 
 
+    @Test
+    public void testFirstSecondOnSolarpanelXML() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	assertLuminaryPanelWithFirstSecond(normalizer, "Sol");
+    }
+
+    @Test
+    public void testFirstSecondOnLunarpanelXML() throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	assertLuminaryPanelWithFirstSecond(normalizer, "Lun");
+    }
+
+    protected void assertLuminaryPanelWithFirstSecond(XPathNormalizer normalizer, String luminary) throws SelectorException {
+	Pair<XdmNode, Integer> result;
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.FIRST);
+	assertEquals(luminary, result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.SECOND);
+	assertEquals(luminary, result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.FIRST);
+	assertEquals(luminary, result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.SECOND);
+	assertEquals("ar", result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.FIRST);
+	assertEquals("ar", result.getLeft().toString());
+	assertEquals(2, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.SECOND);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.FIRST);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.SECOND);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.FIRST);
+	assertEquals("pan", result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.SECOND);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(0, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.FIRST);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.SECOND);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(1, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.FIRST);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.SECOND);
+	assertEquals("el!", result.getLeft().toString());
+	assertEquals(3, result.getRight());
+
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.FIRST));
+
+    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.SECOND));
+    }
+
+
+
+
     // 2. Property
 
     /**
@@ -337,6 +418,16 @@ public class TestXPathNormalizer {
     @Disabled // This mode fails the test!
     void testRefEquivForAmbiguityClass2WithModeDeepNodeStepOverEnd() throws SelectorException, SaxonApiException, IOException {
 	assertAmbiguityClass2(Mode.DEEP_NODE_STEP_OVER_END);
+    }
+
+    @Test
+    void testRefEquivForAmbiguityClass1WithModeFirst() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.FIRST);
+    }
+
+    @Test
+    void testRefEquivForAmbiguityClass1WithModeSecond() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.SECOND);
     }
 
 }

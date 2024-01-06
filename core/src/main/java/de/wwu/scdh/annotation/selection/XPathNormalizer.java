@@ -93,6 +93,28 @@ public abstract class XPathNormalizer {
     public enum Mode {
 
 	/**
+	 * Always take the first text node with the position, i.e.,
+	 * the first one in document order.<P>
+	 *
+	 * If the selector selects the first/last position in a
+	 * subtree, this algorithm checks for the first text node on
+	 * the preceding/following axis of the node selected by the
+	 * XPath component.
+	 */
+	FIRST,
+
+	/**
+	 * Always take the second text node with the position, i.e.,
+	 * the second in document order.
+	 *
+	 * If the selector selects the first/last position in a
+	 * subtree, this algorithm checks for the first text node on
+	 * the preceding/following axis of the node selected by the
+	 * XPath component.
+	 */
+	SECOND,
+
+	/**
 	 * Descend to the deepest text node. In corner cases, stop at
 	 * the first text node, that contains the position.<P>
 	 *
@@ -221,6 +243,8 @@ public abstract class XPathNormalizer {
      */
     protected Pair<XdmNode, Integer> getTextNodeAtPosition(String xpath, int position, Mode mode) throws SelectorException {
 	return switch(mode) {
+	case FIRST -> getFirstNodeAtPosition(xpath, position);
+	case SECOND -> getSecondNodeAtPosition(xpath, position);
 	case FIRST_OF_DEEPEST_NODES -> getFirstOfDeepestNodesAtPosition(xpath, position);
 	case LAST_OF_DEEPEST_NODES -> getLastOfDeepestNodesAtPosition(xpath, position);
 	case DEEP_NODE_STOP_AT_END -> getDeepTextNodeAtPositionStopAtEnd(xpath, position);
@@ -230,6 +254,36 @@ public abstract class XPathNormalizer {
 	    throw new SelectorException("mode " + mode.name() + " not implemented");
 	}
 	};
+    }
+
+    /**
+     * The implementation of step 1 of the normalization algorithm in
+     * in mode {@link Mode#FIRST}.
+     */
+    protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else {
+	    return nodesAtPosition.get(0);
+	}
+    }
+
+    /**
+     * The implementation of step 1 of the normalization algorithm in
+     * in mode {@link Mode#SECOND}.
+     */
+    protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(xpath);
+	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
+	if (nodesAtPosition.isEmpty()) {
+	    return reportNotFound(xpath, position);
+	} else if (nodesAtPosition.size() == 1) {
+	    return nodesAtPosition.get(0);
+	} else {
+	    return nodesAtPosition.get(1);
+	}
     }
 
     /**
@@ -385,6 +439,74 @@ public abstract class XPathNormalizer {
 		    } else {
 			charsEaten += length;
 		    }
+		}
+	    }
+	}
+	return nodesAtPosition;
+    }
+
+    /**
+     * Helper method used by implementations of normalization stage 1,
+     * that search deep text nodes. This return a list of all pairs of
+     * a node and a position, that contain the character scheme
+     * position inside a given fragment, or in the first text node
+     * before or after it.<P>
+     *
+     * This method collects all canditates in case of referential
+     * ambiguity. See {@link Mode}.
+     *
+     * @param fragment  as {@link XdmNode} inside a {@link DOMResource}
+     * @param position  the RFC 5147 character scheme position inside the fragment
+     */
+    protected final List<Pair<XdmNode, Integer>> getTextNodesWithPosition(final XdmNode fragment, final int position) {
+	List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
+	XdmNode node;
+	// 1. before the fragment, if position is zero
+	if (position == 0) {
+	    Iterator<XdmNode> preceding = fragment.axisIterator(Axis.PRECEDING);
+	    boolean textNodeSeen = false;
+	    while (preceding.hasNext() && !textNodeSeen) {
+		node = preceding.next();
+		if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
+		    textNodeSeen = true;
+		    int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
+		    nodesAtPosition.add(new ImmutablePair<XdmNode,Integer>(node, length));
+		}
+	    }
+	}
+	// 2. Inside the fragment
+	Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
+	int charsEaten = 0;
+	node = fragment;
+	while (descendants.hasNext()) {
+	    node = descendants.next();
+	    LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
+	    if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
+		int length = node.getUnderlyingValue().getUnicodeStringValue().length32();
+		if (position > charsEaten + length) {
+		    // position not yet reached
+		    charsEaten += length;
+		} else {
+		    // position is inside this text node or at its end
+		    nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
+		    if (position < charsEaten + length) {
+			// we can stop, since positions in all further text nodes will have greater positions
+			break;
+		    } else {
+			charsEaten += length;
+		    }
+		}
+	    }
+	}
+	// 3. after the fragment, if reached the end
+	if (!descendants.hasNext() && charsEaten == position) {
+	    Iterator<XdmNode> following = fragment.axisIterator(Axis.FOLLOWING);
+	    boolean textNodeSeen = false;
+	    while (following.hasNext() && !textNodeSeen) {
+		node = following.next();
+		if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
+		    textNodeSeen = true;
+		    nodesAtPosition.add(new ImmutablePair<XdmNode,Integer>(node, 0));
 		}
 	    }
 	}
