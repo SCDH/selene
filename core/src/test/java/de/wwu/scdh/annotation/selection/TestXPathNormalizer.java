@@ -20,6 +20,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
 
+
+/**
+ * 1. Testing for correct pairs
+ * 2. Testing the property of normalizing referentially equalivalent selectors to the same pair
+ */
 public class TestXPathNormalizer {
 
     public static final Processor PROC = new Processor(false);
@@ -52,6 +57,8 @@ public class TestXPathNormalizer {
 	return result.itemAt(0).getStringValue();
     }
 
+
+    // 1. correct pairs
 
     @Test
     public void testPathExpressionXPathRootElement() throws SelectorException, SaxonApiException, IOException {
@@ -287,6 +294,49 @@ public class TestXPathNormalizer {
 	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.FIRST_OF_DEEPEST_NODES));
 
     	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.LAST_OF_DEEPEST_NODES));
-}
+    }
+
+
+    // 2. Property
+
+    /**
+     * Test Cases for Ambiguity Class 2:<P> Testing if two
+     * referentially equal selectors are normalized to the same
+     * pair. Selector 1 selects the position at the end of a
+     * subtree. Selector 2 selects the beginning of the next following
+     * text node.
+     */
+    void assertAmbiguityClass2(Mode mode) throws SelectorException, SaxonApiException, IOException {
+	DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
+	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	Pair<XdmNode, Integer> result1 = normalizer.getTextNodeAtPosition("/*:r[1]/*:t1[1]/text()[1]", 2, mode);
+	Pair<XdmNode, Integer> result2 = normalizer.getTextNodeAtPosition("/*:r[1]/*:t2[1]/text()[1]", 0, mode);
+	assertEquals(result1.getLeft(), result2.getLeft());
+	assertEquals(result1.getRight(), result2.getRight());
+    }
+
+    @Test
+    @Disabled // This mode fails the test!
+    void testRefEquivInAmbiguityClass2WithModeFirstOfDeepestNodes() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.FIRST_OF_DEEPEST_NODES);
+    }
+
+    @Test
+    @Disabled // This mode fails the test!
+    void testRefEquivForAmbiguityClass2WithModeLastOfDeepestNodes() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.LAST_OF_DEEPEST_NODES);
+    }
+
+    @Test
+    @Disabled // This mode fails the test!
+    void testRefEquivForAmbiguityClass2WithModeDeepNodeStopAtEnd() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.DEEP_NODE_STOP_AT_END);
+    }
+
+    @Test
+    @Disabled // This mode fails the test!
+    void testRefEquivForAmbiguityClass2WithModeDeepNodeStepOverEnd() throws SelectorException, SaxonApiException, IOException {
+	assertAmbiguityClass2(Mode.DEEP_NODE_STEP_OVER_END);
+    }
 
 }
