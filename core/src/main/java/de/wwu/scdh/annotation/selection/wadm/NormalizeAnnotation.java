@@ -22,7 +22,13 @@ import de.wwu.scdh.annotation.selection.XPathNormalizer;
 
 /**
  * {@link NormalizeAnnotation} can be used to normalize the model of
- * all WADM annotations given in a graph.
+ * all WADM annotations given in a graph.<P>
+ *
+ * This class implements the {@link Consumer} interface and can thus
+ * be used in a functional style like <code>forEach(new
+ * NormalizeAnnoation(...))</code> on some resource iterator. The
+ * normalization will by side effect be written to the {@link Model}
+ * which was passed into the constructor.
  *
  * USAGE: Use the static methods <code>normalize</code> to do the
  * normalization.
