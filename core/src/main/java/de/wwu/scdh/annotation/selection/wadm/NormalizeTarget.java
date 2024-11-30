@@ -21,7 +21,18 @@ import org.slf4j.LoggerFactory;
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 
-
+/**
+ * Normalize an <code>oa:Target</code>.<P>
+ *
+ * Step 1: get the source either from <code>oa:hasTarget</code> or
+ * take the {@link DOMResource} passed into the constructor.<P>
+ *
+ * Step 2: call normalizer on every selector.<P>
+ *
+ * This class implements Java's functional-style {@link Consumer}
+ * interface and can be used in the <code>..forEach(new
+ * NormalizeTarget(...))</code> functional pattern.<P>
+ */
 public class NormalizeTarget implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeTarget.class);
@@ -31,7 +42,7 @@ public class NormalizeTarget implements Consumer<Resource> {
     protected final XPathNormalizer normalizer;
     protected final Processor processor;
 
-    protected Optional<Exception> error = null;
+    protected Optional<Exception> error = Optional.empty();
 
     public NormalizeTarget(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
 	this.model = model;
@@ -40,38 +51,24 @@ public class NormalizeTarget implements Consumer<Resource> {
 	this.processor = processor;
     }
 
+    public Optional<Exception> getError() {
+	return error;
+    }
+
+    public Model getModel() {
+	return model;
+    }
+
     /**
      * This is the method of the function interface {@link Consumer}
-     * and actually does the normalization without throwing errors.
-     *
+     * and actually does the normalization without throwing
+     * exceptions.
      */
     public void accept(Resource target) {
-	LOG.debug("normalizing target '{}'", target.toString());
-	String targetSource = null;
-	// either we got a Source passed or we get a Source from the Target
-	DOMResource source;
 	try {
-	    if (dom.isEmpty() && target.listProperties(OA.hasSource).hasNext()) {
-		// get target source from annotation
-		targetSource = target.getProperty(OA.hasSource).getObject().toString();
-		LOG.debug("getting and parsing source '{}'", targetSource);
-		URI targetUri = new URI(targetSource);
-		source = DOMResource.fromHTML(targetUri, null, processor);
-	    } else {
-		source = dom.get();
-	    }
-
-	    // normalize RangeSelectors
-	    model
-		.listStatements(target, OA.hasSelector, (RDFNode) null)
-		.mapWith((stmt) -> stmt.getResource())
-		.filterKeep(selector -> {
-			return model.listStatements(selector, RDF.type, OA.RangeSelector).hasNext();
-		    })
-		.forEach(new NormalizeRangeSelector(processor, normalizer, model, source));
-
+	    acceptThrows(target);
 	} catch (URISyntaxException e) {
-	    LOG.error("bad source URI '{}'", targetSource);
+	    LOG.error("bad source URI '{}'", target.getProperty(OA.hasSource).getObject().toString());
 	    error = Optional.of(e);
 	} catch (IOException e) {
 	    LOG.error("failed to load URI: {}", e.getMessage());
@@ -79,7 +76,50 @@ public class NormalizeTarget implements Consumer<Resource> {
 	} catch (SaxonApiException e) {
 	    LOG.error(e.getMessage());
 	    error = Optional.of(e);
+	} catch (ModelException e) {
+	    LOG.error(e.getMessage());
+	    error = Optional.of(e);
+	}
+    }
+
+    /**
+     * Do the normalization tasks.
+     */
+    public void acceptThrows(Resource target) throws ModelException, URISyntaxException, IOException, SaxonApiException {
+	LOG.debug("normalizing target '{}'", target.toString());
+	// a Source was passed into the constructor or we get a
+	// Source from the target; if neither is the case, it
+	// would lack of information in the model
+	DOMResource source;
+	// Note: We are using the pattern
+	// ..listProperties(...).toSet().isEmpty() because toSet()
+	// *exhaustively* consumes the iterator returned by
+	// listStatements; using .hasNext() would not close the
+	// iterator and thus cause a memory leak.
+	if (dom.isEmpty() && target.listProperties(OA.hasSource).toSet().isEmpty()) {
+	    // bad
+	    throw new ModelException("annotation target is missing the OA:hasSource property");
+	}
+	if (dom.isEmpty()) {
+	    // get target source from annotation
+	    String targetSource = target.getProperty(OA.hasSource).getObject().toString();
+	    LOG.debug("getting and parsing source '{}'", targetSource);
+	    URI targetUri = new URI(targetSource);
+	    source = DOMResource.fromHTML(targetUri, null, processor);
+	} else {
+	    source = dom.get();
 	}
 
+	// normalize RangeSelectors
+	model
+	    .listStatements(target, OA.hasSelector, (RDFNode) null)
+	    .mapWith((stmt) -> stmt.getResource())
+	    .filterKeep(selector -> {
+		    return !model.listStatements(selector, RDF.type, OA.RangeSelector).toSet().isEmpty();
+		})
+	    // exceptions are not propagated from selector normalizations
+	    .forEach(new NormalizeRangeSelector(processor, normalizer, model, source));
+
+	// TODO: normalize other selectors
     }
 }
