@@ -96,18 +96,36 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	}
 
 	// do the normalization
+	Model model;
+	try {
+	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, selectorsResolved.toString(), lang, dom);
+	} catch (Exception e) {
+	    System.err.println(e.getMessage());
+	    return 10;
+	}
+
+	// try to make output format
+	//
+	// Note, that ntriples, nquads and others only work on the
+	// try-catch block below!
 	try {
 	    RDFFormat outFormat;
 	    if (variant != null) {
 		RDFFormatVariant outVariant = new RDFFormatVariant(variant);
 		outFormat = new RDFFormat(RDFLanguages.nameToLang(format), outVariant);
 	    } else {
-		outFormat = new RDFFormat(RDFLanguages.nameToLang(format));		
+		outFormat = new RDFFormat(RDFLanguages.nameToLang(format));
 	    }
-	    Model model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, selectorsResolved.toString(), lang, dom);
 	    RDFDataMgr.write(System.out, model, outFormat);
+	    return 0; // done!
 	} catch (Exception e) {
-	    System.err.println(e.getMessage());
+	}
+
+	// try to use format language
+	try {
+	    RDFDataMgr.write(System.out, model, RDFLanguages.nameToLang(format));
+	} catch (Exception err) {
+	    System.err.println(err.getMessage());
 	    return 10;
 	}
 
