@@ -18,33 +18,17 @@ import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
 
 
-@Command(name = "normalize",
+@Command(name = "simple",
 	 mixinStandardHelpOptions = true,
-	 description = "normalize an Open Annotations selector")
-public class Normalize implements Callable<Integer> {
+	 description = "normalize a simple pair of XPath selector and RFC5147 character scheme selector")
+public class Normalize extends AbstractNormalize implements Callable<Integer> {
 
-    private static final Processor PROC = new Processor();
-
-    enum DOMParser {
-	XML,
-	HTML
-    }
-
-    enum Normalizer {
-	FROM_ROOT_CLARK,
-	FROM_DEEPEST_ID_CLARK
-    }
 
     @Parameters(paramLabel = "RESOURCE",
 		description = "The file the selector selects from")
     URI resource;
 
-    @Option(names = { "-p", "--parser" },
-	    paramLabel = "PARSER",
-	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    DOMParser parser = DOMParser.XML;
-
-    @Option(names = { "-x", "--xpath" },
+    @Option(names = { "-p", "--xpath" },
 	    required = true,
 	    paramLabel = "XPATH",
 	    description = "the XPath value of an XPath selector")
@@ -56,15 +40,6 @@ public class Normalize implements Callable<Integer> {
 	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
     int character;
 
-    @Option(names = { "--mode" },
-	    paramLabel = "MODE",
-	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
-
-    @Option(names = { "-n", "--normalizer" },
-	    paramLabel = "NORMALIZER",
-	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
 
     @Override
     public Integer call() throws Exception {
