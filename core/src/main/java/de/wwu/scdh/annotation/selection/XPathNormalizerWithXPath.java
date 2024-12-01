@@ -61,11 +61,10 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
      * Create a new {@link XPathNormalizerWithXPath} normalizer for a
      * {@link DOMResource}.
      *
-     * @param resource  the {@link DOMResource} the normalizer will work on
      * @param xpath  an XPath expression which will be evaluated on a context node for normalization
      */
-    public XPathNormalizerWithXPath(DOMResource resource, String xpath) {
-	super(resource);
+    public XPathNormalizerWithXPath(String xpath) {
+	super();
 	this.xpath = xpath;
     }
 
@@ -74,8 +73,8 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
      * the XPath expressing the normalizer was initialized with.
      */
     @Override
-    protected String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException {
-	XPathCompiler compiler = this.resource.getProcessor().newXPathCompiler();
+    protected String getNormalizedXPath(DOMResource resource, XdmNode node, boolean escaped) throws SelectorException {
+	XPathCompiler compiler = resource.getProcessor().newXPathCompiler();
 	XdmValue nodes;
 	try {
 	    XPathExecutable executable = compiler.compile(xpath);

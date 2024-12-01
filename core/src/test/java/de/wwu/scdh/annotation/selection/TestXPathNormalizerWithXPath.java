@@ -28,20 +28,20 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testWithPathFunction() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, "path(.)");
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath("path(.)");
 	assertEquals("path(.)", normalizer.getXPath());
 	String xpath;
 	Pair<String, Integer> result;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }
@@ -49,13 +49,13 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testWithDeepestIdClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
     }
@@ -63,13 +63,13 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testWithDeepestIdClarkXPathVerse2AppChar6() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("id(&apos;v2&apos;)/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }
@@ -77,13 +77,13 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testPathExpressionClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
 	assertEquals(0, result.getRight());
     }
@@ -91,13 +91,13 @@ public class TestXPathNormalizerWithXPath {
     @Test
     public void testPathExpressionClarkXPathOnVerse2AppChar6() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(resource, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
 	Pair<String, Integer> result;
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
 	assertEquals(1, result.getRight());
     }

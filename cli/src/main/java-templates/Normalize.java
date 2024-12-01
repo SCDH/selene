@@ -108,14 +108,14 @@ public class Normalize implements Callable<Integer> {
 	XPathNormalizerWithXPath xpathNormalizer;
 	if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
 	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		xpathNormalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 2;
 	    }
 	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
 	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(dom, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+		xpathNormalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 2;
@@ -125,7 +125,7 @@ public class Normalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(xpath, character, mode);
+	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(dom, xpath, character, mode);
 	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());

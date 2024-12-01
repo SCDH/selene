@@ -39,11 +39,11 @@ public class TestXPathNormalizer {
     public static final URI LUNARPANEL_XML  = new File(TEST_DIR, "lunarpanel.xml").toURI();
 
     private class DummyNormalizer extends XPathNormalizer {
-	public DummyNormalizer(DOMResource resource) {
-	    super(resource);
+	public DummyNormalizer() {
+	    super();
 	}
 	@Override
-	protected String getNormalizedXPath(XdmNode node, boolean escaped) throws SelectorException {
+	protected String getNormalizedXPath(DOMResource resource, XdmNode node, boolean escaped) throws SelectorException {
 	    return "";
 	}
     }
@@ -63,10 +63,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathRootElement() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "/*";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", getXPath(result.getLeft()));
@@ -78,10 +78,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathRootElementChar4() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "/*";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 3, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 3, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}teiHeader[1]/text()[1]", getXPath(result.getLeft()));
@@ -91,10 +91,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathRootElementPos39() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "/*";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 39, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 39, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}teiHeader[1]/Q{http://www.tei-c.org/ns/1.0}fileDesc[1]/Q{http://www.tei-c.org/ns/1.0}titleStmt[1]/Q{http://www.tei-c.org/ns/1.0}title[1]/text()[1]", getXPath(result.getLeft()));
@@ -105,10 +105,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathVerse1() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "id('v2')/text()[2]";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]", getXPath(result.getLeft()));
@@ -119,10 +119,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathVerse1Char10() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "id('v2')";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 10, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 10, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", getXPath(result.getLeft()));
@@ -133,10 +133,10 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathVerse1Char16() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "id('v2')";
-	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 16, Mode.DEEP_NODE_STOP_AT_END);
+	Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(resource, xpath, 16, Mode.DEEP_NODE_STOP_AT_END);
 	// this selects a text node
 	assertEquals("TEXT", result.getLeft().getNodeKind().name());
 	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]", getXPath(result.getLeft()));
@@ -147,72 +147,72 @@ public class TestXPathNormalizer {
     @Test
     public void testPathExpressionXPathVerse1CaesuraThrows() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "id('v1')/*:caesura[1]";
-	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(xpath, 0, Mode.DEEP_NODE_STOP_AT_END));
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END));
     }
 
     @Test
     public void testPathExpressionXPathVerse1Char100Throws() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
+	XPathNormalizer normalizer = new DummyNormalizer();
 	String xpath;
 	xpath = "id('v1')";
 	// Pair<XdmNode, Integer> result = normalizer.getTextNodeAtPosition(xpath, 100, false);
-	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(xpath, 100, Mode.DEEP_NODE_STOP_AT_END));
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, xpath, 100, Mode.DEEP_NODE_STOP_AT_END));
     }
 
     @Test
     public void testAmbiguityOnSolarXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(SOLAR_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminary(normalizer, "Sol");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminary(normalizer, resource, "Sol");
     }
 
     @Test
     public void testAmbiguityOnLunarXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(LUNAR_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminary(normalizer, "Lun");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminary(normalizer, resource, "Lun");
     }
 
-    protected void assertLuminary(XPathNormalizer normalizer, String luminary) throws SelectorException {
+    protected void assertLuminary(XPathNormalizer normalizer, DOMResource resource, String luminary) throws SelectorException {
 	Pair<XdmNode, Integer> result;
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 0, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.DEEP_NODE_STEP_OVER_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.DEEP_NODE_STEP_OVER_END);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 4, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 4, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 4, Mode.DEEP_NODE_STEP_OVER_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 4, Mode.DEEP_NODE_STEP_OVER_END);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(2, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.DEEP_NODE_STEP_OVER_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.DEEP_NODE_STEP_OVER_END);
 	assertEquals("!", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.DEEP_NODE_STOP_AT_END);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.DEEP_NODE_STOP_AT_END);
 	assertEquals("!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-    	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.DEEP_NODE_STEP_OVER_END);
+    	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.DEEP_NODE_STEP_OVER_END);
 	assertEquals("!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
     }
@@ -221,158 +221,158 @@ public class TestXPathNormalizer {
     @Test
     public void testDeepestNodeOnSolarpanelXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminaryPanel(normalizer, "Sol");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminaryPanel(normalizer, resource, "Sol");
     }
 
     @Test
     public void testDeepestNodeOnLunarpanelXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminaryPanel(normalizer, "Lun");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminaryPanel(normalizer, resource, "Lun");
     }
 
-    protected void assertLuminaryPanel(XPathNormalizer normalizer, String luminary) throws SelectorException {
+    protected void assertLuminaryPanel(XPathNormalizer normalizer, DOMResource resource, String luminary) throws SelectorException {
 	Pair<XdmNode, Integer> result;
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 0, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 0, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(2, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 8, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 8, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 9, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 9, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.FIRST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 11, Mode.FIRST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.LAST_OF_DEEPEST_NODES);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 11, Mode.LAST_OF_DEEPEST_NODES);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.FIRST_OF_DEEPEST_NODES));
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, "/*:r", 12, Mode.FIRST_OF_DEEPEST_NODES));
 
-    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.LAST_OF_DEEPEST_NODES));
+    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, "/*:r", 12, Mode.LAST_OF_DEEPEST_NODES));
     }
 
 
     @Test
     public void testFirstSecondOnSolarpanelXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminaryPanelWithFirstSecond(normalizer, "Sol");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminaryPanelWithFirstSecond(normalizer, resource, "Sol");
     }
 
     @Test
     public void testFirstSecondOnLunarpanelXML() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	assertLuminaryPanelWithFirstSecond(normalizer, "Lun");
+	XPathNormalizer normalizer = new DummyNormalizer();
+	assertLuminaryPanelWithFirstSecond(normalizer, resource, "Lun");
     }
 
-    protected void assertLuminaryPanelWithFirstSecond(XPathNormalizer normalizer, String luminary) throws SelectorException {
+    protected void assertLuminaryPanelWithFirstSecond(XPathNormalizer normalizer, DOMResource resource, String luminary) throws SelectorException {
 	Pair<XdmNode, Integer> result;
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 0, Mode.FIRST);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 0, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 0, Mode.SECOND);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.FIRST);
 	assertEquals(luminary, result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 3, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 3, Mode.SECOND);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.FIRST);
 	assertEquals("ar", result.getLeft().toString());
 	assertEquals(2, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 5, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 5, Mode.SECOND);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.FIRST);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 6, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 6, Mode.SECOND);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 8, Mode.FIRST);
 	assertEquals("pan", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 8, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 8, Mode.SECOND);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(0, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 9, Mode.FIRST);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 9, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 9, Mode.SECOND);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(1, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.FIRST);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 11, Mode.FIRST);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	result = normalizer.getTextNodeAtPosition("/*:r", 11, Mode.SECOND);
+	result = normalizer.getTextNodeAtPosition(resource, "/*:r", 11, Mode.SECOND);
 	assertEquals("el!", result.getLeft().toString());
 	assertEquals(3, result.getRight());
 
-	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.FIRST));
+	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, "/*:r", 12, Mode.FIRST));
 
-    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition("/*:r", 12, Mode.SECOND));
+    	assertThrows(SelectorException.class, () -> normalizer.getTextNodeAtPosition(resource, "/*:r", 12, Mode.SECOND));
     }
 
 
@@ -389,9 +389,9 @@ public class TestXPathNormalizer {
      */
     void assertAmbiguityClass2(Mode mode) throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
-	XPathNormalizer normalizer = new DummyNormalizer(resource);
-	Pair<XdmNode, Integer> result1 = normalizer.getTextNodeAtPosition("/*:r[1]/*:t1[1]/text()[1]", 2, mode);
-	Pair<XdmNode, Integer> result2 = normalizer.getTextNodeAtPosition("/*:r[1]/*:t2[1]/text()[1]", 0, mode);
+	XPathNormalizer normalizer = new DummyNormalizer();
+	Pair<XdmNode, Integer> result1 = normalizer.getTextNodeAtPosition(resource, "/*:r[1]/*:t1[1]/text()[1]", 2, mode);
+	Pair<XdmNode, Integer> result2 = normalizer.getTextNodeAtPosition(resource, "/*:r[1]/*:t2[1]/text()[1]", 0, mode);
 	assertEquals(result1.getLeft(), result2.getLeft());
 	assertEquals(result1.getRight(), result2.getRight());
     }
