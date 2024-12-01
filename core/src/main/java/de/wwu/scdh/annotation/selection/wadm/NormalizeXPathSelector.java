@@ -47,8 +47,7 @@ public class NormalizeXPathSelector implements Consumer<Resource> {
      *
      */
     public void accept(Resource selector) {
-	LOG.debug("normalizing range selector '{}'", selector.toString());
-	model.removeAll(selector, OA.hasStartSelector, (RDFNode) null);
+	LOG.info("normalizing XPathSelector '{}'", selector);
 
 
     }
