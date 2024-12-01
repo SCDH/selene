@@ -203,7 +203,9 @@ public abstract class XPathNormalizer {
 	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(resource, xpath, position, mode);
 	// call the normalization function
 	String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), escaped);
-	return new ImmutablePair<String, Integer>(normalizedXPath, textNode.getRight());
+	XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
+	Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
+	return new ImmutablePair<String, Integer>(normalizedXPath, normalizedPos);
     }
 
     /**
@@ -518,6 +520,41 @@ public abstract class XPathNormalizer {
     }
 
     /**
+     * Get the new position value based on the old one and the
+     * fragment selected by the normalized XPath.
+     *
+     * @param resource the {@link DOMResource} operating on
+     * @param textNode the text node as {@link XdmNode} gotten from step 1
+     * @param pos the position gotten form step 1
+     * @param fragment the {@link XdmNode} selected by the XPath resulting from step 2
+     * @return the position from step 2
+     */
+    protected int posInNormalizedNode(DOMResource resource, XdmNode textNode, int pos, XdmNode fragment) throws SelectorException {
+	if (textNode.equals(fragment)) {
+	    return pos;
+	}
+	// iter over all descendant text nodes until we found textNode
+	boolean found = false;
+	int posAcc = pos;
+	Iterator<XdmNode> descenant = fragment.axisIterator(Axis.DESCENDANT);
+	while (descenant.hasNext() && !found) {
+	    XdmNode node = descenant.next();
+	    if (!node.getNodeKind().equals(XdmNodeKind.TEXT))
+		continue;
+	    if (node.equals(textNode)) {
+		found = true;
+		break;
+	    }
+	    posAcc += node.getUnderlyingValue().getUnicodeStringValue().length32();
+	}
+	if (!found) {
+	    LOG.error("text node not in fragment described by normalized XPath");
+	    throw new SelectorException("text node not in fragment described by normalized XPath");
+	}
+	return posAcc;
+    }
+
+    /**
      * Report that the position is not found inside the selected fragment.
      * @param xpath  XPath expression selecting a fragment from a {@link DOMResource}
      * @param position  the character scheme position inside the fragment
@@ -548,6 +585,13 @@ public abstract class XPathNormalizer {
      */
     protected static int getDepth(Pair<XdmNode, Integer> pair) {
 	return getDepth(pair.getLeft());
+    }
+
+    /**
+     * A utility function for unescaping XPaths.
+     */
+    protected String unespace(String in) {
+	return in.replace("&apos;", "'");
     }
 
 }
