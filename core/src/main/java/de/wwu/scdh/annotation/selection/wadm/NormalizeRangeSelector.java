@@ -6,7 +6,9 @@ import java.util.function.Consumer;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.OA;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.RDFNode;
 
 import net.sf.saxon.s9api.Processor;
 
@@ -20,6 +22,9 @@ import de.wwu.scdh.annotation.selection.XPathNormalizer;
 public class NormalizeRangeSelector implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeRangeSelector.class);
+
+    public static final XPathNormalizer.Mode START_XPATH_SELECTOR_MODE = XPathNormalizer.Mode.LAST_OF_DEEPEST_NODES;
+    public static final XPathNormalizer.Mode END_XPATH_SELECTOR_MODE = XPathNormalizer.Mode.FIRST_OF_DEEPEST_NODES;
 
     protected final DOMResource dom;
     protected Model model;
@@ -47,13 +52,29 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 	    .listProperties(OA.hasStartSelector)
 	    .mapWith(stmt -> stmt.getResource())
 	    .filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector).toSet().isEmpty())
-	    .forEach(new NormalizeXPathSelector(processor, normalizer, model, dom, XPathNormalizer.Mode.LAST_OF_DEEPEST_NODES));
+	    .filterKeep(sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
+			! model.listStatements(sel, OA.refinedBy, (RDFNode) null)
+			.mapWith(stmt -> stmt.getSubject())
+			.filterKeep(refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector).toSet().isEmpty())
+			.filterKeep(refinement -> model.listStatements(refinement, DCTerms.conformsTo, NormalizeXPathSelectorRefinedByRFC5147CharScheme.RFC5147).toSet().isEmpty())
+			// TODO: filter char scheme
+			.toSet()
+			.isEmpty())
+	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, normalizer, model, dom, START_XPATH_SELECTOR_MODE));
 
 	selector
 	    .listProperties(OA.hasEndSelector)
 	    .mapWith(stmt -> stmt.getResource())
 	    .filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector).toSet().isEmpty())
-	    .forEach(new NormalizeXPathSelector(processor, normalizer, model, dom, XPathNormalizer.Mode.FIRST_OF_DEEPEST_NODES));
+	    .filterKeep(sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
+			! model.listStatements(sel, OA.refinedBy, (RDFNode) null)
+			.mapWith(stmt -> stmt.getSubject())
+			.filterKeep(refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector).toSet().isEmpty())
+			.filterKeep(refinement -> model.listStatements(refinement, DCTerms.conformsTo, NormalizeXPathSelectorRefinedByRFC5147CharScheme.RFC5147).toSet().isEmpty())
+			// TODO: filter char scheme
+			.toSet()
+			.isEmpty())
+	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, normalizer, model, dom, END_XPATH_SELECTOR_MODE));
 
     }
 }
