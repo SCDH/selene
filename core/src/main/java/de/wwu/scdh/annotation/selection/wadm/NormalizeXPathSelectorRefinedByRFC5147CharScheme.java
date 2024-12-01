@@ -67,7 +67,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
      *
      */
     public void acceptThrows(Resource selector) throws ModelException, NumberFormatException, SelectorException {
-	LOG.info("normalizing XPathSelector '{}'", selector);
+	LOG.debug("normalizing XPathSelector '{}'", selector);
 
 	// 1. get XPath component
 	String xpath;
@@ -119,10 +119,10 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	}
 
 	// 3. normalize the components
-	LOG.info("normalizing refined XPath {};{}", xpath, startPos);
+	LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 	Pair<String, Integer> normalized = normalizer.normalizeXPathRefinedByCharScheme(dom, xpath, startPos, normalizerMode);
-	LOG.info("normalized to {};{}", normalized.getLeft(), normalized.getRight());
-	LOG.info("normalized to {};{}", normalized.getLeft(), normalized.getRight());
+	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
+	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
 
 	// 4. write the normalized values back to the model
 	model.remove(xpathStatement);
