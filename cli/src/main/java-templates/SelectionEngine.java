@@ -17,7 +17,8 @@ import java.util.concurrent.Callable;
 	 mixinStandardHelpOptions = true,
 	 version = "${revision}${changelist}",
 	 subcommands = {
-	     Normalize.class
+	     Normalize.class,
+	     NormalizeWADM.class
 	 })
 public class SelectionEngine {
 
