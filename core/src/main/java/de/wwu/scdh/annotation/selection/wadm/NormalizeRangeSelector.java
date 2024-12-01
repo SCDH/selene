@@ -9,7 +9,6 @@ import org.apache.jena.vocabulary.OA;
 import org.apache.jena.rdf.model.Resource;
 
 import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,5 +42,18 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
      */
     public void accept(Resource selector) {
 	LOG.debug("normalizing range selector '{}'", selector.toString());
+
+	selector
+	    .listProperties(OA.hasStartSelector)
+	    .mapWith(stmt -> stmt.getResource())
+	    .filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector).toSet().isEmpty())
+	    .forEach(new NormalizeXPathSelector(processor, normalizer, model, dom, XPathNormalizer.Mode.LAST_OF_DEEPEST_NODES));
+
+	selector
+	    .listProperties(OA.hasEndSelector)
+	    .mapWith(stmt -> stmt.getResource())
+	    .filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector).toSet().isEmpty())
+	    .forEach(new NormalizeXPathSelector(processor, normalizer, model, dom, XPathNormalizer.Mode.FIRST_OF_DEEPEST_NODES));
+
     }
 }
