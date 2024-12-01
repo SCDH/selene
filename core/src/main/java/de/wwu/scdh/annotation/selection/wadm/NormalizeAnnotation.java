@@ -96,8 +96,13 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param lang the serialization language of the graph at the URI
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, String uri, String lang, Optional<DOMResource> dom) {
-	Model model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang));
+    public static Model normalize(Processor processor, XPathNormalizer normalizer, String uri, Optional<String> lang, Optional<DOMResource> dom) {
+	Model model;
+	if (lang.isEmpty()) {
+	    model = RDFDataMgr.loadModel(uri);
+	} else {
+	    model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang.get()));
+	}
 	NormalizeAnnotation annotations = new NormalizeAnnotation(processor, normalizer, model, dom);
 	ResIterator annots = model.listResourcesWithProperty(RDF.type, OA.Annotation);
 	annots.forEach(annotations);
