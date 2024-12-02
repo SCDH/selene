@@ -105,7 +105,11 @@ public class NormalizeTarget implements Consumer<Resource> {
 	    String targetSource = target.getProperty(OA.hasSource).getObject().toString();
 	    LOG.debug("getting and parsing source '{}'", targetSource);
 	    URI targetUri = new URI(targetSource);
-	    source = DOMResource.fromHTML(targetUri, null, processor);
+	    try {
+		source = DOMResource.fromXML(targetUri, null, processor);
+	    } catch (Exception e) {
+		source = DOMResource.fromHTML(targetUri, null, processor);
+	    }
 	} else {
 	    source = dom.get();
 	}
