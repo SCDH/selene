@@ -1,5 +1,16 @@
 # Selection Engine
 
+The Selection Engine is a Swiss army knife for dealing with Standoff
+Annotations following the Web Annotation Data Model (WADM).
+
+- normalize selectors
+- convert serialization formats
+- rewrite XPathSelectors, which are refined by a
+  RFC5147-FragmentSelector, to an other XPath component and
+  recalculate the position component accordingly
+- map selectors referencing a target to selectors referencing a
+  derived target
+
 ## Getting Started
 
 Java version required: OpenJDK 17+
