@@ -26,6 +26,18 @@ import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
 import de.wwu.scdh.annotation.selection.SelectorException;
 
+/**
+ * This class can be used to normalize the model of all WADM
+ * XPathSelectors, that are refined by RFC5147 conforming
+ * FragmentSelectors. An {@link XPathNormalizer} does the task of
+ * normalization.<P>
+ *
+ * This class implements the {@link Consumer} interface and can thus
+ * be used in a functional style like <code>forEach(new
+ * NormalizeAnnoation(...))</code> on some resource iterator. The
+ * normalization will by side effect be written to the {@link Model}
+ * which was passed into the constructor.
+ */
 public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeXPathSelectorRefinedByRFC5147CharScheme.class);
@@ -49,6 +61,10 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	this.normalizerMode = mode;
     }
 
+    /**
+     * This is the method of the function interface {@link Consumer}
+     * and actually does the normalization without throwing errors.
+     */
     public void accept(Resource selector) {
 	try {
 	    acceptThrows(selector);
@@ -62,9 +78,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
     }
 
     /**
-     * This is the method of the function interface {@link Consumer}
-     * and actually does the normalization without throwing errors.
-     *
+     * Do the normalization and throw exceptions on errors.
      */
     public void acceptThrows(Resource selector) throws ModelException, NumberFormatException, SelectorException {
 	LOG.debug("normalizing XPathSelector '{}'", selector);
