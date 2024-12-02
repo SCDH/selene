@@ -19,8 +19,18 @@ Generating Java Docs, which will be in `target/site/apidocs`:
 ./mvnw javadoc:aggregate
 ```
 
-
 [Javadocs are online](https://scdh.zivgitlabpages.uni-muenster.de/selectors/selection-engine/apidocs/) for the latest release.
+
+Usage Examples (Linux):
+
+```shell
+cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld -f ttl
+```
+
+```shell
+cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld  -x "path(root(.))" -f ntriples
+```
+
 
 
 ## Further Reading
