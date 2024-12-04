@@ -137,8 +137,9 @@
 
     <modules>
        <module>core</module>
-       <module>cli</module>
        <module>mapping</module>
+       <module>cli</module>
+       <module>rest</module>
     </modules>
 
     <build>
