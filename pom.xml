@@ -50,8 +50,24 @@
        <apache-commons.version>3.13.0</apache-commons.version>
        <apache-jena.version>5.2.0</apache-jena.version>
        <junit.version>5.7.2</junit.version>
+       <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+       <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+       <quarkus.platform.version>3.17.3</quarkus.platform.version>
+       <!--quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery-->
        <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <!-- dependencies needed everywhere -->
     <dependencies>
@@ -144,6 +160,18 @@
 
     <build>
        <plugins>
+
+	  <!-- this gives us the quarkus:dev target -->
+	  <plugin>
+             <groupId>${quarkus.platform.group-id}</groupId>
+             <artifactId>quarkus-maven-plugin</artifactId>
+             <version>${quarkus.platform.version}</version>
+	     <!-- By not providing build goals etc. we exclude maven
+                 modules from being evaluated as quarkus services. The
+                 service module has to have this plugin, too. Helper
+                 libraries do not. -->
+          </plugin>
+
 	  <plugin>
              <groupId>org.codehaus.mojo</groupId>
              <artifactId>flatten-maven-plugin</artifactId>
