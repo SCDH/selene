@@ -1,5 +1,6 @@
 package de.wwu.scdh.annotation.selection.wadm;
 
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -10,6 +11,9 @@ import org.apache.jena.vocabulary.OA;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.ontology.impl.OntModelImpl;
+import org.apache.jena.ontology.OntModelSpec;
 
 import net.sf.saxon.s9api.Processor;
 
@@ -105,6 +109,35 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	    model = RDFDataMgr.loadModel(uri);
 	} else {
 	    model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang.get()));
+	}
+	return normalize(processor, normalizer, model, dom);
+    }
+
+    /**
+     * Normalize all annotations in a {@link Model} which is read from
+     * an {@link InputStream}.
+     *
+     * @param processor  a Saxon {@link Processor} for parsing and processing the target source
+     * @param normalizer  the normalizer
+     * @param input  the {@link InputStream}
+     * @param modelBase  a base URI of the model, given as {@link String}
+     * @param lang the serialization language of the graph at the URI
+     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
+     * @return the normalized {@link Model}
+     */
+    public static Model normalize(Processor processor, XPathNormalizer normalizer, InputStream input, Optional<String> lang, Optional<String> modelBase, Optional<DOMResource> dom) {
+	Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
+	Lang langHint;
+	if (lang.isEmpty()) {
+
+	    langHint = RDFLanguages.nameToLang(lang.get());
+	} else {
+	    langHint = RDFLanguages.JSONLD11;
+	}
+	if (modelBase.isEmpty()) {
+	    RDFDataMgr.read(model, input, langHint);
+	} else {
+	    RDFDataMgr.read(model, input, modelBase.get(), langHint);
 	}
 	return normalize(processor, normalizer, model, dom);
     }
