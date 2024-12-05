@@ -121,7 +121,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param normalizer  the normalizer
      * @param input  the {@link InputStream}
      * @param modelBase  a base URI of the model, given as {@link String}
-     * @param lang the serialization language of the graph at the URI
+     * @param lang  optionally the serialization language of stream data; if not provided, NTriples are assumed
      * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
@@ -132,7 +132,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 
 	    langHint = RDFLanguages.nameToLang(lang.get());
 	} else {
-	    langHint = RDFLanguages.JSONLD11;
+	    langHint = RDFLanguages.NTRIPLES;
 	}
 	if (modelBase.isEmpty()) {
 	    RDFDataMgr.read(model, input, langHint);
