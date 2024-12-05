@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Selection Engine API
+  description: An API for manipulating selectors and references of stand-off annotations 
+  version: 0.1.0
+
+paths:
+  /wadm/normalize:
+    post:
+      summary: normalizes the supplied WADM annotation
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                model:
+                  description: the RDF data
+                  type: string
+                  format: binary
+                source:
+                  description: optional source instead of oa:hasSource
+                  type: string
+                  format: binary
+                config:
+                  $ref: '#/components/schemas/config'
+              required:
+                - model
+            encoding:
+              model:
+                contentType: application/rdf+xml, application/xml, application/x-binary-rdf, text/turtle, application/x-turtle, text/n3, text/rdf+n3, application/rdf+json, application/ld+json, application/x-trig, application/x-trig, application/trix
+              source:
+                contentType: text/html, text/xml, application/xml
+      responses:
+        200:
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        
+components:
+  schemas:
+    config:
+      description: Per request config options
+      type: object
+      properties:
+        xpath:
+          description: XPath for determining the new XPath component of XPathSelectors
+          type: string
+        xpathPre:
+          description: predefined XPath
+          type: string

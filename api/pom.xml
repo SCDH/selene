@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>de.wwu.scdh.annotations.selections</groupId>
+      <artifactId>selection-engine</artifactId>
+      <version>${revision}${changelist}</version>
+   </parent>
+
+   <artifactId>selection-engine-api</artifactId>
+   <name>Selection Engine OpenAPI</name>
+
+   <dependencies>
+      <!-- for the annotations in the model and in the api -->
+      <dependency>
+	 <groupId>io.quarkus</groupId>
+	 <artifactId>quarkus-hibernate-validator</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-databind</artifactId>
+         <version>${jackson.version}</version>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+
+	 <plugin>
+	    <!-- this generates the code for the service -->
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>${openapitools.version}</version>
+            <executions>
+               <execution>
+		  <goals>
+		     <goal>generate</goal>
+		  </goals>
+		  <configuration>
+		     <inputSpec>${project.basedir}/src/main/openapi/openapi.yaml</inputSpec>
+		     <generatorName>jaxrs-spec</generatorName>
+		     <configOptions>
+			<dateLibrary>java8</dateLibrary>
+			<useSwaggerAnnotations>false</useSwaggerAnnotations>
+			<interfaceOnly>true</interfaceOnly>
+			<returnResponse>true</returnResponse>
+			<library>quarkus</library>
+			<useJakartaEe>true</useJakartaEe>
+		     </configOptions>
+		     <apiPackage>de.wwu.scdh.annotations.selections.api</apiPackage>
+		     <modelPackage>de.wwu.scdh.annotations.selections.apimodel</modelPackage>
+		     <generateAliasAsModel>true</generateAliasAsModel>
+		     <generateModelTests>false</generateModelTests>
+		     <generateModelDocumentation>false</generateModelDocumentation>
+		     <generateSupportingFiles>false</generateSupportingFiles>
+		     <generateApiTests>false</generateApiTests>
+		     <generateApiDocumentation>false</generateApiDocumentation>
+		     <auth>false</auth>
+		  </configuration>
+               </execution>
+            </executions>
+	 </plugin>
+	 <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+	    <version>3.3.0</version>
+            <executions>
+               <execution>
+		  <phase>generate-sources</phase>
+		  <goals>
+		     <goal>add-source</goal>
+		  </goals>
+		  <configuration>
+		     <sources>
+			<!-- this tells the compiler where generated code is -->
+			<source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
+		     </sources>
+		  </configuration>
+               </execution>
+            </executions>
+	 </plugin>
+
+	 <!-- index the beans in this module, see
+	      https://quarkus.io/guides/cdi-reference#how-to-generate-a-jandex-index
+	      -->
+	 <plugin>
+	    <groupId>io.smallrye</groupId>
+	    <artifactId>jandex-maven-plugin</artifactId>
+	    <version>${smallrye-jandex-plugin.version}</version>
+	    <executions>
+               <execution>
+		  <id>make-index</id>
+		  <goals>
+		     <goal>jandex</goal>
+		  </goals>
+               </execution>
+	    </executions>
+	 </plugin>
+
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+         </plugin>
+
+	 <!-- flatten the pom -->
+	 <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>flatten-maven-plugin</artifactId>
+            <version>1.5.0</version>
+            <configuration>
+            </configuration>
+            <executions>
+               <!-- enable flattening -->
+               <execution>
+		  <id>flatten</id>
+		  <phase>process-resources</phase>
+		  <goals>
+		     <goal>flatten</goal>
+		  </goals>
+               </execution>
+               <!-- ensure proper cleanup -->
+               <execution>
+		  <id>flatten.clean</id>
+		  <phase>clean</phase>
+		  <goals>
+		     <goal>clean</goal>
+		  </goals>
+               </execution>
+            </executions>
+	 </plugin>
+
+      </plugins>
+   </build>
+
+</project>
