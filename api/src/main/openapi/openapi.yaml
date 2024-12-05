@@ -33,12 +33,13 @@ paths:
                 contentType: text/html, text/xml, application/xml
       responses:
         200:
-          description: OK
-          content:
-            "*/*":
-              schema:
-                type: string
-                format: binary
+          $ref: '#/components/responses/ModelProcessed'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
         
 components:
   schemas:
@@ -52,3 +53,64 @@ components:
         xpathPre:
           description: predefined XPath
           type: string
+
+  responses:
+    ModelProcessed:
+      description: OK
+      content:
+        application/rdf+xml:
+          schema:
+            type: string
+            format: binary
+        application/xml:
+          schema:
+            type: string
+            format: binary
+        application/x-binary-rdf:
+          schema:
+            type: string
+            format: binary
+        text/turtle:
+          schema:
+            type: string
+            format: binary
+        application/x-turtle:
+          schema:
+            type: string
+            format: binary
+        text/n3:
+          schema:
+            type: string
+            format: binary
+        application/rdf+json:
+          schema:
+            type: string
+            format: binary
+        application/ld+json:
+          schema:
+            type: string
+            format: binary
+        application/x-trig:
+          schema:
+            type: string
+            format: binary
+        application/trix:
+          schema:
+            type: string
+            format: binary
+    NotFound:
+      description: The specified resource was not found
+    BadRequest:
+      description: Bad request.
+      content:
+        text/plain:
+          schema:
+            type: string
+            format: binary
+    InternalError:
+      description: An error occurred while performing the transformation.
+      content:
+        text/plain:
+          schema:
+            type: string
+            format: binary
