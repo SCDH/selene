@@ -30,7 +30,7 @@ paths:
               model:
                 contentType: application/rdf+xml, application/xml, application/x-binary-rdf, text/turtle, application/x-turtle, text/n3, text/rdf+n3, application/rdf+json, application/ld+json, application/x-trig, application/x-trig, application/trix
               source:
-                contentType: text/html, text/xml, application/xml
+                contentType: text/html, application/xhtml+xml, text/xml, application/xml
       responses:
         200:
           $ref: '#/components/responses/ModelProcessed'
