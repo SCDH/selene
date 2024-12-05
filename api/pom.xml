@@ -49,8 +49,8 @@
 			<library>quarkus</library>
 			<useJakartaEe>true</useJakartaEe>
 		     </configOptions>
-		     <apiPackage>de.wwu.scdh.annotations.selections.api</apiPackage>
-		     <modelPackage>de.wwu.scdh.annotations.selections.apimodel</modelPackage>
+		     <apiPackage>de.wwu.scdh.annotations.selections.service.api</apiPackage>
+		     <modelPackage>de.wwu.scdh.annotations.selections.service.model</modelPackage>
 		     <generateAliasAsModel>true</generateAliasAsModel>
 		     <generateModelTests>false</generateModelTests>
 		     <generateModelDocumentation>false</generateModelDocumentation>
