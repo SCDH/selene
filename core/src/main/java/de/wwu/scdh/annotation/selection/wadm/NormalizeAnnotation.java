@@ -80,8 +80,8 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      *
      * @param processor  a Saxon {@link Processor} for parsing and processing the target source
      * @param normalizer  the normalizer
-     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @parma model  the RDF model (graph) containing the annotations
+     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
     public static Model normalize(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
@@ -92,15 +92,15 @@ public class NormalizeAnnotation implements Consumer<Resource> {
     }
 
     /**
-     * Normalize all annotations in the {@link Model} given by a URI
+     * Normalize all annotations in a {@link Model} given by a URI
      * as {@link String} which may reference a local file (file URI)
      * or an online resource.
      *
      * @param processor  a Saxon {@link Processor} for parsing and processing the target source
      * @param normalizer  the normalizer
-     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @param uri  the URI where to read the RDF from
      * @param lang the serialization language of the graph at the URI
+     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
     public static Model normalize(Processor processor, XPathNormalizer normalizer, String uri, Optional<String> lang, Optional<DOMResource> dom) {
