@@ -64,7 +64,8 @@ public class NormalizeAnnotation implements Consumer<Resource> {
     }
 
     /**
-     * Returns the normalized {@link Model}.
+     * Returns the {@link Model}. The model is normalized, when
+     * <code>accept</code> was called.
      */
     public Model getModel() {
 	return model;
@@ -80,14 +81,16 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @return the normalized {@link Model}
      */
     public static Model normalize(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
-	NormalizeAnnotation annotations = new NormalizeAnnotation(processor, normalizer, model, dom);
+	NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(processor, normalizer, model, dom);
 	ResIterator annots = model.listResourcesWithProperty(RDF.type, OA.Annotation);
-	annots.forEach(annotations);
-	return annotations.getModel();
+	annots.forEach(normalizeAnnotation);
+	return normalizeAnnotation.getModel();
     }
 
     /**
-     * Normalize all annotations in the provided {@link Model}.
+     * Normalize all annotations in the {@link Model} given by a URI
+     * as {@link String} which may reference a local file (file URI)
+     * or an online resource.
      *
      * @param processor  a Saxon {@link Processor} for parsing and processing the target source
      * @param normalizer  the normalizer
@@ -103,10 +106,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	} else {
 	    model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang.get()));
 	}
-	NormalizeAnnotation annotations = new NormalizeAnnotation(processor, normalizer, model, dom);
-	ResIterator annots = model.listResourcesWithProperty(RDF.type, OA.Annotation);
-	annots.forEach(annotations);
-	return annotations.getModel();
+	return normalize(processor, normalizer, model, dom);
     }
 
 }
