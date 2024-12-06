@@ -53,7 +53,7 @@
        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
        <quarkus.platform.version>3.17.3</quarkus.platform.version>
-       <openapitools.version>7.7.0</openapitools.version>
+       <openapitools.version>7.10.0</openapitools.version>
        <jackson.version>2.14.2</jackson.version>
        <smallrye-jandex-plugin.version>3.0.5</smallrye-jandex-plugin.version>
        <!--quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery-->
