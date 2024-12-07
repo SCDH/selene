@@ -54,8 +54,8 @@
        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
        <quarkus.platform.version>3.17.3</quarkus.platform.version>
        <openapitools.version>7.10.0</openapitools.version>
-       <jackson.version>2.14.2</jackson.version>
-       <smallrye-jandex-plugin.version>3.0.5</smallrye-jandex-plugin.version>
+       <jackson.version>2.18.2</jackson.version>
+       <smallrye-jandex-plugin.version>3.2.3</smallrye-jandex-plugin.version>
        <!--quarkus.bootstrap.workspace-discovery>true</quarkus.bootstrap.workspace-discovery-->
        <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
     </properties>
