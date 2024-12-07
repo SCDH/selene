@@ -11,15 +11,6 @@
     <artifactId>rest</artifactId>
     <name>Selection Engine RESTful Webservice</name>
 
-    <properties>
-        <compiler-plugin.version>3.13.0</compiler-plugin.version>
-        <maven.compiler.release>17</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <skipITs>true</skipITs>
-        <surefire-plugin.version>3.5.0</surefire-plugin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
