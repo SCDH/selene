@@ -19,6 +19,10 @@
 	 <artifactId>quarkus-hibernate-validator</artifactId>
       </dependency>
       <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-smallrye-openapi</artifactId>
+      </dependency>
+      <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-databind</artifactId>
          <version>${jackson.version}</version>
@@ -29,7 +33,7 @@
       <plugins>
 
 	 <plugin>
-	    <!-- this generates the code for the service -->
+	    <!-- this generates the code for the Quarkus REST service -->
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator-maven-plugin</artifactId>
             <version>${openapitools.version}</version>
@@ -42,8 +46,10 @@
 		     <inputSpec>${project.basedir}/src/main/openapi/openapi.yaml</inputSpec>
 		     <generatorName>jaxrs-spec</generatorName>
 		     <configOptions>
-			<dateLibrary>java8</dateLibrary>
+		        <dateLibrary>java8</dateLibrary>
+			<!-- quarkus does not support swagger annotations, but uses the microprofile annotations -->
 			<useSwaggerAnnotations>false</useSwaggerAnnotations>
+			<useMicroProfileOpenAPIAnnotations>true</useMicroProfileOpenAPIAnnotations>
 			<interfaceOnly>true</interfaceOnly>
 			<returnResponse>true</returnResponse>
 			<library>quarkus</library>
