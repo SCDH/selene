@@ -1,0 +1,25 @@
+{
+    "@context": {
+	"@vocab": "http://www.w3.org/ns/oa#",
+	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+	"dcterms": "http://purl.org/dc/terms/"
+    },
+    "@type": "Annotation",
+    "hasTarget": {
+	"hasSelector": {
+	    "@type": "RangeSelector",
+	    "hasStartSelector": {
+		"@type": "XPathSelector",
+		"refinedBy": {
+		    "@type": "FragmentSelector"
+		}
+	    },
+	    "hasEndSelector": {
+		"@type": "XPathSelector",
+		"refinedBy": {
+		    "@type": "FragmentSelector"
+		}
+	    }
+	}
+    }
+}
