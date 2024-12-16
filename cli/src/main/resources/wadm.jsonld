@@ -1,0 +1,43 @@
+{
+    "@context": {
+	"@vocab": "http://www.w3.org/ns/anno.jsonld",
+	"oa": "http://www.w3.org/ns/oa#",
+	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+	"dcterms": "http://purl.org/dc/terms/",
+
+        "id":      {"@type": "@id", "@id": "@id"},
+	"type":    {"@type": "@id", "@id": "@type"},
+	"value": "rdf:value",
+	"Annotation": "oa:Annotation",
+	"RangeSelector": "oa:RangeSelector",
+	"XPathSelector": "oa:XPathSelector",
+	"FragmentSelector": "oa:FragmentSelector",
+	"body": "oa:hasBody",
+	"target": "oa:hasTarget",
+	"selector": "oa:hasSelector",
+	"startSelector": "oa:hasStartSelector",
+	"endSelector": "oa:hasEndSelector",
+	"refinedBy": "oa:refinedBy",
+	"source":        {"@type": "@id", "@id": "oa:hasSource"},
+        "conformsTo":    {"@type": "@id", "@id": "dcterms:conformsTo"}
+    },
+    "@type": "oa:Annotation",
+    "oa:hasTarget": {
+	"oa:hasSelector": {
+	    "@type": "oa:RangeSelector",
+	    "oa:hasStartSelector": {
+		"@type": "oa:XPathSelector",
+		"oa:refinedBy": {
+		    "@type": "oa:FragmentSelector"
+		}
+	    },
+	    "oa:hasEndSelector": {
+		"@type": "oa:XPathSelector",
+		"oa:refinedBy": {
+		    "@type": "oa:FragmentSelector"
+		}
+	    }
+	}
+    }
+}
+
