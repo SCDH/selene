@@ -59,21 +59,21 @@ import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 
 @Command(name = "normalize",
 	 mixinStandardHelpOptions = true,
-	 description = "normalize an Open Annotations selector")
+	 description = "normalize Web/Open Annotations selectors")
 public class NormalizeWADM extends AbstractNormalize implements Callable<Integer> {
 
-    @Parameters(paramLabel = "SELECTORS",
-		description = "The selectors given as URL or file path")
+    @Parameters(paramLabel = "ANNOTATIONS",
+		description = "The annotations given as URL or file path")
     URI selectors;
 
     @Option(names = { "-s", "--source" },
 	    paramLabel = "SOURCE",
-	    description = "The file all selectors selects from, overriding oa:hasSource")
+	    description = "The file all the ANNOTATIONS' selectors select from. This can be used to override oa:hasSource.")
     URI resource = null;
 
     @Option(names = { "-l", "--language" },
 	    paramLabel = "LANG",
-	    description = "The RDF language of the SELECTORS. By default, this is guessed by the file extension.")
+	    description = "The RDF language of the ANNOTATIONS. By default, this is guessed by the file extension.")
     String rdfLanguage = null;
 
     @Option(names = { "-f", "--format" },
@@ -83,7 +83,7 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 
     @Option(names = { "-v", "--variant" },
 	    paramLabel = "VARIANT",
-	    description = "The output format variant.")
+	    description = "The output format variant. Use 'framed' for getting JSON-LD 1.1 framing output.")
     String variant = null;
 
     @Option(names = { "--framing" },
