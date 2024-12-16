@@ -1,9 +1,15 @@
 package de.wwu.scdh.annotation.selection.cli;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import org.apache.commons.lang3.tuple.Pair;
 import java.util.Optional;
+import java.io.StringWriter;
+import java.util.Collections;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -20,6 +26,30 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFFormatVariant;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.system.JenaTitanium;
+import org.apache.jena.riot.WriterDatasetRIOT;
+import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.riot.system.PrefixMap;
+import org.apache.jena.riot.system.PrefixMapZero;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.sparql.core.DatasetImpl;
+import org.apache.jena.sparql.util.Context;
+import com.apicatalog.jsonld.lang.Keywords;
+
+import com.apicatalog.rdf.RdfDataset;
+import com.apicatalog.jsonld.document.RdfDocument;
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.api.FramingApi;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
+
+import jakarta.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonWriter;
+import jakarta.json.JsonWriterFactory;
+import jakarta.json.stream.JsonGenerator;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
@@ -48,13 +78,18 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 
     @Option(names = { "-f", "--format" },
 	    paramLabel = "FORMAT",
-	    description = "The output format. Defaults to jsonld")
-    String format = "jsonld";
+	    description = "The output format. Defaults to ${DEFAULT-VALUE}")
+    String format = "jsonld11";
 
     @Option(names = { "-v", "--variant" },
 	    paramLabel = "VARIANT",
 	    description = "The output format variant.")
     String variant = null;
+
+    @Option(names = { "--framing" },
+	    paramLabel = "FRAMEMING-URI",
+	    description = "Where to get the framing from. Defaults to ${DEFAULT-VALUE}")
+    URL framingUri = NormalizeWADM.class.getResource("/wadm.jsonld");
 
 
     @Override
@@ -103,22 +138,64 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	    System.err.println(e.getMessage());
 	    return 10;
 	}
+	Dataset ds = new DatasetImpl(model);
+
+
+	if (format.equals("jsonld11") && variant.equals("framed")) {
+	    // do the framing and serialization with Titanium
+
+	    try {
+		RdfDataset rdfds = JenaTitanium.convert(ds.asDatasetGraph());
+		Document rdfdoc = RdfDocument.of(rdfds);
+		// The Titanium API for framing does not allow
+		// RdfDocuments.  Thus, we make a JsonDocument
+		// representing the graph like for plain output
+		JsonArray array = JsonLd.fromRdf(rdfdoc).get();
+		JsonObject jsonStructure = Json.createObjectBuilder()
+		    .add(Keywords.GRAPH, array)
+		    .build();
+		JsonDocument jsonDocument = JsonDocument.of(jsonStructure);
+		// do the framing
+		FramingApi api = JsonLd.frame(jsonDocument, JsonDocument.of(framingUri.openStream()));
+		api.context("http://www.w3.org/ns/anno.jsonld");
+		final JsonObject output = api.get();
+
+		//JsonOutput.print(System.out, true);
+		final JsonWriterFactory writerFactory = Json
+		    .createWriterFactory(Collections.singletonMap(JsonGenerator.PRETTY_PRINTING, true));
+		final StringWriter stringWriter = new StringWriter();
+		try (final JsonWriter jsonWriter = writerFactory.createWriter(stringWriter)) {
+		    jsonWriter.write(output);
+		}
+		System.out.println(stringWriter.toString());
+		return 0;
+	    } catch (FileNotFoundException e) {
+		System.err.println("Framing file not found: " + e.getMessage());
+		return 4;
+	    }
+	}
+
 
 	// try to make output format
 	//
 	// Note, that ntriples, nquads and others only work on the
 	// try-catch block below!
 	try {
-	    RDFFormat outFormat;
+	    WriterDatasetRIOT writer;
 	    if (variant != null) {
 		RDFFormatVariant outVariant = new RDFFormatVariant(variant);
-		outFormat = new RDFFormat(RDFLanguages.nameToLang(format), outVariant);
+		RDFFormat outFormat = new RDFFormat(RDFLanguages.nameToLang(format), outVariant);
+		writer = RDFWriterRegistry.getWriterDatasetFactory(outFormat).create(outFormat);
 	    } else {
-		outFormat = new RDFFormat(RDFLanguages.nameToLang(format));
+		RDFFormat outFormat = new RDFFormat(RDFLanguages.nameToLang(format));
+		writer = RDFWriterRegistry.getWriterDatasetFactory(outFormat).create(outFormat);
 	    }
-	    RDFDataMgr.write(System.out, model, outFormat);
+	    PrefixMap prefixMap = PrefixMapZero.empty;
+	    Context ctx = new Context();
+	    writer.write(System.out, ds.asDatasetGraph(), prefixMap, resource.toString(), ctx);
 	    return 0; // done!
 	} catch (Exception e) {
+	    System.err.println(e.getMessage());
 	}
 
 	// try to use format language
