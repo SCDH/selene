@@ -16,7 +16,7 @@ import net.sf.saxon.s9api.Processor;
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
-
+import de.wwu.scdh.annotation.selection.Mode;
 
 abstract class AbstractNormalize {
 
@@ -53,7 +53,7 @@ abstract class AbstractNormalize {
     @Option(names = { "--mode" },
 	    paramLabel = "MODE",
 	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
+    Mode mode = Mode.DEEP_NODE_STOP_AT_END;
 
     @Option(names = { "-n", "--normalizer" },
 	    paramLabel = "NORMALIZER",

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
+import de.wwu.scdh.annotation.selection.Mode;
 import de.wwu.scdh.annotation.selection.SelectorException;
 
 /**
@@ -53,7 +53,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, XPathNormalizer.Mode mode) {
+    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, Mode mode) {
 	this.model = model;
 	this.normalizer = normalizer;
 	this.dom = dom;

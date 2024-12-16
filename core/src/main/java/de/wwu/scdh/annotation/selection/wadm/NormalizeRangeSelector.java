@@ -17,14 +17,15 @@ import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.Mode;
 
 
 public class NormalizeRangeSelector implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeRangeSelector.class);
 
-    public static final XPathNormalizer.Mode START_XPATH_SELECTOR_MODE = XPathNormalizer.Mode.LAST_OF_DEEPEST_NODES;
-    public static final XPathNormalizer.Mode END_XPATH_SELECTOR_MODE = XPathNormalizer.Mode.FIRST_OF_DEEPEST_NODES;
+    public static final Mode START_XPATH_SELECTOR_MODE = Mode.LAST_OF_DEEPEST_NODES;
+    public static final Mode END_XPATH_SELECTOR_MODE = Mode.FIRST_OF_DEEPEST_NODES;
 
     protected final DOMResource dom;
     protected Model model;

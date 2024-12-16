@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
+import de.wwu.scdh.annotation.selection.Mode;
 
 
 public class NormalizeXPathSelector implements Consumer<Resource> {
@@ -33,7 +33,7 @@ public class NormalizeXPathSelector implements Consumer<Resource> {
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelector(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, XPathNormalizer.Mode mode) {
+    public NormalizeXPathSelector(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, Mode mode) {
 	this.model = model;
 	this.normalizer = normalizer;
 	this.dom = dom;

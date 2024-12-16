@@ -13,7 +13,7 @@ import net.sf.saxon.s9api.SaxonApiException;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
+import de.wwu.scdh.annotation.selection.Mode;
 
 
 public class TestXPathNormalizerWithXPath {
