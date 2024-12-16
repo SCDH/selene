@@ -157,7 +157,6 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 		JsonDocument jsonDocument = JsonDocument.of(jsonStructure);
 		// do the framing
 		FramingApi api = JsonLd.frame(jsonDocument, JsonDocument.of(framingUri.openStream()));
-		api.context("http://www.w3.org/ns/anno.jsonld");
 		final JsonObject output = api.get();
 
 		//JsonOutput.print(System.out, true);
