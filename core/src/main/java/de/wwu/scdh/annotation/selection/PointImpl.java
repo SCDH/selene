@@ -2,6 +2,9 @@ package de.wwu.scdh.annotation.selection;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
 
 public class PointImpl implements Point {
 
@@ -38,6 +41,26 @@ public class PointImpl implements Point {
     @Override
     public <C extends Component<?>> boolean hasComponent(Class<C> component) {
 	return components.containsKey(component.getCanonicalName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int size() {
+	return components.size();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <C extends Component<?>> Set<Class<C>> dimensions() {
+	Set<Class<C>> dims = new HashSet<Class<C>>();
+	for (String c : components.keySet()) {
+	    dims.add((Class<C>) components.get(c).getClass());
+	}
+	return dims;
     }
 
     /**

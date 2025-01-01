@@ -1,5 +1,6 @@
 package de.wwu.scdh.annotation.selection;
 
+import java.util.Set;
 
 /**
  * A {@link Point} is an abstract reference to a resource which offers
@@ -24,6 +25,16 @@ public interface Point {
      * @param component  the component as {@link Class}
      */
     public <C extends Component<?>> boolean hasComponent(Class<C> component);
+
+    /**
+     * Returns the number of components.
+     */
+    public int size();
+
+    /**
+     * Returns the components of the point as a {@link Set}.
+     */
+    public <C extends Component<?>> Set<Class<C>> dimensions();
 
     /**
      * Returns the value of the requested component in a type-safe

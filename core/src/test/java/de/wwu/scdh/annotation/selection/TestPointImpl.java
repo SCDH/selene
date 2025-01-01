@@ -11,6 +11,8 @@ public class TestPointImpl {
 	Point point = new PointImpl();
 	assertFalse(point.hasComponent(XPathComponent.class));
 	assertThrows(NoSuchComponentException.class, () -> point.getComponent(XPathComponent.class));
+	assertEquals(0, point.size());
+	assertEquals(0, point.dimensions().size());
     }
 
     @Test
@@ -24,7 +26,10 @@ public class TestPointImpl {
 	assertEquals(xpath.getType(), point.getComponent(xpath.getClass()).getClass());
 	assertFalse(point.hasComponent(RFC5147CharComponent.class));
 	assertThrows(NoSuchComponentException.class, () -> point.getComponent(RFC5147CharComponent.class));
-    }
+	assertEquals(1, point.size());
+	assertTrue(point.dimensions().contains(XPathComponent.class));
+ 	assertFalse(point.dimensions().contains(RFC5147CharComponent.class));
+   }
 
     @Test
     void testComplexPoint() throws NoSuchComponentException {
@@ -37,6 +42,9 @@ public class TestPointImpl {
 	assertTrue(point.hasComponent(chr.getClass()));
 	assertTrue(point.hasComponent(RFC5147CharComponent.class));
 	assertEquals(0, point.getComponent(chr.getClass()));
+	assertEquals(2, point.size());
+	assertTrue(point.dimensions().contains(XPathComponent.class));
+	assertTrue(point.dimensions().contains(RFC5147CharComponent.class));
     }
 
     @Test
@@ -49,6 +57,7 @@ public class TestPointImpl {
 		   point.getComponent(XPathComponent.class).equals(xpath2.getValue()));
 	assertFalse(point.getComponent(XPathComponent.class).equals(xpath1.getValue()) &&
 		   point.getComponent(XPathComponent.class).equals(xpath2.getValue()));
+	assertEquals(1, point.size());
     }
 
 
