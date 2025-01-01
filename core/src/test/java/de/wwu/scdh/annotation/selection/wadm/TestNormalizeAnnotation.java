@@ -16,6 +16,7 @@ import org.apache.jena.rdf.model.Resource;
 
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 /**
  * This class is used to test all the wadm normalizers.
@@ -29,6 +30,7 @@ public class TestNormalizeAnnotation {
     public static final String P1_1_JSON = new File(SAMPLE_DIR, "p1.1.json").toString();
 
     private XPathNormalizer normalizer;
+    private RewriterConfig normalizerConfig = new RewriterConfig(null, false);
 
     private Processor processor = new Processor();
 
@@ -40,7 +42,7 @@ public class TestNormalizeAnnotation {
     @Test
     public void testAcceptP11WithPath() {
 	normalizer = new XPathNormalizerWithXPath("path(.)");
-	model = NormalizeAnnotation.normalize(processor, normalizer, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+	model = NormalizeAnnotation.normalize(processor, normalizer, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
 	assertEquals(21, model.size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "/html[1]/body[1]/p[1]/text()[1]").toSet().size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "char=3").toSet().size());
@@ -51,7 +53,7 @@ public class TestNormalizeAnnotation {
     @Test
     public void testAcceptP11WithPathParent() {
 	normalizer = new XPathNormalizerWithXPath("path(parent::*)");
-	model = NormalizeAnnotation.normalize(processor, normalizer, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+	model = NormalizeAnnotation.normalize(processor, normalizer, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
 	assertEquals(21, model.size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "/html[1]/body[1]/p[1]/text()[1]").toSet().size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "char=3").toSet().size());
@@ -62,7 +64,7 @@ public class TestNormalizeAnnotation {
     @Test
     public void testAcceptP11WithPathParentParent() {
 	normalizer = new XPathNormalizerWithXPath("path(parent::*/parent::*)");
-	model = NormalizeAnnotation.normalize(processor, normalizer, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+	model = NormalizeAnnotation.normalize(processor, normalizer, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
 	assertEquals(21, model.size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "/html[1]/body[1]/p[1]/text()[1]").toSet().size());
 	assertEquals(1, model.listStatements((Resource) null, RDF.value, "char=3").toSet().size());

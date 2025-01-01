@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 /**
  * Normalize an <code>oa:Target</code>.<P>
@@ -41,14 +42,17 @@ public class NormalizeTarget implements Consumer<Resource> {
     protected Model model;
     protected final XPathNormalizer normalizer;
     protected final Processor processor;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = Optional.empty();
 
-    public NormalizeTarget(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
+    public NormalizeTarget(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, Model model, Optional<DOMResource> dom) {
 	this.model = model;
 	this.normalizer = normalizer;
 	this.dom = dom;
 	this.processor = processor;
+	this.normalizerConfig = normalizerConfig;
+
     }
 
     public Optional<Exception> getError() {
@@ -122,7 +126,7 @@ public class NormalizeTarget implements Consumer<Resource> {
 		    return !model.listStatements(selector, RDF.type, OA.RangeSelector).toSet().isEmpty();
 		})
 	    // exceptions are not propagated from selector normalizations
-	    .forEach(new NormalizeRangeSelector(processor, normalizer, model, source));
+	    .forEach(new NormalizeRangeSelector(processor, normalizer, normalizerConfig, model, source));
 
 	// TODO: normalize other selectors
     }

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
 /**
@@ -45,14 +46,16 @@ public class NormalizeAnnotation implements Consumer<Resource> {
     protected Model model;
     protected final XPathNormalizer normalizer;
     protected final Processor processor;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeAnnotation(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
+    public NormalizeAnnotation(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, Model model, Optional<DOMResource> dom) {
 	this.model = model;
 	this.normalizer = normalizer;
 	this.dom = dom;
 	this.processor = processor;
+	this.normalizerConfig = normalizerConfig;
     }
 
     /**
@@ -64,7 +67,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	LOG.debug("normalizing annotation '{}'", annotation.getURI());
 	annotation.listProperties(OA.hasTarget)
 	    .mapWith(stmt -> stmt.getResource())
-	    .forEach(new NormalizeTarget(processor, normalizer, model, dom));
+	    .forEach(new NormalizeTarget(processor, normalizer, normalizerConfig, model, dom));
     }
 
     /**
@@ -84,8 +87,8 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
-	NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(processor, normalizer, model, dom);
+    public static Model normalize(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, Model model, Optional<DOMResource> dom) {
+	NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(processor, normalizer, normalizerConfig,  model, dom);
 	ResIterator annots = model.listResourcesWithProperty(RDF.type, OA.Annotation);
 	annots.forEach(normalizeAnnotation);
 	return normalizeAnnotation.getModel();
@@ -103,14 +106,14 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, String uri, Optional<String> lang, Optional<DOMResource> dom) {
+    public static Model normalize(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, String uri, Optional<String> lang, Optional<DOMResource> dom) {
 	Model model;
 	if (lang.isEmpty()) {
 	    model = RDFDataMgr.loadModel(uri);
 	} else {
 	    model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang.get()));
 	}
-	return normalize(processor, normalizer, model, dom);
+	return normalize(processor, normalizer, normalizerConfig, model, dom);
     }
 
     /**
@@ -125,7 +128,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, InputStream input, Optional<String> lang, Optional<String> modelBase, Optional<DOMResource> dom) {
+    public static Model normalize(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, InputStream input, Optional<String> lang, Optional<String> modelBase, Optional<DOMResource> dom) {
 	Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
 	Lang langHint;
 	if (lang.isEmpty()) {
@@ -139,7 +142,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	} else {
 	    RDFDataMgr.read(model, input, modelBase.get(), langHint);
 	}
-	return normalize(processor, normalizer, model, dom);
+	return normalize(processor, normalizer, normalizerConfig, model, dom);
     }
 
 }
