@@ -56,7 +56,8 @@ import org.slf4j.LoggerFactory;
  * {@link DOMResource}. Expressions selecting not exactly one node
  *  result in an {@link SelectorException}.
  */
-public abstract class XPathNormalizer {
+public abstract class XPathNormalizer
+    implements Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
     private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizer.class);
 
@@ -69,21 +70,6 @@ public abstract class XPathNormalizer {
     public XPathNormalizer() {
     }
 
-    /**
-     * Same as
-     * {@link #normalizeXPathRefinedByCharScheme(String,int,boolean)},
-     * but returns an escaped string.
-     * @param resource  the {@link DOMResource} on the base of which the normalization is done
-     * @param xpath  a XPath expression selecting a single node
-     * @param position  the inter-character position following the character scheme from RFC5147
-     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
-     * @return a {@link Pair} of XPath expression and character scheme position
-     * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
-     */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(DOMResource resource, String xpath, int position, Mode mode)
-	throws SelectorException {
-	return normalizeXPathRefinedByCharScheme(resource, xpath, position, mode, true);
-    }
 
     /**
      * Normalize an XPath Selector refined by an RFC5147 character
@@ -92,24 +78,25 @@ public abstract class XPathNormalizer {
      * fragment's text (its concatenated text nodes) is shorter than
      * the position's value, a {@link SelectorException} is thrown.<P>
      *
-     * In general, this method will result in a recalculated pair of
-     * XPath *and* position.
+     * In general, this method will result in a recalculated XPath
+     * *and* position.
      *
      * @param resource  the {@link DOMResource} on the base of which the normalization is done
-     * @param xpath  a XPath expression selecting a single node
-     * @param position  the inter-character position following the character scheme from RFC5147
-     * @param escaped   whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
-     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
-     * @return a {@link Pair} of XPath expression and character scheme position
+     * @param point     an {@link XPathRefinedByRFC5147CharScheme} record representing point in the resource
+     * @param config    a record with configuration options
+     * @return a recalculated {@link XPathRefinedByRFC5147CharScheme}
      */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(DOMResource resource, String xpath, int position, Mode mode, boolean escaped)
+    @Override
+    public XPathRefinedByRFC5147CharScheme rewrite
+	(DOMResource resource, XPathRefinedByRFC5147CharScheme point, RewriterConfig config)
 	throws SelectorException {
-	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(resource, xpath, position, mode);
-	// call the normalization function
-	String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), escaped);
-	XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
-	Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
-	return new ImmutablePair<String, Integer>(normalizedXPath, normalizedPos);
+	    Pair<XdmNode, Integer> textNode = getTextNodeAtPosition
+		(resource, point.getXPath(),
+		 point.getChar(), config.getMode());
+	    String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), config.getEscaped());
+	    XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
+	    Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
+	    return new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos);
     }
 
     /**
