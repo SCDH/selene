@@ -30,7 +30,7 @@ public class TestNormalizeAnnotation {
     public static final String P1_1_JSON = new File(SAMPLE_DIR, "p1.1.json").toString();
 
     private XPathNormalizer normalizer;
-    private RewriterConfig normalizerConfig = new RewriterConfig(null, false);
+    private RewriterConfig normalizerConfig = new RewriterConfig(null, false, null);
 
     private Processor processor = new Processor();
 
