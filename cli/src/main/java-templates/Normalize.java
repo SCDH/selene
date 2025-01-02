@@ -104,8 +104,7 @@ public class Normalize extends AbstractNormalize implements Callable<Integer> {
 	try {
 	    XPathRefinedByRFC5147CharScheme input, normalized;
 	    input = new XPathRefinedByRFC5147CharScheme(xpath, character);
-	    RewriterConfig config = new RewriterConfig(mode, false);
-	    normalized = xpathNormalizer.rewrite(dom, input, config);
+	    normalized = xpathNormalizer.rewrite(dom, input, getRewriterConfig());
 	    System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());

@@ -132,10 +132,9 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	}
 
 	// do the normalization
-	RewriterConfig config = new RewriterConfig(mode, false);
 	Model model;
 	try {
-	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, config, selectorsResolved.toString(), lang, dom);
+	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, getRewriterConfig(), selectorsResolved.toString(), lang, dom);
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 10;
