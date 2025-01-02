@@ -1,5 +1,6 @@
 package de.wwu.scdh.annotation.selection;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -32,9 +33,11 @@ public interface MappedResource<T1, T2, A1, A2, P1 extends Point, P2 extends Poi
 
     /**
      * For a given part in the preimage, this returns the
-     * corresponding part in the image.
+     * corresponding part in the image. Since the image may contain
+     * multiple copies of the same part of the preimage, a list of
+     * parts is returned.
      */
-    Optional<A2> getCorrespondingInImage(A1 preimagePart);
+    List<A2> getCorrespondingInImage(A1 preimagePart);
 
     /**
      * For a given part in the image, this returns the corresponting
@@ -45,7 +48,7 @@ public interface MappedResource<T1, T2, A1, A2, P1 extends Point, P2 extends Poi
     /**
      * Locate the given {@link Point} from preimage in the image.
      */
-    Optional<P2> locateInImage(P1 preimagePoint) throws SelectorException;
+    List<P2> locateInImage(P1 preimagePoint) throws SelectorException;
 
     /**
      * Locate the given {@link Point} from image in the preimage.
