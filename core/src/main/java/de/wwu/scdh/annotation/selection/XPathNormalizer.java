@@ -280,7 +280,7 @@ public abstract class XPathNormalizer
 	try {
 	    XPathExecutable executable = compiler.compile(xpath);
 	    XPathSelector selector = executable.load();
-	    selector.setContextItem(resource.getDOM());
+	    selector.setContextItem(resource.getContents());
 	    XdmValue nodes = selector.evaluate();
 	    // assert that the XPath selects exactly 1 node
 	    if (nodes.size() != 1) {
