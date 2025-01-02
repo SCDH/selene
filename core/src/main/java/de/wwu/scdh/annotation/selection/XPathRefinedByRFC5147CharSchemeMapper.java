@@ -1,0 +1,26 @@
+package de.wwu.scdh.annotation.selection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+public class XPathRefinedByRFC5147CharSchemeMapper implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
+
+    private final Logger LOG = LoggerFactory.getLogger(XPathRefinedByRFC5147CharSchemeForwardMapper.class);
+
+
+    public XPathRefinedByRFC5147CharSchemeMapper() {
+
+    }
+
+    @Override
+    public XPathRefinedByRFC5147CharScheme rewrite
+	(MappedDOMResource preimage,
+	 XPathRefinedByRFC5147CharScheme preimagePoint,
+	 RewriterConfig config) throws SelectorException {
+
+	// TODO
+	return null;
+    }
+
+}
