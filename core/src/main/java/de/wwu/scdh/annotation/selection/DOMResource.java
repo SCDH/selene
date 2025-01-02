@@ -22,13 +22,11 @@ import nu.validator.htmlparser.sax.HtmlParser;
  * A {@link DOMResource} is a web {@link Resource} that can be parsed
  * to a DOM representation, e.g., an HTML or an XML document.
  */
-public class DOMResource implements Resource {
+public class DOMResource implements Resource<XdmNode> {
 
     private final URI uri;
 
     private final XdmNode document;
-
-    private final Resource preimage;
 
     private final Processor processor;
 
@@ -37,13 +35,11 @@ public class DOMResource implements Resource {
      *
      * @param uri a {@link URI} identifying the resource
      * @param document  the document node (root node)
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor a saxon {@link Processor} that was used by the document builder
      */
-    public DOMResource(URI uri, XdmNode document, Resource preimage, Processor processor) {
+    public DOMResource(URI uri, XdmNode document, Processor processor) {
 	this.uri = uri;
 	this.document = document;
-	this.preimage = preimage;
 	this.processor = processor;
     }
 
@@ -59,15 +55,13 @@ public class DOMResource implements Resource {
      *
      * @param uri a {@link URI} identifying the resource
      * @param source  the document as a JAXP {@link Source}
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public DOMResource(URI uri, Source source, Resource preimage, Processor processor) throws SaxonApiException {
+    public DOMResource(URI uri, Source source, Processor processor) throws SaxonApiException {
 	this.uri = uri;
 	source.setSystemId(uri.toString()); // assert that systemId is set
-	this.preimage = preimage;
 	this.processor = processor;
 	DocumentBuilder documentBuilder = processor.newDocumentBuilder();
 	XdmNode docNode = documentBuilder.build(source);
@@ -81,19 +75,18 @@ public class DOMResource implements Resource {
      *
      * @param uri  a {@link URI} identifying the resource
      * @param inputStream  {@link InputStream} with the HTML document
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromHTML(URI uri, InputStream inputStream, Resource preimage, Processor processor) throws SaxonApiException {
+    public static DOMResource fromHTML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
 	// encapsulate input stream in InputSource
 	InputSource inputSource = new InputSource(inputStream);
 	inputSource.setSystemId(uri.toString());
 	// use HTML parser
 	Source source = new SAXSource(new HtmlParser(), inputSource);
 	// hand over to just DOM handling
-	return new DOMResource(uri, source, preimage, processor);
+	return new DOMResource(uri, source, processor);
     }
 
     /**
@@ -104,14 +97,13 @@ public class DOMResource implements Resource {
      * but gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromHTML(URI uri, Resource preimage, Processor processor) throws IOException, SaxonApiException {
+    public static DOMResource fromHTML(URI uri, Processor processor) throws IOException, SaxonApiException {
 	InputStream in = uri.toURL().openStream();
-	return fromHTML(uri, in, preimage, processor);
+	return fromHTML(uri, in, processor);
     }
 
 
@@ -122,15 +114,14 @@ public class DOMResource implements Resource {
      *
      * @param uri  a {@link URI} identifying the resource
      * @param inputStream  {@link InputStream} with the XML document
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromXML(URI uri, InputStream inputStream, Resource preimage, Processor processor) throws SaxonApiException {
+    public static DOMResource fromXML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
 	Source source = new StreamSource(inputStream);
 	source.setSystemId(uri.toString());
-	return new DOMResource(uri, source, preimage, processor);
+	return new DOMResource(uri, source, processor);
     }
 
     /**
@@ -140,24 +131,15 @@ public class DOMResource implements Resource {
      * gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromXML(URI uri, Resource preimage, Processor processor) throws IOException, SaxonApiException {
+    public static DOMResource fromXML(URI uri, Processor processor) throws IOException, SaxonApiException {
 	InputStream in = uri.toURL().openStream();
-	return fromXML(uri, in, preimage, processor);
+	return fromXML(uri, in, processor);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Resource getPreImage() {
-	return this.preimage;
-    }
 
     /**
      * {@inheritDoc}
@@ -171,7 +153,8 @@ public class DOMResource implements Resource {
      * Returns the document node of the DOM resource.
      * @return an {@link XdmNode}
      */
-    public XdmNode getDOM() {
+    @Override
+    public XdmNode getContents() {
 	return this.document;
     }
 
