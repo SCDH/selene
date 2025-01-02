@@ -17,6 +17,7 @@ import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 abstract class AbstractNormalize {
 
@@ -101,24 +102,24 @@ abstract class AbstractNormalize {
 	}
     }
 
-    protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
+    protected String getNormalizerXPath() throws CliException {
 	if (normalizerXPath != null) {
 	    try {
-		return new XPathNormalizerWithXPath(normalizerXPath);
+		return normalizerXPath;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
 	} else if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
 	    try {
-		return new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		return XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
 	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
 	    try {
-		return new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+		return XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
@@ -127,6 +128,14 @@ abstract class AbstractNormalize {
 	    System.err.printf("unknown normalizer %s\n", normalizer.name());
 	    throw new CliException("unknown normalizer " + normalizer.name());
 	}
+    }
+
+    protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
+	return new XPathNormalizerWithXPath(getNormalizerXPath());
+    }
+
+    protected RewriterConfig getRewriterConfig() throws CliException {
+	return new RewriterConfig(mode, false, getNormalizerXPath());
     }
 
 }

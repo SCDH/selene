@@ -25,25 +25,29 @@ public class TestXPathNormalizerWithXPath {
     public static final URI GESANG_HTML = new File(TEST_DIR, "Gesang.tei.html").toURI();
     public static final URI GESANG_XML  = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
+    RewriterConfig config = new RewriterConfig(null, false, null);
+
     @Test
     public void testWithPathFunction() throws SelectorException, SaxonApiException, IOException {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
 	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath("path(.)");
 	assertEquals("path(.)", normalizer.getXPath());
 	String xpath;
-	Pair<String, Integer> result;
+	XPathRefinedByRFC5147CharScheme result, point;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
-	assertEquals(0, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 0);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getXPath());
+	assertEquals(0, result.getChar());
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
-	assertEquals(1, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 6);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getXPath());
+	assertEquals(1, result.getChar());
     }
 
     @Test
@@ -51,13 +55,14 @@ public class TestXPathNormalizerWithXPath {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
 	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	String xpath;
-	Pair<String, Integer> result;
+	XPathRefinedByRFC5147CharScheme result, point;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
-	assertEquals(0, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 0);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getXPath());
+	assertEquals(0, result.getChar());
     }
 
     @Test
@@ -65,13 +70,14 @@ public class TestXPathNormalizerWithXPath {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
 	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 	String xpath;
-	Pair<String, Integer> result;
+	XPathRefinedByRFC5147CharScheme result, point;
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("id(&apos;v2&apos;)/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
-	assertEquals(1, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 6);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("id(&apos;v2&apos;)/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getXPath());
+	assertEquals(1, result.getChar());
     }
 
     @Test
@@ -79,13 +85,14 @@ public class TestXPathNormalizerWithXPath {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
 	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
-	Pair<String, Integer> result;
+	XPathRefinedByRFC5147CharScheme result, point;
 
 	// root element, char=0
 	xpath = "/*";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 0, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getLeft());
-	assertEquals(0, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 0);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/text()[1]", result.getXPath());
+	assertEquals(0, result.getChar());
     }
 
     @Test
@@ -93,13 +100,14 @@ public class TestXPathNormalizerWithXPath {
 	DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
 	XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 	String xpath;
-	Pair<String, Integer> result;
+	XPathRefinedByRFC5147CharScheme result, point;
 
 	// verse 2 //app, char=6
 	xpath = "id('v2')//*:app";
-	result = normalizer.normalizeXPathRefinedByCharScheme(resource, xpath, 6, Mode.DEEP_NODE_STOP_AT_END);
-	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getLeft());
-	assertEquals(1, result.getRight());
+	point = new XPathRefinedByRFC5147CharScheme(xpath, 6);
+	result = normalizer.rewrite(resource, point, RewriterConfig.withMode(config, Mode.DEEP_NODE_STOP_AT_END));
+	assertEquals("/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/Q{http://www.tei-c.org/ns/1.0}app[1]/Q{http://www.tei-c.org/ns/1.0}rdg[1]/text()[1]", result.getXPath());
+	assertEquals(1, result.getChar());
     }
 
 }

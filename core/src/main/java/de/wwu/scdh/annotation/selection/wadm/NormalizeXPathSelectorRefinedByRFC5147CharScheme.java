@@ -22,7 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
+import de.wwu.scdh.annotation.selection.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.Mode;
 import de.wwu.scdh.annotation.selection.SelectorException;
 
@@ -49,16 +51,16 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
     protected Model model;
     protected final XPathNormalizer normalizer;
     protected final Processor processor;
-    protected final Mode normalizerMode;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, Mode mode) {
+    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, RewriterConfig normalizerConfig) {
 	this.model = model;
 	this.normalizer = normalizer;
 	this.dom = dom;
 	this.processor = processor;
-	this.normalizerMode = mode;
+	this.normalizerConfig = normalizerConfig;
     }
 
     /**
@@ -134,17 +136,18 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 
 	// 3. normalize the components
 	LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
-	Pair<String, Integer> normalized = normalizer.normalizeXPathRefinedByCharScheme(dom, xpath, startPos, normalizerMode);
-	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
-	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
+	XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
+	XPathRefinedByRFC5147CharScheme normalized = normalizer.rewrite(dom, point, normalizerConfig);
+	LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
+	LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
 
 	// 4. write the normalized values back to the model
 	model.remove(xpathStatement);
-	Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getLeft());
+	Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
 	model.add(xpathStmt);
 	model.remove(refinementValueStatement);
 	Statement charStatement = model.createLiteralStatement(refinement, RDF.value,
-							       "char=" + String.valueOf(normalized.getRight()));
+							       "char=" + String.valueOf(normalized.getChar()));
 	model.add(charStatement);
     }
 }

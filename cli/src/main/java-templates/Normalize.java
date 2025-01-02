@@ -16,6 +16,8 @@ import net.sf.saxon.s9api.Processor;
 import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
 @Command(name = "simple",
@@ -100,8 +102,10 @@ public class Normalize extends AbstractNormalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(dom, xpath, character, mode);
-	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
+	    XPathRefinedByRFC5147CharScheme input, normalized;
+	    input = new XPathRefinedByRFC5147CharScheme(xpath, character);
+	    normalized = xpathNormalizer.rewrite(dom, input, getRewriterConfig());
+	    System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 3;

@@ -55,6 +55,7 @@ import de.wwu.scdh.annotation.selection.DOMResource;
 import de.wwu.scdh.annotation.selection.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
 @Command(name = "normalize",
@@ -133,7 +134,7 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	// do the normalization
 	Model model;
 	try {
-	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, selectorsResolved.toString(), lang, dom);
+	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, getRewriterConfig(), selectorsResolved.toString(), lang, dom);
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 10;
