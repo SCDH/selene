@@ -6,7 +6,7 @@ package de.wwu.scdh.annotation.selection;
  * representation. Normalizers are rewriters. This interface offers
  * type-safe rewriting of points in resources by type parameters
  */
-public interface Rewriter<R extends Resource, P1 extends Point, P2 extends Point> {
+public interface Rewriter<R extends Resource<?>, P1 extends Point, P2 extends Point> {
 
     /**
      * Rewrite a {@link Point} in a {@link Resource} to the same

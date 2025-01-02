@@ -16,6 +16,6 @@ public interface RewriterFactory {
      * @param point2  desired output representation
      * @param config  global {@link RewriterConfig} record
      */
-    <R extends Resource, P1 extends Point, P2 extends Point, RW extends Rewriter<R, P1, P2>> RW getRewriter(Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException;
+    <R extends Resource<?>, P1 extends Point, P2 extends Point, RW extends Rewriter<R, P1, P2>> RW getRewriter(Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException;
 
 }
