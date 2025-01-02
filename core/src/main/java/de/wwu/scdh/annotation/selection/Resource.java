@@ -2,8 +2,6 @@ package de.wwu.scdh.annotation.selection;
 
 import java.net.URI;
 
-// import net.sf.saxon.s9api.XdmNode;
-
 
 /**
  * A {@link Resource} is a Java representation of a web resource
@@ -22,10 +20,5 @@ public interface Resource<T> {
      * Returns the contents of the resource as parsed type.
      */
     T getContents();
-
-    // /**
-    //  * Returns the parsed DOM.
-    //  */
-    // XdmNode getDom();
 
 }
