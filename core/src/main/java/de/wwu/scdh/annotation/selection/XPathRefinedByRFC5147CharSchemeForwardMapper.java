@@ -4,12 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class XPathRefinedByRFC5147CharSchemeMapper implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
+public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterBase implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
     private final Logger LOG = LoggerFactory.getLogger(XPathRefinedByRFC5147CharSchemeForwardMapper.class);
 
 
-    public XPathRefinedByRFC5147CharSchemeMapper() {
+    public XPathRefinedByRFC5147CharSchemeForwardMapper() {
 
     }
 
