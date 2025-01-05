@@ -24,7 +24,7 @@ import java.util.Optional;
  * In a {@link DOMResource}, the parsed content type Tx and part type
  * Ax will be the same. But this is not the case in general.
  */
-public interface MappedResource<T1, T2, A1, A2, P1 extends Point, P2 extends Point> extends Resource<T1> {
+public interface MappedResource<T1, T2, A1, A2> extends Resource<T1> {
 
     /**
      * Returns the image.
@@ -44,16 +44,5 @@ public interface MappedResource<T1, T2, A1, A2, P1 extends Point, P2 extends Poi
      * part in the preimage.
      */
     Optional<A1> getCorrespondingInPreimage(A2 imagePart);
-
-    /**
-     * Locate the given {@link Point} from preimage in the image.
-     */
-    List<P2> locateInImage(P1 preimagePoint) throws SelectorException;
-
-    /**
-     * Locate the given {@link Point} from image in the preimage.
-     *
-     */
-    Optional<P1> locateInPreimage(P2 imagePoint) throws SelectorException;
 
 }

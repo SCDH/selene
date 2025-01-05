@@ -16,8 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class MappedDOMResource extends DOMResource implements
-		MappedResource<XdmNode, XdmNode, XdmNode, XdmNode, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
+public class MappedDOMResource extends DOMResource implements MappedResource<XdmNode, XdmNode, XdmNode, XdmNode> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappedDOMResource.class);
 
