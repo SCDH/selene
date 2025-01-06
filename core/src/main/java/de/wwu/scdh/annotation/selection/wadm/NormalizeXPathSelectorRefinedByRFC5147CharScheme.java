@@ -137,7 +137,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	// 3. normalize the components
 	LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 	XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
-	XPathRefinedByRFC5147CharScheme normalized = normalizer.rewrite(dom, point, normalizerConfig);
+	XPathRefinedByRFC5147CharScheme normalized = normalizer.rewrite(dom, point, normalizerConfig).get(0); // TODO: iterate over all
 	LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
 	LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
 

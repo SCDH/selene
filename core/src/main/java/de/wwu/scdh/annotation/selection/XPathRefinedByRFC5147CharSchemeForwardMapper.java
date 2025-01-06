@@ -1,5 +1,7 @@
 package de.wwu.scdh.annotation.selection;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
     }
 
     @Override
-    public XPathRefinedByRFC5147CharScheme rewrite
+    public List<XPathRefinedByRFC5147CharScheme> rewrite
 	(MappedDOMResource preimage,
 	 XPathRefinedByRFC5147CharScheme preimagePoint,
 	 RewriterConfig config) throws SelectorException {

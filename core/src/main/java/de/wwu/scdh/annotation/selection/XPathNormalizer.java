@@ -87,7 +87,7 @@ public abstract class XPathNormalizer
      * @return a recalculated {@link XPathRefinedByRFC5147CharScheme}
      */
     @Override
-    public XPathRefinedByRFC5147CharScheme rewrite
+    public List<XPathRefinedByRFC5147CharScheme> rewrite
 	(DOMResource resource, XPathRefinedByRFC5147CharScheme point, RewriterConfig config)
 	throws SelectorException {
 	    Pair<XdmNode, Integer> textNode = getTextNodeAtPosition
@@ -96,7 +96,7 @@ public abstract class XPathNormalizer
 	    String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), config.getEscaped());
 	    XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
 	    Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
-	    return new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos);
+	    return List.of(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
     }
 
     /**
