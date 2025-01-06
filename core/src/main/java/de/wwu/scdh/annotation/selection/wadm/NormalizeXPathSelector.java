@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
 import de.wwu.scdh.annotation.selection.*;
 
 
-public class NormalizeXPathSelector<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
+public class NormalizeXPathSelector implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeXPathSelector.class);
 
-    protected final S dom;
+    protected final de.wwu.scdh.annotation.selection.Resource<?> dom;
     protected Model model;
     protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
@@ -31,7 +31,7 @@ public class NormalizeXPathSelector<S extends de.wwu.scdh.annotation.selection.R
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelector(Processor processor, RewriterFactory rewriterFactory, Model model, S dom, Mode mode) {
+    public NormalizeXPathSelector(Processor processor, RewriterFactory rewriterFactory, Model model, de.wwu.scdh.annotation.selection.Resource<?> dom, Mode mode) {
 	this.model = model;
 	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
