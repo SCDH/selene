@@ -14,8 +14,9 @@ import java.util.concurrent.Callable;
 import net.sf.saxon.s9api.Processor;
 
 import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import de.wwu.scdh.annotation.selection.Mode;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
 
@@ -132,6 +133,10 @@ abstract class AbstractNormalize {
 
     protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
 	return new XPathNormalizerWithXPath(getNormalizerXPath());
+    }
+
+    protected NormalizerFactory getNormalizerFactory() {
+	return new NormalizerFactory();
     }
 
     protected RewriterConfig getRewriterConfig() throws CliException {
