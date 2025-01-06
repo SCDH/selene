@@ -58,12 +58,12 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme<S extends de.wwu.s
 	} catch (Exception e) {
 	    LOG.error("failed to cast resource to DOM resource");
 	}
-	LOG.info("dom present");
+	LOG.debug("dom present");
 	this.processor = processor;
 	this.normalizerConfig = normalizerConfig;
 	try {
 	    this.rewriter = rewriterFactory.getRewriter(XPathRefinedByRFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class, normalizerConfig);
-	    LOG.info("rewriting an oa:XPathSelector which is refined by RFC5147 character scheme with rewriter {}", rewriter.getClass().getCanonicalName());
+	    LOG.debug("rewriting an oa:XPathSelector which is refined by RFC5147 character scheme with rewriter {}", rewriter.getClass().getCanonicalName());
 	} catch (ConfigurationException e) {
 	    LOG.error(e.getMessage());
 	    error = Optional.of(e);
@@ -142,12 +142,12 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme<S extends de.wwu.s
 	}
 
 	// 3. normalize the components
-	LOG.info("normalizing refined XPath {};{}", xpath, startPos);
+	LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 	XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
 	for (XPathRefinedByRFC5147CharScheme p : rewriter.rewrite(dom, point, normalizerConfig)) {
 	    if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
 		XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
-		LOG.info("normalized to {};{}", normalized.getXPath(), normalized.getChar());
+		LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
 		
 		// 4. write the normalized values back to the model
 		model.remove(xpathStatement);
