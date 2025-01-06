@@ -16,26 +16,24 @@ import net.sf.saxon.s9api.SaxonApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.*;
 
 
-public class NormalizeXPathSelector implements Consumer<Resource> {
+public class NormalizeXPathSelector<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeXPathSelector.class);
 
-    protected final DOMResource dom;
+    protected final S dom;
     protected Model model;
-    protected final XPathNormalizer normalizer;
+    protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
     protected final Mode normalizerMode;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelector(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, Mode mode) {
+    public NormalizeXPathSelector(Processor processor, RewriterFactory rewriterFactory, Model model, S dom, Mode mode) {
 	this.model = model;
-	this.normalizer = normalizer;
+	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
 	this.processor = processor;
 	this.normalizerMode = mode;

@@ -15,30 +15,27 @@ import net.sf.saxon.s9api.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.RewriterConfig;
-import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.*;
 
 
-public class NormalizeRangeSelector implements Consumer<Resource> {
+public class NormalizeRangeSelector<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeRangeSelector.class);
 
     public static final Mode START_XPATH_SELECTOR_MODE = Mode.LAST_OF_DEEPEST_NODES;
     public static final Mode END_XPATH_SELECTOR_MODE = Mode.FIRST_OF_DEEPEST_NODES;
 
-    protected final DOMResource dom;
+    protected final S dom;
     protected Model model;
-    protected final XPathNormalizer normalizer;
+    protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
     protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeRangeSelector(Processor processor, XPathNormalizer normalizer, RewriterConfig normalizerConfig, Model model, DOMResource dom) {
+    public NormalizeRangeSelector(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, S dom) {
 	this.model = model;
-	this.normalizer = normalizer;
+	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
 	this.processor = processor;
 	this.normalizerConfig = normalizerConfig;
@@ -64,7 +61,7 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 			// TODO: filter char scheme
 			.toSet()
 			.isEmpty())
-	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, normalizer, model, dom, RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
+	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, rewriterFactory, model, dom, RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
 
 	selector
 	    .listProperties(OA.hasEndSelector)
@@ -78,7 +75,7 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 			// TODO: filter char scheme
 			.toSet()
 			.isEmpty())
-	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, normalizer, model, dom, RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+	    .forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(processor, rewriterFactory, model, dom, RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
 
     }
 }
