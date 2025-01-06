@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.rewriter;
 
 import java.util.List;
 import java.io.IOException;
@@ -12,9 +12,7 @@ import java.nio.file.Paths;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.*;
 
 
 public class TestXPathNormalizerWithXPath {

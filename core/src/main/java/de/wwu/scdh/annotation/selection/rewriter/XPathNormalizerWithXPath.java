@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.rewriter;
 
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XPathCompiler;
@@ -9,6 +9,8 @@ import net.sf.saxon.s9api.SaxonApiException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.wwu.scdh.annotation.selection.*;
 
 
 /**
