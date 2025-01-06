@@ -51,7 +51,7 @@ import jakarta.json.JsonWriter;
 import jakarta.json.JsonWriterFactory;
 import jakarta.json.stream.JsonGenerator;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
+import de.wwu.scdh.annotation.selection.Resource;
 import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
@@ -95,7 +95,7 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
     @Override
     public Integer call() throws Exception {
 
-	Optional<DOMResource> dom = Optional.empty();
+	Optional<Resource<?>> dom = Optional.empty();
 	if (resource != null) {
 	    try {
 		dom = Optional.of(parseResource(resource));

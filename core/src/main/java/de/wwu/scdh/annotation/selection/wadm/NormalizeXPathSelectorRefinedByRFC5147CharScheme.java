@@ -34,7 +34,7 @@ import de.wwu.scdh.annotation.selection.XPathRefinedByRFC5147CharScheme;
  * normalization will by side effect be written to the {@link Model}
  * which was passed into the constructor.
  */
-public class NormalizeXPathSelectorRefinedByRFC5147CharScheme<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
+public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeXPathSelectorRefinedByRFC5147CharScheme.class);
 
@@ -50,7 +50,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme<S extends de.wwu.s
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, RewriterFactory rewriterFactory, Model model, S dom, RewriterConfig normalizerConfig) {
+    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, RewriterFactory rewriterFactory, Model model, de.wwu.scdh.annotation.selection.Resource<?> dom, RewriterConfig normalizerConfig) {
 	this.model = model;
 	this.rewriterFactory = rewriterFactory;
 	try {

@@ -32,11 +32,11 @@ import de.wwu.scdh.annotation.selection.*;
  * interface and can be used in the <code>..forEach(new
  * NormalizeTarget(...))</code> functional pattern.<P>
  */
-public class NormalizeTarget<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
+public class NormalizeTarget implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeTarget.class);
 
-    protected final Optional<S> dom;
+    protected final Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom;
     protected Model model;
 	protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
@@ -44,7 +44,7 @@ public class NormalizeTarget<S extends de.wwu.scdh.annotation.selection.Resource
 
     protected Optional<Exception> error = Optional.empty();
 
-    public NormalizeTarget(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, Optional<S> dom) {
+    public NormalizeTarget(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
 	this.model = model;
 	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
@@ -92,7 +92,7 @@ public class NormalizeTarget<S extends de.wwu.scdh.annotation.selection.Resource
 	// a Source was passed into the constructor or we get a
 	// Source from the target; if neither is the case, it
 	// would lack of information in the model
-	S source;
+	de.wwu.scdh.annotation.selection.Resource<?> source;
 	// Note: We are using the pattern
 	// ..listProperties(...).toSet().isEmpty() because toSet()
 	// *exhaustively* consumes the iterator returned by
@@ -108,9 +108,9 @@ public class NormalizeTarget<S extends de.wwu.scdh.annotation.selection.Resource
 	    LOG.debug("getting and parsing source '{}'", targetSource);
 	    URI targetUri = new URI(targetSource);
 	    try {
-		source = (S) DOMResource.fromXML(targetUri, null, processor);
+		source = DOMResource.fromXML(targetUri, null, processor);
 	    } catch (Exception e) {
-		source = (S) DOMResource.fromHTML(targetUri, null, processor);
+		source = DOMResource.fromHTML(targetUri, null, processor);
 	    }
 	} else {
 	    source = dom.get();

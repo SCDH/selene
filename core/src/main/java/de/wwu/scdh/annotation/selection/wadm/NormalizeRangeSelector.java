@@ -18,14 +18,14 @@ import org.slf4j.LoggerFactory;
 import de.wwu.scdh.annotation.selection.*;
 
 
-public class NormalizeRangeSelector<S extends de.wwu.scdh.annotation.selection.Resource<?>> implements Consumer<Resource> {
+public class NormalizeRangeSelector implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeRangeSelector.class);
 
     public static final Mode START_XPATH_SELECTOR_MODE = Mode.LAST_OF_DEEPEST_NODES;
     public static final Mode END_XPATH_SELECTOR_MODE = Mode.FIRST_OF_DEEPEST_NODES;
 
-    protected final S dom;
+    protected final de.wwu.scdh.annotation.selection.Resource<?> dom;
     protected Model model;
     protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
@@ -33,7 +33,7 @@ public class NormalizeRangeSelector<S extends de.wwu.scdh.annotation.selection.R
 
     protected Optional<Exception> error = null;
 
-    public NormalizeRangeSelector(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, S dom) {
+    public NormalizeRangeSelector(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, de.wwu.scdh.annotation.selection.Resource<?> dom) {
 	this.model = model;
 	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
