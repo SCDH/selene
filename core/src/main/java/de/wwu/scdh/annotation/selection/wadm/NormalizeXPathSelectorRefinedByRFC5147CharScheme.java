@@ -20,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.*;
-import de.wwu.scdh.annotation.selection.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+
 
 /**
  * This class can be used to normalize the model of all WADM

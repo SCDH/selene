@@ -7,7 +7,7 @@ import de.wwu.scdh.annotation.selection.Rewriter;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.ConfigurationException;
 
-import de.wwu.scdh.annotation.selection.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 
 
 public class NormalizerFactory implements RewriterFactory {

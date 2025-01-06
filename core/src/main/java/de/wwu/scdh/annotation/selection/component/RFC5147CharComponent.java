@@ -1,4 +1,7 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.component;
+
+import de.wwu.scdh.annotation.selection.Component;
+
 
 /**
  * An {@link RFC5147CharComponent} is a {@link Component} following

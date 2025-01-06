@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;

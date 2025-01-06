@@ -13,6 +13,8 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 
 
 public class TestXPathNormalizerWithXPath {

@@ -1,4 +1,6 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.component;
+
+import de.wwu.scdh.annotation.selection.Component;
 
 
 /**

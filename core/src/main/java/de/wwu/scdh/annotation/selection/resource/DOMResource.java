@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.resource;
 
 import java.net.URI;
 import java.io.InputStream;
@@ -17,6 +17,8 @@ import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 
 import nu.validator.htmlparser.sax.HtmlParser;
+
+import de.wwu.scdh.annotation.selection.Resource;
 
 /**
  * A {@link DOMResource} is a web {@link Resource} that can be parsed

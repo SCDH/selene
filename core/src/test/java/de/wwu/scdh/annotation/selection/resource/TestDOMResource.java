@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.resource;
 
 import java.io.IOException;
 import java.util.Iterator;

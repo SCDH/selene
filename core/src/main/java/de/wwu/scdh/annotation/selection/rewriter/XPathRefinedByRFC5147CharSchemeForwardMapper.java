@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 
 
 public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterBase implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {

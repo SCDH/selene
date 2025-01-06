@@ -1,4 +1,8 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.point;
+
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.component.XPathComponent;
+import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
 
 
 /**

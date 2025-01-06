@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.resource;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -14,6 +14,9 @@ import org.w3c.dom.Node;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.wwu.scdh.annotation.selection.MappedResource;
+import de.wwu.scdh.annotation.selection.ResourceException;
 
 
 public class MappedDOMResource extends DOMResource implements MappedResource<XdmNode, XdmNode, XdmNode, XdmNode> {

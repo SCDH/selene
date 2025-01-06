@@ -1,9 +1,13 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.point;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+
+import de.wwu.scdh.annotation.selection.Component;
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.NoSuchComponentException;
 
 
 public class PointImpl implements Point {

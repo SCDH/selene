@@ -1,7 +1,10 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.point;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.component.*;
 
 
 public class TestPointImpl {
