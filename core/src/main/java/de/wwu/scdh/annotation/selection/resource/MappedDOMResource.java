@@ -10,6 +10,7 @@ import java.net.URI;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
@@ -83,7 +84,10 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	int nodeId;
 	while (nodes.hasNext()) {
 	    XdmNode node = nodes.next();
-	    nodeId = node.hashCode();
+	    NodeInfo nodeInfo = node.getUnderlyingNode();
+	    int line = nodeInfo.getLineNumber();
+	    int column = nodeInfo.getColumnNumber();
+	    nodeId = line * 1000000 + column;
 	    // add to mappings
 	    idToPreimageNode.put(nodeId, node);
 	}
@@ -107,7 +111,10 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
 	    while (treeIterator.hasNext()) {
 		node = treeIterator.next();
-		int nodeId = node.hashCode();
+		NodeInfo nodeInfo = node.getUnderlyingNode();
+		int line = nodeInfo.getLineNumber();
+		int column = nodeInfo.getColumnNumber();
+		int nodeId = line * 1000000 + column;
 		if (!idToPreimageNode.containsKey(nodeId)) {
 		    // if no user data present, we can only set the reverse map
 		    reverseMap.put(node, null);
@@ -151,7 +158,11 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * Get the node ID of the given node.
      */
     protected static Optional<Integer> getNodeTrace(XdmNode node) {
-	return Optional.of(node.hashCode());
+	NodeInfo nodeInfo = node.getUnderlyingNode();
+	int line = nodeInfo.getLineNumber();
+	int column = nodeInfo.getColumnNumber();
+	int nodeId = line * 1000000 + column;
+	return Optional.of(nodeId);
     }
 
 }
