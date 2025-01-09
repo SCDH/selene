@@ -6,21 +6,13 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 import java.net.URI;
-import java.io.InputStream;
-import java.io.IOException;
 
 import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,24 +80,12 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     protected void leaveTraces() throws ResourceException {
 	XdmSequenceIterator<XdmNode> nodes = getContents().axisIterator(Axis.DESCENDANT_OR_SELF);
-	int nodeId = 1;
+	int nodeId;
 	while (nodes.hasNext()) {
 	    XdmNode node = nodes.next();
-	    // write node ID to DOM level 3 user data
-	    if (node.getExternalNode() == null || !Node.class.isAssignableFrom(node.getExternalNode().getClass())) {
-		String nodeClass = "null";
-		if (node.getExternalNode() != null) {
-		    nodeClass = node.getExternalNode().getClass().getCanonicalName();
-		}
-		LOG.error("underlying nodes from preimage are not org.w3c.dom nodes: {}", nodeClass);
-		throw new ResourceException("underlying nodes from preimage are not org.w3c.dom nodes");
-	    }
-	    Node domNode = (Node) node.getExternalNode();
-	    domNode.setUserData(NODE_ID_USER_DATA, nodeId, null);
+	    nodeId = node.hashCode();
 	    // add to mappings
 	    idToPreimageNode.put(nodeId, node);
-	    // increment node ID
-	    nodeId++;
 	}
     }
 
@@ -127,24 +107,17 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
 	    while (treeIterator.hasNext()) {
 		node = treeIterator.next();
-		if (node.getExternalNode() == null || !Node.class.isAssignableFrom(node.getExternalNode().getClass())) {
-		    // this may be true for text nodes generated with <xsl:text>
-		    LOG.debug("underlying nodes from image are not org.w3c.dom nodes");
-		    continue;
-		}
-		Node domNode = (Node) node.getExternalNode();
-		Object userData = domNode.getUserData(NODE_ID_USER_DATA);
-		if (userData == null) {
+		int nodeId = node.hashCode();
+		if (!idToPreimageNode.containsKey(nodeId)) {
 		    // if no user data present, we can only set the reverse map
 		    reverseMap.put(node, null);
 		    continue;
 		}
+		XdmNode preimageNode = idToPreimageNode.get(nodeId);
 		// set the reverse map
-		int nodeId = (int) userData;
+		reverseMap.put(node, preimageNode);
 		// set the forward map, where a preimage node may be
 		// mapped to multiple nodes in the image
-		XdmNode preimageNode = idToPreimageNode.get(nodeId);
-		reverseMap.put(node, preimageNode);
 		if (forwardMap.containsKey(preimageNode)) {
 		    forwardMap.get(preimageNode).add(node);
 		} else {
@@ -178,14 +151,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * Get the node ID of the given node.
      */
     protected static Optional<Integer> getNodeTrace(XdmNode node) {
-	Object underlyingNodeObject = node.getExternalNode();
-	if (underlyingNodeObject == null || !Node.class.isAssignableFrom(underlyingNodeObject.getClass())) {
-	    LOG.error("node has no user data");
-	    return Optional.empty();
-	}
-	Node domNode = (Node) underlyingNodeObject;
-	Integer nodeId = (Integer) domNode.getUserData(NODE_ID_USER_DATA);
-	return Optional.of(nodeId);
+	return Optional.of(node.hashCode());
     }
 
 }
