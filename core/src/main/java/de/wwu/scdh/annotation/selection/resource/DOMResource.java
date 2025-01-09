@@ -4,6 +4,8 @@ import java.net.URI;
 import java.io.InputStream;
 import java.io.IOException;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import javax.xml.transform.sax.SAXSource;
@@ -19,6 +21,8 @@ import net.sf.saxon.s9api.SaxonApiException;
 import nu.validator.htmlparser.sax.HtmlParser;
 
 import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.ResourceException;
+
 
 /**
  * A {@link DOMResource} is a web {@link Resource} that can be parsed
@@ -142,6 +146,58 @@ public class DOMResource implements Resource<XdmNode> {
 	return fromXML(uri, in, processor);
     }
 
+    /**
+     * Make a {@link MappedDOMResource} from XML input given as an
+     * {@link InputStream} using the Xerces DOM parser. The parsed
+     * document is wrapped in XDM nodes, but the underlying nodes are
+     * <code>w3c.xml.dom</code> nodes.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param inputStream  {@link InputStream} with the XML document
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
+     */
+    public static DOMResource fromXMLwithXerces(URI uri, InputStream inputStream, Processor processor) throws ResourceException {
+	try {
+	    InputSource inputSource = new InputSource(inputStream);
+	    inputSource.setSystemId(uri.toString());
+	    org.apache.xerces.parsers.DOMParser parser = new org.apache.xerces.parsers.DOMParser();
+	    parser.parse(inputSource);
+	    Document doc = parser.getDocument();
+	    // wrap w3c document in XDM node, see
+	    // https://www.saxonica.com/documentation12/index.html#!sourcedocs/tree-models/thirdparty
+	    // and
+	    // https://stackoverflow.com/questions/49829126/what-is-idiomatic-way-to-serialize-dom-document-with-s9api-serializer
+	    XdmNode xdmDoc = processor.newDocumentBuilder().wrap(doc);
+	    return new DOMResource(uri, xdmDoc, processor);
+	} catch (SAXException e) {
+	    throw new ResourceException(e.getMessage());
+	} catch (IOException e) {
+	    throw new ResourceException(e.getMessage());
+	}
+    }
+
+    /**
+     * Same as
+     *
+     * {@link DOMResource#fromXMLwithXerces(URI, InputStream, Processor)},
+     *
+     * but gets the input from the URI.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
+     */
+    public static DOMResource fromXMLwithXerces(URI uri, Processor processor) throws ResourceException {
+	try {
+	InputStream in = uri.toURL().openStream();
+	return fromXMLwithXerces(uri, in, processor);
+	} catch (IOException e) {
+	    throw new ResourceException(e.getMessage());
+	}
+    }
 
     /**
      * {@inheritDoc}

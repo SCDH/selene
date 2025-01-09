@@ -92,6 +92,11 @@
            <version>${xmlresolver.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>xerces</groupId>
+	    <artifactId>xercesImpl</artifactId>
+	    <version>2.12.2</version>
+	</dependency>
+	<dependency>
 	    <!-- a HTML parser -->
 	    <groupId>nu.validator</groupId>
 	    <artifactId>htmlparser</artifactId>
