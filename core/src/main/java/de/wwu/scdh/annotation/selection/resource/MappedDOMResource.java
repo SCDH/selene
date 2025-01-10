@@ -6,21 +6,16 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 import java.net.URI;
-import java.io.InputStream;
-import java.io.IOException;
 
 import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
-import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.DOMImplementation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +27,17 @@ import de.wwu.scdh.annotation.selection.ResourceException;
  *
  *
  */
-public class MappedDOMResource extends DOMResource implements MappedResource<XdmNode, XdmValue, XdmNode, XdmNode> {
+public class MappedDOMResource extends DOMResource implements MappedResource<XdmNode, Document, XdmNode, Node> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappedDOMResource.class);
 
     public static final String NODE_ID_USER_DATA = "mapped-dom-id";
 
     protected Map<Integer, XdmNode> idToPreimageNode = new HashMap<Integer, XdmNode>();
-    protected Map<XdmNode, List<XdmNode>> forwardMap = new HashMap<XdmNode, List<XdmNode>>();
-    protected Map<XdmNode, XdmNode> reverseMap = new HashMap<XdmNode, XdmNode>();
+    protected Map<XdmNode, List<Node>> forwardMap = new HashMap<XdmNode, List<Node>>();
+    protected Map<Node, XdmNode> reverseMap = new HashMap<Node, XdmNode>();
 
-    private XdmValueResource image = null;
+    private W3CDOMResource image = null;
 
     /**
      * Make a {@link MappedDOMResource} from a {@link DOMResource}
@@ -69,7 +64,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
     /**
      * Set the image {@link DOMResource}.
      */
-    public void setImage(XdmValueResource image) throws ResourceException {
+    public void setImage(W3CDOMResource image) throws ResourceException {
 	this.image = image;
 	readTraces();
     }
@@ -78,7 +73,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * {@inheritDoc}
      */
     @Override
-    public XdmValueResource getImage() {
+    public W3CDOMResource getImage() {
 	return image;
     }
 
@@ -116,43 +111,32 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * 3 user data in there.
      */
     protected void readTraces() throws ResourceException {
-	XdmSequenceIterator<XdmItem> items = getImage().getContents().iterator();
-	// iterate over all items in the mapped resource
-	while (items.hasNext()) {
-	    XdmItem item = items.next();
-	    if (!item.isNode()) {
-		continue;
+    }
+
+    protected void readTraces(Node node) throws ResourceException {
+	Object userData = node.getUserData(NODE_ID_USER_DATA);
+	if (userData == null) {
+	    // if no user data present, we can only set the reverse map
+	    reverseMap.put(node, null);
+	} else {
+	    // set the reverse map
+	    int nodeId = (int) userData;
+	    // set the forward map, where a preimage node may be
+	    // mapped to multiple nodes in the image
+	    XdmNode preimageNode = idToPreimageNode.get(nodeId);
+	    reverseMap.put(node, preimageNode);
+	    if (forwardMap.containsKey(preimageNode)) {
+		forwardMap.get(preimageNode).add(node);
+	    } else {
+		List<Node> imageNodes = new ArrayList<Node>();
+		imageNodes.add(node);
+		forwardMap.put(preimageNode, imageNodes);
 	    }
-	    XdmNode node = (XdmNode) item;
-	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
-	    while (treeIterator.hasNext()) {
-		node = treeIterator.next();
-		if (node.getExternalNode() == null || !Node.class.isAssignableFrom(node.getExternalNode().getClass())) {
-		    // this may be true for text nodes generated with <xsl:text>
-		    LOG.debug("underlying nodes from image are not org.w3c.dom nodes");
-		    continue;
-		}
-		Node domNode = (Node) node.getExternalNode();
-		Object userData = domNode.getUserData(NODE_ID_USER_DATA);
-		if (userData == null) {
-		    // if no user data present, we can only set the reverse map
-		    reverseMap.put(node, null);
-		    continue;
-		}
-		// set the reverse map
-		int nodeId = (int) userData;
-		// set the forward map, where a preimage node may be
-		// mapped to multiple nodes in the image
-		XdmNode preimageNode = idToPreimageNode.get(nodeId);
-		reverseMap.put(node, preimageNode);
-		if (forwardMap.containsKey(preimageNode)) {
-		    forwardMap.get(preimageNode).add(node);
-		} else {
-		    List<XdmNode> imageNodes = new ArrayList<XdmNode>();
-		    imageNodes.add(node);
-		    forwardMap.put(preimageNode, imageNodes);
-		}
-	    }
+	}
+	// recursion over children
+	NodeList children = node.getChildNodes();
+	for (int i = 0; i < children.getLength(); i++) {
+	    readTraces(children.item(i));
 	}
     }
 
@@ -161,7 +145,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * {@inheritDoc}
      */
     @Override
-    public Optional<XdmNode> getCorrespondingInPreimage(XdmNode imageNode) {
+    public Optional<XdmNode> getCorrespondingInPreimage(Node imageNode) {
 	return Optional.of(reverseMap.get(imageNode));
     }
 
@@ -169,7 +153,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      * {@inheritDoc}
      */
     @Override
-    public List<XdmNode> getCorrespondingInImage(XdmNode preimageNode) {
+    public List<Node> getCorrespondingInImage(XdmNode preimageNode) {
 	return forwardMap.get(preimageNode);
     }
 
@@ -186,6 +170,15 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	Node domNode = (Node) underlyingNodeObject;
 	Integer nodeId = (Integer) domNode.getUserData(NODE_ID_USER_DATA);
 	return Optional.of(nodeId);
+    }
+
+    public DOMImplementation getDOMImplementation() {
+	Object externalNode = getContents().getExternalNode();
+	if (externalNode == null || !Node.class.isAssignableFrom(externalNode.getClass())) {
+	    return null;
+	}
+	Document doc = (Document) externalNode;
+	return doc.getImplementation();
     }
 
 }
