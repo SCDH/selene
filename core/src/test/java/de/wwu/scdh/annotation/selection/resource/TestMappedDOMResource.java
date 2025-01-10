@@ -22,18 +22,27 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmNodeKind;
 import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.event.Builder;
 
 import de.wwu.scdh.annotation.selection.*;
 
 public class TestMappedDOMResource {
 
-    public static final Processor PROC = new Processor(false);
+    public static final Processor PROC = mkProc();
 
     public static final File TEST_DIR = Paths.get("..", "test").toFile();
 
     public static final URI GESANG_XML  = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
     public static final File ID_XSL = Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
+
+    public static Processor mkProc() {
+	Processor proc = new Processor(false);
+	//proc.setConfigurationProperty(Feature.TREE_MODEL, Builder.LINKED_TREE);
+	proc.setConfigurationProperty(Feature.LINE_NUMBERING, true);
+	return proc;
+    }
 
     public static XdmValue transform(DOMResource resource, File stylesheet) throws SaxonApiException {
 	XsltCompiler compiler = PROC.newXsltCompiler();
