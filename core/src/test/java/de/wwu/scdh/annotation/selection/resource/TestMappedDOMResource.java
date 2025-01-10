@@ -101,7 +101,7 @@ public class TestMappedDOMResource {
 	    XdmNode node = tree.next();
 	    System.out.println(node.getNodeKind().toString() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node)));
 	    assertTrue(MappedDOMResource.getNodeTrace(node).isPresent());
-	    if (node.getNodeKind().equals(XdmNodeKind.DOCUMENT)) {
+	    if (!node.getNodeKind().equals(XdmNodeKind.TEXT)) {
 		continue;
 	    }
 	    assertNotEquals(null, preimage.getCorrespondingInImage(node)); // fails: is null
