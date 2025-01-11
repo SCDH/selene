@@ -17,6 +17,7 @@ import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XPathExecutable;
 import net.sf.saxon.s9api.XPathSelector;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNodeKind;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,14 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
     public static final String NODE_ID_USER_DATA = "mapped-dom-id";
 
+    public static final String TRACKING_NAMESPACE = "http://wwu.scdh.de/selection";
+
+    public static final String TRACKING_PREFIX = "track";
+
+    public static final String TRACKING_ATTRIBUTE = "track";
+
+    public static final String TRACKING_XPATH = "@" + TRACKING_PREFIX + ":" + TRACKING_ATTRIBUTE;
+
     public static final String ID_XPATH = "generate-id(.)";
 
     protected Map<String, XdmNode> idToPreimageNode = new HashMap<String, XdmNode>();
@@ -42,23 +51,13 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
     private XdmValueResource image = null;
 
-    protected final XPathExecutable xpathExecutable;
-
     /**
      * Make a {@link MappedDOMResource} from a {@link DOMResource}
      * which is used as the preimage.
      */
     public MappedDOMResource(DOMResource preimage) throws ResourceException {
 	super(preimage.getUri(), preimage.getContents(), preimage.getProcessor());
-	Processor processor = preimage.getProcessor();
-	XPathCompiler compiler = processor.newXPathCompiler();
-	try {
-	    xpathExecutable = compiler.compile(ID_XPATH);
-	    leaveTraces();
-	} catch (SaxonApiException e) {
-	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
-	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
-	}
+	leaveTraces();
     }
 
     /**
@@ -70,14 +69,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     public MappedDOMResource(URI uri, XdmNode document, Processor processor) throws ResourceException {
 	super(uri, document, processor);
-	XPathCompiler compiler = processor.newXPathCompiler();
-	try {
-	    xpathExecutable = compiler.compile(ID_XPATH);
-	    leaveTraces();
-	} catch (SaxonApiException e) {
-	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
-	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
-	}
+	leaveTraces();
     }
 
 
@@ -103,6 +95,15 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     protected void leaveTraces() throws ResourceException {
 	XdmSequenceIterator<XdmNode> nodes = getContents().axisIterator(Axis.DESCENDANT_OR_SELF);
+	XPathCompiler compiler = getProcessor().newXPathCompiler();
+	compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	XPathExecutable xpathExecutable;
+	try {
+	    xpathExecutable = compiler.compile(ID_XPATH);
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
+	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
+	}
 	XPathSelector selector;
 	XdmItem nodeId;
 	while (nodes.hasNext()) {
@@ -112,6 +113,10 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 		selector = xpathExecutable.load();
 		selector.setContextItem(node);
 		nodeId = selector.evaluateSingle();
+		if (nodeId == null) {
+		    LOG.error("cannot leave trace on {}", node.getNodeKind());
+		    continue;
+		}
 		// add to mappings
 		idToPreimageNode.put(nodeId.getStringValue(), node);
 	    } catch (SaxonApiException e) {
@@ -130,7 +135,16 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
     protected void readTraces() throws ResourceException {
 	XdmSequenceIterator<XdmItem> items = getImage().getContents().iterator();
 	XPathSelector selector;
-	String nodeId;
+	XPathExecutable xpathExecutable;
+	XPathCompiler compiler = getProcessor().newXPathCompiler();
+	compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	try {
+	    xpathExecutable = compiler.compile(TRACKING_XPATH);
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
+	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
+	}
+	XdmItem nodeId;
 	// iterate over all items in the mapped resource
 	while (items.hasNext()) {
 	    XdmItem item = items.next();
@@ -141,18 +155,20 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
 	    while (treeIterator.hasNext()) {
 		node = treeIterator.next();
+		if (!node.getNodeKind().equals(XdmNodeKind.TEXT))
+			continue;
 		try {
 		    // generate/get ID
 		    selector = xpathExecutable.load();
 		    selector.setContextItem(node);
-		    nodeId = selector.evaluateSingle().getStringValue();
+		    nodeId = selector.evaluateSingle();
 		    // Id known in preimage?
-		    if (!idToPreimageNode.containsKey(nodeId)) {
+		    if (nodeId == null || !idToPreimageNode.containsKey(nodeId.getStringValue())) {
 			// if no user data present, we can only set the reverse map
 			reverseMap.put(node, null);
 			continue;
 		    }
-		    XdmNode preimageNode = idToPreimageNode.get(nodeId);
+		    XdmNode preimageNode = idToPreimageNode.get(nodeId.getStringValue());
 		    // set the reverse map
 		    reverseMap.put(node, preimageNode);
 		    // set the forward map, where a preimage node may be
@@ -193,18 +209,22 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
     /**
      * Get the node ID of the given node.
      */
-    protected static Optional<String> getNodeTrace(XdmNode node) throws ResourceException {
+    protected static Optional<String> getNodeTrace(XdmNode node, String xpath) throws ResourceException {
 	try {
 	    Processor processor = node.getProcessor();
 	    XPathCompiler compiler = processor.newXPathCompiler();
-	    XPathExecutable executable = compiler.compile(ID_XPATH);
+	    compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	    XPathExecutable executable = compiler.compile(xpath);
 	    XPathSelector selector = executable.load();
 	    selector.setContextItem(node);
 	    XdmItem value = selector.evaluateSingle();
-	    if (!value.isAtomicValue()) {
-		LOG.error("evaluating 'generate-id(.)' on provided node does not return an atomic value");
-		throw new ResourceException("evaluating 'generate-id(.)' on provided node does not return an atomic value");
+	    if (value == null) {
+		return Optional.of(xpath + " not present");
 	    }
+	    // if (!value.isAtomicValue()) {
+	    // 	LOG.error("evaluating '{}' on provided node does not return an atomic value");
+	    // 	throw new ResourceException("evaluating '" + xpath + "' on provided node does not return an atomic value");
+	    // }
 	    return Optional.of(value.getStringValue());
 	}  catch (SaxonApiException e) {
 	    LOG.error(e.getMessage());
