@@ -35,8 +35,6 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
     private static final Logger LOG = LoggerFactory.getLogger(MappedDOMResource.class);
 
-    public static final String NODE_ID_USER_DATA = "mapped-dom-id";
-
     public static final String TRACKING_NAMESPACE = "http://wwu.de/scdh/selection-engine/node-tracing";
 
     public static final String TRACKING_PREFIX = "track";
