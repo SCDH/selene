@@ -17,7 +17,6 @@ import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XPathExecutable;
 import net.sf.saxon.s9api.XPathSelector;
 import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmNodeKind;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,10 @@ import de.wwu.scdh.annotation.selection.MappedResource;
 import de.wwu.scdh.annotation.selection.ResourceException;
 
 /**
- *
- *
+ * A {@link MappedResource} mapping two {@link DOMResource}s to each
+ * other. The mapping is based on attributes and text node wrappers,
+ * that are in <code>libtrace.xsl</code> and its internal
+ * replacements.
  */
 public class MappedDOMResource extends DOMResource implements MappedResource<XdmNode, XdmValue, XdmNode, XdmNode> {
 
@@ -35,11 +36,11 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
     public static final String NODE_ID_USER_DATA = "mapped-dom-id";
 
-    public static final String TRACKING_NAMESPACE = "http://wwu.scdh.de/selection";
+    public static final String TRACKING_NAMESPACE = "http://wwu.de/scdh/selection-engine/node-tracing";
 
     public static final String TRACKING_PREFIX = "track";
 
-    public static final String TRACKING_ATTRIBUTE = "track";
+    public static final String TRACKING_ATTRIBUTE = "source-id";
 
     public static final String TRACKING_XPATH = "@" + TRACKING_PREFIX + ":" + TRACKING_ATTRIBUTE;
 
@@ -117,6 +118,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 		    LOG.error("cannot leave trace on {}", node.getNodeKind());
 		    continue;
 		}
+		LOG.debug("set source id on {} {}: {}", node.getNodeKind(), node.getNodeName(), nodeId.getStringValue());
 		// add to mappings
 		idToPreimageNode.put(nodeId.getStringValue(), node);
 	    } catch (SaxonApiException e) {
@@ -141,8 +143,8 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	try {
 	    xpathExecutable = compiler.compile(TRACKING_XPATH);
 	} catch (SaxonApiException e) {
-	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
-	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
+	    LOG.error("failed to compile XPath expression {}", TRACKING_XPATH);
+	    throw new ResourceException("failed to compile XPath expression " + TRACKING_XPATH);
 	}
 	XdmItem nodeId;
 	// iterate over all items in the mapped resource
@@ -155,8 +157,8 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
 	    while (treeIterator.hasNext()) {
 		node = treeIterator.next();
-		if (!node.getNodeKind().equals(XdmNodeKind.TEXT))
-			continue;
+		// if (!node.getNodeKind().equals(XdmNodeKind.ELEMENT))
+		// 	continue;
 		try {
 		    // generate/get ID
 		    selector = xpathExecutable.load();

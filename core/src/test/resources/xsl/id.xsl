@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- identity transformation -->
-<xsl:stylesheet
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:tracking="http://wwu.scdh.de/selection"
-    version="3.0">
+<!-- identity transformation with node tracing -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:trace="http://wwu.de/scdh/selection-engine/node-tracing" exclude-result-prefixes="#all"
+  version="3.0">
+
+  <xsl:use-package name="http://wwu.de/scdh/selection-engine/node-tracing" package-version="1.0.0"/>
 
   <xsl:mode on-no-match="shallow-copy"/>
 
-  <xsl:template match="text() | *">
+  <xsl:template match="element()">
     <xsl:copy>
-      <xsl:attribute name="tracking:track" select="generate-id(.)"/>
+      <xsl:call-template name="trace:source-id"/>
+      <xsl:apply-templates select="node() | attribute() | comment() | processing-instruction()"/>
     </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="text()">
+    <xsl:call-template name="trace:text"/>
   </xsl:template>
 
 </xsl:stylesheet>

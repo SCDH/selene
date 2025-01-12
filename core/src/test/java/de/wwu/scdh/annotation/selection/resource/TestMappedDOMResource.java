@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XdmValue;
+import net.sf.saxon.s9api.XsltPackage;
 
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
@@ -29,14 +30,18 @@ public class TestMappedDOMResource {
 
     public static final Processor PROC = new Processor(false);
 
+    public static final File LIBTRACE_XML = Paths.get("src", "main", "resources", "xslt", "libtrace-xml.xsl").toFile();
+
     public static final File TEST_DIR = Paths.get("..", "test").toFile();
 
     public static final URI GESANG_XML  = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
     public static final File ID_XSL = Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
 
-    public static XdmValue transform(DOMResource resource, File stylesheet) throws SaxonApiException {
+    public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 	XsltCompiler compiler = PROC.newXsltCompiler();
+	XsltPackage xsltPackage = compiler.compilePackage(pkg);
+	compiler.importPackage(xsltPackage);
 	XsltExecutable executable = compiler.compile(stylesheet);
 	Xslt30Transformer transformer = executable.load30();
 	return transformer.applyTemplates(resource.getContents());
@@ -58,8 +63,10 @@ public class TestMappedDOMResource {
 	//assertEquals(Optional.of(1), MappedDOMResource.getNodeTrace(doc));
 	XdmSequenceIterator<XdmNode> tree = doc.axisIterator(Axis.DESCENDANT_OR_SELF);
 	// traverse preimage and assert that there are node traces in the mapping of identifiers to preimage nodes
+	System.out.println("preimage");
 	while (tree.hasNext()) {
 	    XdmNode node = tree.next();
+	    //System.out.println(node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
 	    assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).isPresent());
 	    assertTrue(preimage.idToPreimageNode.containsKey(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).get()));
 	    assertEquals(node, preimage.idToPreimageNode.get(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).get()));
@@ -70,9 +77,10 @@ public class TestMappedDOMResource {
     public void testGesangMappedWithIdentity() throws ResourceException, SaxonApiException {
 	DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
 	MappedDOMResource preimage = new MappedDOMResource(source);
-	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL));
+	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 	preimage.setImage(image);
 	// traverse image and assert that there is a trace on its nodes
+	System.out.println("image");
 	XdmSequenceIterator<XdmItem> items = preimage.getImage().getContents().iterator();
 	while (items.hasNext()) {
 	    XdmItem item = items.next();
@@ -81,7 +89,7 @@ public class TestMappedDOMResource {
 		XdmSequenceIterator<XdmNode> treeIterator = tree.axisIterator(Axis.DESCENDANT_OR_SELF);
 		while (treeIterator.hasNext()) {
 		    XdmNode node = treeIterator.next();
-		    System.out.println(node.getNodeKind().toString() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH)));
+		    System.out.println(node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH)));
 		    if (node.getNodeKind().equals(XdmNodeKind.DOCUMENT)) continue;
 		    assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH).isPresent());
 		}
@@ -93,7 +101,7 @@ public class TestMappedDOMResource {
     public void testGesangForwardMapping() throws ResourceException, SaxonApiException {
 	DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
 	MappedDOMResource preimage = new MappedDOMResource(source);
-	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL));
+	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 	preimage.setImage(image);
 	XdmSequenceIterator<XdmNode> tree = preimage.getContents().axisIterator(Axis.DESCENDANT_OR_SELF);
 	// traverse preimage and assert that we have a forward mapping of preimage nodes
