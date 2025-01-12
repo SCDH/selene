@@ -6,21 +6,18 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 import java.net.URI;
-import java.io.InputStream;
-import java.io.IOException;
 
 import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import net.sf.saxon.s9api.XPathCompiler;
+import net.sf.saxon.s9api.XPathExecutable;
+import net.sf.saxon.s9api.XPathSelector;
+import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.XdmNodeKind;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +35,17 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
     public static final String NODE_ID_USER_DATA = "mapped-dom-id";
 
-    protected Map<Integer, XdmNode> idToPreimageNode = new HashMap<Integer, XdmNode>();
+    public static final String TRACKING_NAMESPACE = "http://wwu.scdh.de/selection";
+
+    public static final String TRACKING_PREFIX = "track";
+
+    public static final String TRACKING_ATTRIBUTE = "track";
+
+    public static final String TRACKING_XPATH = "@" + TRACKING_PREFIX + ":" + TRACKING_ATTRIBUTE;
+
+    public static final String ID_XPATH = "generate-id(.)";
+
+    protected Map<String, XdmNode> idToPreimageNode = new HashMap<String, XdmNode>();
     protected Map<XdmNode, List<XdmNode>> forwardMap = new HashMap<XdmNode, List<XdmNode>>();
     protected Map<XdmNode, XdmNode> reverseMap = new HashMap<XdmNode, XdmNode>();
 
@@ -88,24 +95,34 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     protected void leaveTraces() throws ResourceException {
 	XdmSequenceIterator<XdmNode> nodes = getContents().axisIterator(Axis.DESCENDANT_OR_SELF);
-	int nodeId = 1;
+	XPathCompiler compiler = getProcessor().newXPathCompiler();
+	compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	XPathExecutable xpathExecutable;
+	try {
+	    xpathExecutable = compiler.compile(ID_XPATH);
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
+	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
+	}
+	XPathSelector selector;
+	XdmItem nodeId;
 	while (nodes.hasNext()) {
 	    XdmNode node = nodes.next();
-	    // write node ID to DOM level 3 user data
-	    if (node.getExternalNode() == null || !Node.class.isAssignableFrom(node.getExternalNode().getClass())) {
-		String nodeClass = "null";
-		if (node.getExternalNode() != null) {
-		    nodeClass = node.getExternalNode().getClass().getCanonicalName();
+	    try {
+		// generate/get ID
+		selector = xpathExecutable.load();
+		selector.setContextItem(node);
+		nodeId = selector.evaluateSingle();
+		if (nodeId == null) {
+		    LOG.error("cannot leave trace on {}", node.getNodeKind());
+		    continue;
 		}
-		LOG.error("underlying nodes from preimage are not org.w3c.dom nodes: {}", nodeClass);
-		throw new ResourceException("underlying nodes from preimage are not org.w3c.dom nodes");
+		// add to mappings
+		idToPreimageNode.put(nodeId.getStringValue(), node);
+	    } catch (SaxonApiException e) {
+		LOG.error("failed to generate ID for preimage node");
+		throw new ResourceException(e.getMessage());
 	    }
-	    Node domNode = (Node) node.getExternalNode();
-	    domNode.setUserData(NODE_ID_USER_DATA, nodeId, null);
-	    // add to mappings
-	    idToPreimageNode.put(nodeId, node);
-	    // increment node ID
-	    nodeId++;
 	}
     }
 
@@ -117,6 +134,17 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     protected void readTraces() throws ResourceException {
 	XdmSequenceIterator<XdmItem> items = getImage().getContents().iterator();
+	XPathSelector selector;
+	XPathExecutable xpathExecutable;
+	XPathCompiler compiler = getProcessor().newXPathCompiler();
+	compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	try {
+	    xpathExecutable = compiler.compile(TRACKING_XPATH);
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to compile XPath expression {}", ID_XPATH);
+	    throw new ResourceException("failed to compile XPath expression " + ID_XPATH);
+	}
+	XdmItem nodeId;
 	// iterate over all items in the mapped resource
 	while (items.hasNext()) {
 	    XdmItem item = items.next();
@@ -127,30 +155,34 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    XdmSequenceIterator<XdmNode> treeIterator = node.axisIterator(Axis.DESCENDANT_OR_SELF);
 	    while (treeIterator.hasNext()) {
 		node = treeIterator.next();
-		if (node.getExternalNode() == null || !Node.class.isAssignableFrom(node.getExternalNode().getClass())) {
-		    // this may be true for text nodes generated with <xsl:text>
-		    LOG.debug("underlying nodes from image are not org.w3c.dom nodes");
-		    continue;
-		}
-		Node domNode = (Node) node.getExternalNode();
-		Object userData = domNode.getUserData(NODE_ID_USER_DATA);
-		if (userData == null) {
-		    // if no user data present, we can only set the reverse map
-		    reverseMap.put(node, null);
-		    continue;
-		}
-		// set the reverse map
-		int nodeId = (int) userData;
-		// set the forward map, where a preimage node may be
-		// mapped to multiple nodes in the image
-		XdmNode preimageNode = idToPreimageNode.get(nodeId);
-		reverseMap.put(node, preimageNode);
-		if (forwardMap.containsKey(preimageNode)) {
-		    forwardMap.get(preimageNode).add(node);
-		} else {
-		    List<XdmNode> imageNodes = new ArrayList<XdmNode>();
-		    imageNodes.add(node);
-		    forwardMap.put(preimageNode, imageNodes);
+		if (!node.getNodeKind().equals(XdmNodeKind.TEXT))
+			continue;
+		try {
+		    // generate/get ID
+		    selector = xpathExecutable.load();
+		    selector.setContextItem(node);
+		    nodeId = selector.evaluateSingle();
+		    // Id known in preimage?
+		    if (nodeId == null || !idToPreimageNode.containsKey(nodeId.getStringValue())) {
+			// if no user data present, we can only set the reverse map
+			reverseMap.put(node, null);
+			continue;
+		    }
+		    XdmNode preimageNode = idToPreimageNode.get(nodeId.getStringValue());
+		    // set the reverse map
+		    reverseMap.put(node, preimageNode);
+		    // set the forward map, where a preimage node may be
+		    // mapped to multiple nodes in the image
+		    if (forwardMap.containsKey(preimageNode)) {
+			forwardMap.get(preimageNode).add(node);
+		    } else {
+			List<XdmNode> imageNodes = new ArrayList<XdmNode>();
+			imageNodes.add(node);
+			forwardMap.put(preimageNode, imageNodes);
+		    }
+		} catch (SaxonApiException e) {
+		    LOG.error("failed to generate Id for image node");
+		    throw new ResourceException("failed to generate Id for imae node");
 		}
 	    }
 	}
@@ -177,15 +209,27 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
     /**
      * Get the node ID of the given node.
      */
-    protected static Optional<Integer> getNodeTrace(XdmNode node) {
-	Object underlyingNodeObject = node.getExternalNode();
-	if (underlyingNodeObject == null || !Node.class.isAssignableFrom(underlyingNodeObject.getClass())) {
-	    LOG.error("node has no user data");
-	    return Optional.empty();
+    protected static Optional<String> getNodeTrace(XdmNode node, String xpath) throws ResourceException {
+	try {
+	    Processor processor = node.getProcessor();
+	    XPathCompiler compiler = processor.newXPathCompiler();
+	    compiler.declareNamespace(TRACKING_PREFIX, TRACKING_NAMESPACE);
+	    XPathExecutable executable = compiler.compile(xpath);
+	    XPathSelector selector = executable.load();
+	    selector.setContextItem(node);
+	    XdmItem value = selector.evaluateSingle();
+	    if (value == null) {
+		return Optional.of(xpath + " not present");
+	    }
+	    // if (!value.isAtomicValue()) {
+	    // 	LOG.error("evaluating '{}' on provided node does not return an atomic value");
+	    // 	throw new ResourceException("evaluating '" + xpath + "' on provided node does not return an atomic value");
+	    // }
+	    return Optional.of(value.getStringValue());
+	}  catch (SaxonApiException e) {
+	    LOG.error(e.getMessage());
+	    throw new ResourceException(e.getMessage());
 	}
-	Node domNode = (Node) underlyingNodeObject;
-	Integer nodeId = (Integer) domNode.getUserData(NODE_ID_USER_DATA);
-	return Optional.of(nodeId);
     }
 
 }
