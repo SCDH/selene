@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 import java.net.URI;
+import java.net.URL;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XdmItem;
@@ -232,6 +233,13 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	    LOG.error(e.getMessage());
 	    throw new ResourceException(e.getMessage());
 	}
+    }
+
+    /**
+     * Return an {@link URL} to a stylesheet for mapping;
+     */
+    public URL getMappingResource() {
+	return this.getClass().getResource("/xslt/libtrace-xml.xsl");
     }
 
 }
