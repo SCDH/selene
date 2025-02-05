@@ -13,6 +13,8 @@ import net.sf.saxon.s9api.XPathExecutable;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.XdmItem;
+import net.sf.saxon.s9api.XdmEmptySequence;
 import net.sf.saxon.s9api.Axis;
 import net.sf.saxon.s9api.XdmNodeKind;
 import net.sf.saxon.s9api.XPathSelector;
@@ -231,6 +233,33 @@ public abstract class XPathRewriterBase {
 		throw new SelectorException("XPath '" + xpath + "' does not select a node");
 	    } else {
 		return (XdmNode) nodes.itemAt(0);
+	    }
+	} catch (SaxonApiException e) {
+	    LOG.error(e.getMessage());
+	    throw new SelectorException(e);
+	}
+    }
+
+    /**
+     * Get the node from the DOM resource given by the the XPath
+     * passed as argument. If the XPath does not evaluate to a single
+     * node, this method raises an {@link SelectorException}.
+     */
+    protected final XdmNode getNode(XdmValue value, String xpath, Processor processor) throws SelectorException {
+	XPathCompiler compiler = processor.newXPathCompiler();
+	try {
+	    XPathExecutable executable = compiler.compile(xpath);
+	    XdmValue result = XdmEmptySequence.getInstance();
+	    for (XdmItem item : value.stream().asList()) {
+		XPathSelector selector = executable.load();
+		selector.setContextItem(item);
+		result.append(selector.evaluate());
+	    }
+	    if (result.size() != 1 && !result.itemAt(0).isNode()) {
+		LOG.error("XPath '{}' does not select exaclty one node in XdmValueResource: selects {} nodes", xpath, result.size());
+		throw new SelectorException("XPath '" + xpath + "' does not select a single node in XdmValueResource");
+	    } else {
+		return (XdmNode) result.itemAt(0);
 	    }
 	} catch (SaxonApiException e) {
 	    LOG.error(e.getMessage());
