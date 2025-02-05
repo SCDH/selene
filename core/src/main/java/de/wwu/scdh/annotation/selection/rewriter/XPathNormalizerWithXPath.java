@@ -1,14 +1,6 @@
 package de.wwu.scdh.annotation.selection.rewriter;
 
 import net.sf.saxon.s9api.XdmNode;
-import net.sf.saxon.s9api.XPathCompiler;
-import net.sf.saxon.s9api.XPathExecutable;
-import net.sf.saxon.s9api.XdmValue;
-import net.sf.saxon.s9api.XPathSelector;
-import net.sf.saxon.s9api.SaxonApiException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.*;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
@@ -24,8 +16,6 @@ import de.wwu.scdh.annotation.selection.resource.DOMResource;
  * This is generally a text node.
  */
 public class XPathNormalizerWithXPath extends XPathNormalizer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizerWithXPath.class);
 
     /**
      * An XPath expression suitable for normalizing path expressions
@@ -77,36 +67,7 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
      */
     @Override
     protected String getNormalizedXPath(DOMResource resource, XdmNode node, boolean escaped) throws SelectorException {
-	XPathCompiler compiler = resource.getProcessor().newXPathCompiler();
-	XdmValue nodes;
-	try {
-	    XPathExecutable executable = compiler.compile(xpath);
-	    XPathSelector selector = executable.load();
-	    selector.setContextItem(node);
-	    nodes = selector.evaluate();
-	} catch (SaxonApiException e) {
-	    LOG.error("failed to normalize XPath using '{}': ", xpath, e.getMessage());
-	    throw new SelectorException(e);
-	}
-	if (nodes.size() != 1) {
-	    LOG.error("normalizing XPath '{}' did not return exactly one item: returned {} items", xpath, nodes.size());
-	    throw new SelectorException("normalizing XPath '" +
-					xpath +
-					"' did not return exactly one item: returned " +
-					String.valueOf(nodes.size()) +
-					" item");
-	} else if (!nodes.itemAt(0).isAtomicValue()) {
-	    LOG.error("normalizing XPath '{}' did not return an atomic value", xpath, nodes.size());
-	    throw new SelectorException("normalizing XPath '" +
-					xpath +
-					"' did not return an atomic value");
-	} else {
-	    if (escaped) {
-		return nodes.itemAt(0).getStringValue();
-	    } else {
-		return nodes.itemAt(0).getUnderlyingValue().getUnicodeStringValue().toString();
-	    }
-	}
+	return pathExpressionWithXPath(getXPath(), node, escaped, resource.getProcessor());
     }
 
     public String getXPath() {
