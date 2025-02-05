@@ -203,7 +203,11 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
      */
     @Override
     public List<XdmNode> getCorrespondingInImage(XdmNode preimageNode) {
-	return forwardMap.get(preimageNode);
+	if (forwardMap.containsKey(preimageNode)) {
+	    return forwardMap.get(preimageNode);
+	} else {
+	    return List.of();
+	}
     }
 
 

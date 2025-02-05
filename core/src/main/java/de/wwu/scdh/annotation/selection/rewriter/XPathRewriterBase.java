@@ -253,11 +253,14 @@ public abstract class XPathRewriterBase {
 	    for (XdmItem item : value.stream().asList()) {
 		XPathSelector selector = executable.load();
 		selector.setContextItem(item);
-		result.append(selector.evaluate());
+		result = result.append(selector.evaluate());
 	    }
-	    if (result.size() != 1 && !result.itemAt(0).isNode()) {
+	    if (result.size() != 1) {
 		LOG.error("XPath '{}' does not select exaclty one node in XdmValueResource: selects {} nodes", xpath, result.size());
-		throw new SelectorException("XPath '" + xpath + "' does not select a single node in XdmValueResource");
+		throw new SelectorException("XPath '" + xpath + "' does not select exactly one node in XdmValueResource");
+	    } else if (!result.itemAt(0).isNode()) {
+		LOG.error("XPath '{}' does not select a node", xpath, result.size());
+		throw new SelectorException("XPath '" + xpath + "' does not select a node");
 	    } else {
 		return (XdmNode) result.itemAt(0);
 	    }
