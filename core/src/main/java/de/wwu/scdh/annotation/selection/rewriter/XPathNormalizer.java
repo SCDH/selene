@@ -86,7 +86,7 @@ public abstract class XPathNormalizer extends XPathRewriterBase
 		 point.getChar(), config.getMode());
 	    String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), config.getEscaped());
 	    XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
-	    Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
+	    Integer normalizedPos = posInNormalizedNode(textNode.getLeft(), textNode.getRight(), normalizedNode);
 	    return List.of(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
     }
 

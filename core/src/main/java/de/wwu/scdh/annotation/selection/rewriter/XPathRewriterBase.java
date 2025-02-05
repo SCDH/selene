@@ -385,7 +385,7 @@ public abstract class XPathRewriterBase {
      * @param fragment the {@link XdmNode} selected by the XPath resulting from step 2
      * @return the position from step 2
      */
-    protected int posInNormalizedNode(DOMResource resource, XdmNode textNode, int pos, XdmNode fragment) throws SelectorException {
+    protected int posInNormalizedNode(XdmNode textNode, int pos, XdmNode fragment) throws SelectorException {
 	if (textNode.equals(fragment)) {
 	    return pos;
 	}
