@@ -450,4 +450,50 @@ public abstract class XPathRewriterBase {
 	return in.replace("&apos;", "'");
     }
 
+
+    /**
+     * Get the path to the {@link XdmNode} given as parameter by using
+     * the provided XPath for generating a path expression.<P>
+     *
+     * This is typically used in step 2 of normalization.
+     *
+     * @param xpath    the XPath for generating a path expression, e.g., fn:xpath()
+     * @param node     the {@link XdmNode} for which to generate the path expression
+     * @param escaped  whether or not the generated path expression is to be escaped
+     * @param processor  a Saxon {@link Processor}
+     */
+    protected String pathExpressionWithXPath(String xpath, XdmNode node, boolean escaped, Processor processor)
+	throws SelectorException {
+	XPathCompiler compiler = processor.newXPathCompiler();
+	XdmValue nodes;
+	try {
+	    XPathExecutable executable = compiler.compile(xpath);
+	    XPathSelector selector = executable.load();
+	    selector.setContextItem(node);
+	    nodes = selector.evaluate();
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to normalize XPath using '{}': ", xpath, e.getMessage());
+	    throw new SelectorException(e);
+	}
+	if (nodes.size() != 1) {
+	    LOG.error("normalizing XPath '{}' did not return exactly one item: returned {} items", xpath, nodes.size());
+	    throw new SelectorException("normalizing XPath '" +
+					xpath +
+					"' did not return exactly one item: returned " +
+					String.valueOf(nodes.size()) +
+					" item");
+	} else if (!nodes.itemAt(0).isAtomicValue()) {
+	    LOG.error("normalizing XPath '{}' did not return an atomic value", xpath, nodes.size());
+	    throw new SelectorException("normalizing XPath '" +
+					xpath +
+					"' did not return an atomic value");
+	} else {
+	    if (escaped) {
+		return nodes.itemAt(0).getStringValue();
+	    } else {
+		return nodes.itemAt(0).getUnderlyingValue().getUnicodeStringValue().toString();
+	    }
+	}
+    }
+
 }
