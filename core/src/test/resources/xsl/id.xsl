@@ -8,6 +8,10 @@
 
   <xsl:mode on-no-match="shallow-copy"/>
 
+  <xsl:template match="/">
+    <xsl:call-template name="trace:root"/>
+  </xsl:template>
+
   <xsl:template match="element()">
     <xsl:copy>
       <xsl:call-template name="trace:source-id"/>

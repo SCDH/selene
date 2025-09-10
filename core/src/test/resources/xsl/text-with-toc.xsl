@@ -19,6 +19,10 @@
     </xsl:template>
 
     <xsl:template match="document-node()">
+      <!-- This is document node is a replacement instead the using
+	   the trace:root named template
+      -->
+      <xsl:document>
         <html>
             <head>
                 <title>
@@ -36,6 +40,7 @@
                 </div>
             </body>
         </html>
+      </xsl:document>
     </xsl:template>
 
     <xsl:template mode="toc #unnamed" match="lg | div">

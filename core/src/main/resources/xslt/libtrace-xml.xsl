@@ -1,3 +1,8 @@
+<!-- Implementation of the node tracing package for internal use
+
+This implementation is used for node tracing when the output
+method is XML.
+-->
 <xsl:package name="http://wwu.de/scdh/selection-engine/node-tracing" package-version="1.0.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:trace="http://wwu.de/scdh/selection-engine/node-tracing" exclude-result-prefixes="#all"
@@ -18,10 +23,15 @@
   </xsl:template>
 
   <xsl:template name="trace:root" as="item()*" visibility="final">
-    <xsl:element name="trace:root">
+    <!-- A document node is required because we transform with Saxon
+	 Xslt30transformer.applytemplates() which returns an XdmValue
+	 which is not wrapped into a document node. The document node
+	 is required for correct XPath selectors.
+    -->
+    <xsl:document>
       <xsl:apply-templates mode="#current"
         select="node() | attribute() | comment() | processing-instruction()"/>
-    </xsl:element>
+    </xsl:document>
   </xsl:template>
 
 </xsl:package>

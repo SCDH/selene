@@ -84,11 +84,11 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
 	assertEquals(2, mapped.size());
 
-	// assertEquals("/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]", mapped.get(0).getXPath());
+	assertEquals("/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]", mapped.get(0).getXPath());
 	assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
 	assertEquals(mapped.get(0).getChar(), 5);
 
-    	//assertEquals("/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[2]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]", mapped.get(1).getXPath());
+    	assertEquals("/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[2]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]", mapped.get(1).getXPath());
 	assertTrue(mapped.get(1).getXPath().endsWith("/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[2]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
 	assertEquals(mapped.get(1).getChar(), 5);
     }
