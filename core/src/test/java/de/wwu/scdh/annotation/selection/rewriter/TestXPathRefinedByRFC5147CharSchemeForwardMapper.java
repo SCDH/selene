@@ -46,6 +46,8 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 
     public static final File TEXT_WITH_TOC_XSL = Paths.get("src", "test", "resources", "xsl", "text-with-toc.xsl").toFile();
 
+    public static final File TEXT_XSL = Paths.get("src", "test", "resources", "xsl", "text.xsl").toFile();
+
     RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null);
 
     public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
@@ -55,17 +57,6 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	XsltExecutable executable = compiler.compile(stylesheet);
 	Xslt30Transformer transformer = executable.load30();
 	return transformer.applyTemplates(resource.getContents());
-    }
-
-    public static Destination transformToDestination(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
-	XsltCompiler compiler = PROC.newXsltCompiler();
-	XsltPackage xsltPackage = compiler.compilePackage(pkg);
-	compiler.importPackage(xsltPackage);
-	XsltExecutable executable = compiler.compile(stylesheet);
-	Xslt30Transformer transformer = executable.load30();
-	Serializer serializer = transformer.newSerializer();
-	transformer.applyTemplates(resource.getContents(), serializer);
-	return serializer;
     }
 
     @Test
@@ -120,4 +111,38 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
 	assertEquals(0, mapped.size());
     }
+
+    @Test
+    public void testTextToOneNode() throws ResourceException, SaxonApiException, SelectorException {
+	DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+	MappedDOMResource preimage = new MappedDOMResource(source);
+	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
+	preimage.setImage(image);
+	XPathRefinedByRFC5147CharSchemeForwardMapper mapper = new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+	XPathRefinedByRFC5147CharScheme preimagePoint =
+	    new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
+	List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+	assertEquals(1, mapped.size());
+	// the XdmValue output looks a bit weird: all text containers are directly in document node
+	assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"));
+	assertEquals(5, mapped.get(0).getChar());
+    }
+
+    @Test
+    public void testTextToOneNodeWithRootOffset() throws ResourceException, SaxonApiException, SelectorException {
+	DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+	MappedDOMResource preimage = new MappedDOMResource(source);
+	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
+	preimage.setImage(image);
+	//let $ctx:=., $rt:=$ctx/ancestor-or-self::node()[parent::node()[not(parent::node())]] return path($rt)
+	XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
+	    new XPathRefinedByRFC5147CharSchemeForwardMapper("path(ancestor-or-self::node()[ parent::node()[not(parent::node())]  ]) ");
+	XPathRefinedByRFC5147CharScheme preimagePoint =
+	    new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
+	List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+	assertEquals(1, mapped.size());
+	assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"));
+	assertEquals(5, mapped.get(0).getChar());
+    }
+
 }
