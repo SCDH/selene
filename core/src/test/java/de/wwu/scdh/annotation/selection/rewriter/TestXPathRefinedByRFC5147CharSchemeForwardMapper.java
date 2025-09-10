@@ -19,6 +19,8 @@ import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltPackage;
+import net.sf.saxon.s9api.Serializer;
+import net.sf.saxon.s9api.Destination;
 
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
@@ -53,6 +55,17 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	XsltExecutable executable = compiler.compile(stylesheet);
 	Xslt30Transformer transformer = executable.load30();
 	return transformer.applyTemplates(resource.getContents());
+    }
+
+    public static Destination transformToDestination(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
+	XsltCompiler compiler = PROC.newXsltCompiler();
+	XsltPackage xsltPackage = compiler.compilePackage(pkg);
+	compiler.importPackage(xsltPackage);
+	XsltExecutable executable = compiler.compile(stylesheet);
+	Xslt30Transformer transformer = executable.load30();
+	Serializer serializer = transformer.newSerializer();
+	transformer.applyTemplates(resource.getContents(), serializer);
+	return serializer;
     }
 
     @Test
