@@ -36,13 +36,11 @@ import net.sf.saxon.s9api.XdmItem;
  * will be applied to each of these pairs of nodes and char scheme
  * positions.<P>
  *
- * 3) Calculate a normalized pair of path expression and char scheme
- * that is referentially equivalent. This involves getting the path
- * expression using an XPath that returns a path expression, and then
- * recalculating the position inside the fragment that is selected by
- * this path expression. The XPath that returns a path expression is a
- * configuration feature of this rewriter and thus passed to the
- * constructor.
+ * 3) Calculate the RFC5147 character scheme, i.e. the inter-glyph
+ * character position, by summing up the lengths of text nodes
+ * preceding the node gotten in step 2 in the image and add the char
+ * scheme position gotten in step 2. This sum is the new inter-glyph
+ * character position in the plain text image.
  */
 public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper
     extends XPathRewriterBase
