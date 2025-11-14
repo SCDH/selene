@@ -26,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.S9ApiResource;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.XdmValueResource;
 
 
 /**
@@ -73,7 +75,7 @@ public abstract class XPathRewriterBase {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected Pair<XdmNode, Integer> getTextNodeAtPosition(DOMResource resource, String xpath, int position, Mode mode) throws SelectorException {
+    protected Pair<XdmNode, Integer> getTextNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position, Mode mode) throws SelectorException {
 	return switch(mode) {
 	case FIRST -> getFirstNodeAtPosition(resource, xpath, position);
 	case SECOND -> getSecondNodeAtPosition(resource, xpath, position);
@@ -92,8 +94,8 @@ public abstract class XPathRewriterBase {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#FIRST}.
      */
-    protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -106,8 +108,8 @@ public abstract class XPathRewriterBase {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#SECOND}.
      */
-    protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -122,8 +124,8 @@ public abstract class XPathRewriterBase {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#FIRST_OF_DEEPEST_NODES}.
      */
-    protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -143,8 +145,8 @@ public abstract class XPathRewriterBase {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#LAST_OF_DEEPEST_NODES}.
      */
-    protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -171,8 +173,8 @@ public abstract class XPathRewriterBase {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -191,8 +193,8 @@ public abstract class XPathRewriterBase {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -238,6 +240,19 @@ public abstract class XPathRewriterBase {
 	    LOG.error(e.getMessage());
 	    throw new SelectorException(e);
 	}
+    }
+
+    /**
+     * Get the node from the XDM value resource given by the the XPath
+     * passed as argument. If the XPath does not evaluate to a single
+     * node, this method raises an {@link SelectorException}.
+     *
+     * @param resource  the {@link XdmValueResource} on the base of which the normalization is done
+     * @param xpath  the XPath as {@link String}
+     * @return an {@link XdmNode} which the XPath points to
+     */
+    protected final XdmNode getNode(XdmValueResource resource, String xpath) throws SelectorException {
+	return getNode(resource.getContents(), xpath, resource.getProcessor());
     }
 
     /**

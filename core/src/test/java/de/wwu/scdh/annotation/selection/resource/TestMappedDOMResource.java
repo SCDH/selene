@@ -28,6 +28,10 @@ import de.wwu.scdh.annotation.selection.*;
 
 public class TestMappedDOMResource {
 
+    private static void log(String s) {
+	//System.err.println(s);
+    }
+
     public static final Processor PROC = new Processor(false);
 
     public static final File LIBTRACE_XML = Paths.get("src", "main", "resources", "xslt", "libtrace-xml.xsl").toFile();
@@ -63,10 +67,10 @@ public class TestMappedDOMResource {
 	//assertEquals(Optional.of(1), MappedDOMResource.getNodeTrace(doc));
 	XdmSequenceIterator<XdmNode> tree = doc.axisIterator(Axis.DESCENDANT_OR_SELF);
 	// traverse preimage and assert that there are node traces in the mapping of identifiers to preimage nodes
-	System.out.println("preimage");
+	log("preimage");
 	while (tree.hasNext()) {
 	    XdmNode node = tree.next();
-	    //System.out.println(node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
+	    //log(node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
 	    assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).isPresent());
 	    assertTrue(preimage.idToPreimageNode.containsKey(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).get()));
 	    assertEquals(node, preimage.idToPreimageNode.get(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).get()));
@@ -80,7 +84,7 @@ public class TestMappedDOMResource {
 	XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 	preimage.setImage(image);
 	// traverse image and assert that there is a trace on its nodes
-	System.out.println("image");
+	log("image");
 	XdmSequenceIterator<XdmItem> items = preimage.getImage().getContents().iterator();
 	while (items.hasNext()) {
 	    XdmItem item = items.next();
@@ -89,7 +93,7 @@ public class TestMappedDOMResource {
 		XdmSequenceIterator<XdmNode> treeIterator = tree.axisIterator(Axis.DESCENDANT_OR_SELF);
 		while (treeIterator.hasNext()) {
 		    XdmNode node = treeIterator.next();
-		    System.out.println(node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH)));
+		    log("id: " + node.getNodeKind().toString() + " " + node.getNodeName() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH)));
 		    if (node.getNodeKind().equals(XdmNodeKind.DOCUMENT)) continue;
 		    assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.TRACKING_XPATH).isPresent());
 		}
@@ -107,7 +111,7 @@ public class TestMappedDOMResource {
 	// traverse preimage and assert that we have a forward mapping of preimage nodes
 	while (tree.hasNext()) {
 	    XdmNode node = tree.next();
-	    System.out.println(node.getNodeKind().toString() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
+	    log("forward: " + node.getNodeKind().toString() + " " + String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
 	    assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).isPresent());
 	    if (!node.getNodeKind().equals(XdmNodeKind.ELEMENT)) {
 		continue;
@@ -116,5 +120,41 @@ public class TestMappedDOMResource {
 	    assertEquals(1, preimage.getCorrespondingInImage(node).size());
 	}
     }
+
+    @Test
+	public void testGesangBackwardMapping() throws ResourceException, SaxonApiException {
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
+		preimage.setImage(image);
+		assertEquals(1, image.getContents().size());
+		XdmSequenceIterator<XdmItem> seq = image.getContents().iterator();
+		while (seq.hasNext()) {
+			XdmItem item = seq.next();
+			if (item.isNode()) {
+				XdmNode nodeItem = (XdmNode) item;
+				XdmSequenceIterator<XdmNode> tree = nodeItem.axisIterator(Axis.DESCENDANT_OR_SELF);
+				// traverse preimage and assert that we have a forward mapping of preimage nodes
+				while (tree.hasNext()) {
+					XdmNode node = tree.next();
+					log("backward: " + node.getNodeKind().toString() + " "
+							+ String.valueOf(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH)));
+					assertTrue(MappedDOMResource.getNodeTrace(node, MappedDOMResource.ID_XPATH).isPresent());
+					if (node.getNodeKind().equals((XdmNodeKind.TEXT))) {
+
+					}
+					if (!node.getNodeKind().equals(XdmNodeKind.ELEMENT)) {
+						continue;
+					}
+					assertNotEquals(null, preimage.getCorrespondingInPreimage(node)); // fails: is null
+					assertTrue(preimage.getCorrespondingInPreimage(node).isPresent());
+					if (!node.getNodeName().equals("trace:text")) {
+					    //assertEquals(node.getNodeName(), preimage.getCorrespondingInPreimage(node).get().getNodeName());
+					}
+					log("backward image node: " + node.getNodeName());
+				}
+			}
+		}
+	}
 
 }
