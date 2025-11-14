@@ -20,10 +20,10 @@ import java.util.concurrent.Callable;
 	     Normalize.class,
 	     NormalizeWADM.class
 	 })
-public class SelectionEngine {
+public class App {
 
     public static void main(String... args) {
-	System.exit(new CommandLine(new SelectionEngine()).execute(args));
+	System.exit(new CommandLine(new App()).execute(args));
     }
 
 }
