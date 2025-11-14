@@ -28,7 +28,7 @@ import de.wwu.scdh.annotation.selection.ResourceException;
  * A {@link DOMResource} is a web {@link Resource} that can be parsed
  * to a DOM representation, e.g., an HTML or an XML document.
  */
-public class DOMResource implements Resource<XdmNode> {
+public class DOMResource implements S9ApiResource<XdmNode> {
 
     private final URI uri;
 
@@ -217,10 +217,9 @@ public class DOMResource implements Resource<XdmNode> {
     }
 
     /**
-     * Returns the Saxon {@link Processor} the resource was parsed
-     * with.
-     * @return a Saxon {@link Processor}
+     * {@inheritDoc}
      */
+    @Override
     public Processor getProcessor() {
 	return this.processor;
     }

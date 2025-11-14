@@ -3,28 +3,48 @@ package de.wwu.scdh.annotation.selection.resource;
 import java.net.URI;
 
 import net.sf.saxon.s9api.XdmValue;
+import net.sf.saxon.s9api.Processor;
 
-import de.wwu.scdh.annotation.selection.Resource;
-
-
-public class XdmValueResource implements Resource<XdmValue> {
+public class XdmValueResource implements S9ApiResource<XdmValue> {
 
     private final URI uri;
     private final XdmValue value;
+    private final Processor processor;
 
     public XdmValueResource(URI uri, XdmValue value) {
 	this.uri = uri;
 	this.value = value;
+	this.processor = null;
     }
 
+    public XdmValueResource(URI uri, XdmValue value, Processor processor) {
+	this.uri = uri;
+	this.value = value;
+	this.processor = processor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public XdmValue getContents() {
 	return value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public URI getUri() {
 	return uri;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Processor getProcessor() {
+	return processor;
     }
 
 }
