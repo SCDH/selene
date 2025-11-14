@@ -17,12 +17,16 @@
 
           <!-- configure test reporter for JUnit 5 -->
           <plugin>
-             <artifactId>maven-surefire-plugin</artifactId>
-             <version>2.22.2</version>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>3.5.4</version>
              <configuration>
                 <!-- set to false for debugging! -->
                 <trimStackTrace>true</trimStackTrace>
              </configuration>
+          </plugin>
+          <plugin>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <version>3.5.4</version>
           </plugin>
 
 	 <plugin>
