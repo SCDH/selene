@@ -1,15 +1,51 @@
-# Selection Engine
+# Selene Selection Engine
 
-The Selection Engine is a Swiss army knife for dealing with Standoff
-Annotations following the Web Annotation Data Model (WADM).
+Selene is the Swiss Army Knife of processing references to parts of
+resources like used in standoff annotations. The [Web Annotation Data
+Model](https://www.w3.org/TR/annotation-model/#selectors) (WADM) calls
+the mechanisms for referencing a part of a textual, pictorial
+etc. resource **selectors**. Other standards may call them
+**pointers**.
 
-- normalize selectors
-- convert serialization formats
-- rewrite XPathSelectors, which are refined by a
-  RFC5147-FragmentSelector, to an other XPath component and
-  recalculate the position component accordingly
-- map selectors referencing a target to selectors referencing a
-  derived target
+Selene offers commands for
+
+- normalizing selectors: A selection of the same part of a resource
+  may be expressed in different ways. Normalizing selectors is
+  important for storing them in a uniform way and key for testing
+  equality without applying them to the resource.
+- transforming selectors: Deriving different representations (images)
+  from a resource (preimage) is a common task, e.g. transforming an
+  XML encoded text to HTML or plain text. Selene can transform
+  selectors into the preimage to selectors into the image (forward
+  transformation of selectors) and vice versa (backward transformation
+  of selectors) with the same transformation that is used for deriving
+  a representation of the resource. Transforming selectors is
+  important for making standoff annotations interoperable when they
+  were aggregated for a particular image; it is thus a corner stone of
+  generating and processing FAIR research data.
+- converting between different selector serialization formats
+
+## Details
+
+### Normalizing Selectors
+
+### Transforming Selectors
+
+| preimage | image      | Techn.         | forward selector transformation    | backward selector transformation   |
+|:---------|------------|----------------|------------------------------------|------------------------------------|
+| XML      | XML        | arbitrary XSLT | ✅ (XML selector to XML selector)  | ✅ (XML selector to XML selector)  |
+| XML      | XHTML      | arbitrary XSLT | ✅ (XML selector to HTML selector) | ✅ (HTML selector to XML selector) |
+| XML      | HTML       | arbitrary XSLT | ❓ (XML selector to HTML selector) | ❓ (HTML selector to XML selector) |
+| XML      | plain text | arbitrary XSLT | ✅ (XML selector to text selector) | ✅ (text selector to XML selector) |
+
+Currently only selector transformation forward and backward is only
+supported alongside XSLT transformation of preimage to image. Why?
+Because XSLT is a formidable technology based on a truly declarative
+programming paradigm. And Selene's selector transformation exploits
+the possibilities to only declarative languages provide.
+
+### Converting Selector Serializations
+
 
 ## Getting Started
 
