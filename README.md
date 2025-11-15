@@ -20,8 +20,8 @@ the resource.
 
 Deriving different representations (**images**) from a resource
 (**preimage**) is a common task, e.g. transforming an XML encoded text
-to HTML or plain text. Selene can transform selectors into the
-preimage to selectors into the image (**forward** transformation of
+to HTML or plain text. Selene can transform *pointers into the
+preimage* to *pointers into the image* (**forward** transformation of
 selectors) and vice versa (**backward** transformation of selectors)
 with the same transformation that is used for deriving a
 representation of the resource. Transforming selectors is important
@@ -40,7 +40,13 @@ Currently only selector transformation forward and backward is only
 supported alongside XSLT transformation of preimage to image. Why?
 Because XSLT is a formidable technology based on a truly declarative
 programming paradigm. And Selene's selector transformation exploits
-the possibilities only a declarative language can provide.
+the possibilities only a declarative language can provide. Lern more
+about the preconditions to the XSLT in the [project's Wiki](wiki/XSLT).
+
+Yes, as you can see in the table, Selene is capable of rewriting
+pointers into plain text (inter-glyph character positions) to pointers
+into XML (XPath selectors refined by inter-glyph character positions)
+if the plain text was derived from XML with XSLT.
 
 ### Converting Selector Serializations
 
