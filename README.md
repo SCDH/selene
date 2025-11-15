@@ -7,30 +7,27 @@ the mechanisms for referencing a part of a textual, pictorial
 etc. resource **selectors**. Other standards may call them
 **pointers**.
 
-Selene offers commands for
-
-- normalizing selectors: A selection of the same part of a resource
-  may be expressed in different ways. Normalizing selectors is
-  important for storing them in a uniform way and key for testing
-  equality without applying them to the resource.
-- transforming selectors: Deriving different representations
-  (**images**) from a resource (**preimage**) is a common task,
-  e.g. transforming an XML encoded text to HTML or plain text. Selene
-  can transform selectors into the preimage to selectors into the
-  image (**forward** transformation of selectors) and vice versa
-  (**backward** transformation of selectors) with the same
-  transformation that is used for deriving a representation of the
-  resource. Transforming selectors is important for making standoff
-  annotations interoperable when they were aggregated for a particular
-  image; it is thus a corner stone of generating and processing FAIR
-  research data.
-- converting between different selector serialization formats
-
-## Details
+## Selene offers commands for
 
 ### Normalizing Selectors
 
+A selection of the same part of a resource may be expressed in
+different ways. Normalizing selectors is important for storing them in
+a uniform way and key for testing equality without applying them to
+the resource.
+
 ### Transforming Selectors
+
+Deriving different representations (**images**) from a resource
+(**preimage**) is a common task, e.g. transforming an XML encoded text
+to HTML or plain text. Selene can transform selectors into the
+preimage to selectors into the image (**forward** transformation of
+selectors) and vice versa (**backward** transformation of selectors)
+with the same transformation that is used for deriving a
+representation of the resource. Transforming selectors is important
+for making standoff annotations interoperable when they were
+aggregated for a particular image; it is thus a corner stone of
+generating and processing FAIR research data.
 
 | preimage | image      | Techn.         | forward selector transformation    | backward selector transformation   |
 |:---------|------------|----------------|------------------------------------|------------------------------------|
@@ -46,6 +43,8 @@ programming paradigm. And Selene's selector transformation exploits
 the possibilities only a declarative language can provide.
 
 ### Converting Selector Serializations
+
+Converting between different selector serialization formats.
 
 
 ## Getting Started
