@@ -29,15 +29,15 @@ for making standoff annotations interoperable when they were
 aggregated for a particular image; it is thus a corner stone of
 generating and processing FAIR research data.
 
-| preimage | image      | Techn.         | forward selector transformation    | backward selector transformation   |
-|:---------|------------|----------------|------------------------------------|------------------------------------|
-| XML      | XML        | arbitrary XSLT | ✅ (XML selector to XML selector)  | ✅ (XML selector to XML selector)  |
-| XML      | XHTML      | arbitrary XSLT | ✅ (XML selector to HTML selector) | ✅ (HTML selector to XML selector) |
-| XML      | HTML       | arbitrary XSLT | ❓ (XML selector to HTML selector) | ❓ (HTML selector to XML selector) |
-| XML      | plain text | arbitrary XSLT | ✅ (XML selector to text selector) | ✅ (text selector to XML selector) |
+| preimage | image      | Transformation Techn. | forward selector transformation    | backward selector transformation   |
+|:---------|------------|-----------------------|------------------------------------|------------------------------------|
+| XML      | XML        | arbitrary XSLT        | ✅ (XML selector to XML selector)  | ✅ (XML selector to XML selector)  |
+| XML      | XHTML      | arbitrary XSLT        | ✅ (XML selector to HTML selector) | ✅ (HTML selector to XML selector) |
+| XML      | HTML       | arbitrary XSLT        | ❓ (XML selector to HTML selector) | ❓ (HTML selector to XML selector) |
+| XML      | plain text | arbitrary XSLT        | ✅ (XML selector to text selector) | ✅ (text selector to XML selector) |
 
-Currently only selector transformation forward and backward is only
-supported alongside XSLT transformation of preimage to image. Why?
+Currently, selector transformations forward and backward are only
+supported alongside XSLT transformations of preimage to image. Why?
 Because XSLT is a formidable technology based on a truly declarative
 programming paradigm. And Selene's selector transformation exploits
 the possibilities only a declarative language can provide. Lern more
