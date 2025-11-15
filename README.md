@@ -43,7 +43,7 @@ Currently only selector transformation forward and backward is only
 supported alongside XSLT transformation of preimage to image. Why?
 Because XSLT is a formidable technology based on a truly declarative
 programming paradigm. And Selene's selector transformation exploits
-the possibilities to only declarative languages provide.
+the possibilities only a declarative language can provide.
 
 ### Converting Selector Serializations
 
