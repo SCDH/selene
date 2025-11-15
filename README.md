@@ -9,6 +9,10 @@ etc. resource **selectors**. Other standards may call them
 
 ## Selene offers commands for
 
+- [normalizing selectors](#normalizing-selectors)
+- [transforming selectors](#transforming-selectors)
+- [converting selector serializations](#converting-selector-serializations)
+
 ### Normalizing Selectors
 
 A selection of the same part of a resource may be expressed in
