@@ -7,7 +7,7 @@ the mechanisms for referencing a part of a textual, pictorial
 etc. resource **selectors**. Other standards may call them
 **pointers**.
 
-## Selene offers commands for
+Selene offers commands for
 
 - [normalizing selectors](#normalizing-selectors)
 - [transforming selectors](#transforming-selectors)
