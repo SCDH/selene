@@ -42,6 +42,20 @@ cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld -f ttl
 cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld  -x "path(root(.))" -f ntriples
 ```
 
+Building native executable:
+
+1. set up graalvm
+
+```shell
+tar -zxf graalvm.tgz
+export GRAALVM_HOMT=graalvm-...
+```
+
+2. build native executable
+
+```shell
+./mvnw package -Pnative
+```
 
 
 ## Further Reading

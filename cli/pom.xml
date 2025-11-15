@@ -21,16 +21,63 @@
        <dependency>
 	  <groupId>info.picocli</groupId>
 	  <artifactId>picocli</artifactId>
-	  <version>4.7.5</version>
+	  <version>${picocli.version}</version>
+       </dependency>
+       <dependency>
+          <groupId>info.picocli</groupId>
+          <artifactId>picocli-jansi-graalvm</artifactId>
+          <version>${picocli-jansi-graalvm.version}</version>
        </dependency>
     </dependencies>
 
     <properties>
-      <app.name>oasel</app.name>
+       <app.name>selwr</app.name>
     </properties>
 
     <build>
        <plugins>
+
+	  <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-compiler-plugin</artifactId>
+             <version>3.14.1</version>
+             <configuration>
+                <source>${maven.compiler.source}</source>
+                <target>${maven.compiler.target}</target>
+                <annotationProcessorPaths>
+                   <path>
+                      <groupId>info.picocli</groupId>
+                      <artifactId>picocli-codegen</artifactId>
+                      <version>${picocli.version}</version>
+                   </path>
+                </annotationProcessorPaths>
+                <compilerArgs>
+                   <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                </compilerArgs>
+                <fork>true</fork>
+             </configuration>
+	  </plugin>
+	  <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-jar-plugin</artifactId>
+             <version>3.4.2</version>
+             <executions>
+                <execution>
+                   <goals>
+                      <goal>jar</goal>
+                   </goals>
+                   <id>default-jar</id>
+                </execution>
+             </executions>
+             <configuration>
+                <archive>
+                   <manifest>
+                      <mainClass>de.wwu.scdh.annotation.selection.cli.SelectionEngine</mainClass>
+                      <addClasspath>true</addClasspath>
+                   </manifest>
+                </archive>
+             </configuration>
+          </plugin>
 
           <!-- configure test reporter for JUnit 5 -->
           <plugin>
@@ -174,5 +221,103 @@
 
        </plugins>
     </build>
+
+    <profiles>
+       <profile>
+          <id>native</id>
+          <build>
+             <plugins>
+                <plugin>
+                   <groupId>org.graalvm.buildtools</groupId>
+                   <artifactId>native-maven-plugin</artifactId>
+                   <version>0.11.3</version>
+                   <extensions>true</extensions>
+                   <configuration>
+                      <!--                            <imageName>${command.name}</imageName>-->
+                      <!--                            <mainClass>${mainClass}</mainClass>-->
+                      <buildArgs>
+                         <buildArg>&#45;&#45;report-unsupported-elements-at-runtime</buildArg>
+                         <buildArg>&#45;H:+AddAllCharsets</buildArg>
+                         <buildArg>&#45;&#45;enable&#45;http</buildArg>
+                         <buildArg>&#45;&#45;enable-https</buildArg>
+                         <buildArg>&#45;H:&#43;UnlockExperimentalVMOptions</buildArg>
+                         <buildArg>&#45;H:+ReportExceptionStackTraces</buildArg>
+                         <buildArg>&#45;H:ReflectionConfigurationFiles=${project.basedir}/graal.json</buildArg>
+                         <buildArg>&#45;H:IncludeResources=.*/.*jsonld$</buildArg>
+                      </buildArgs>
+                   </configuration>
+
+                   <executions>
+                      <execution>
+                         <id>build-native</id>
+                         <goals>
+                            <goal>compile-no-fork</goal>
+                         </goals>
+                         <phase>package</phase>
+                      </execution>
+                      <execution>
+                         <id>test-native</id>
+                         <goals>
+                            <goal>test</goal>
+                         </goals>
+                         <phase>test</phase>
+                      </execution>
+                   </executions>
+                </plugin>
+             </plugins>
+          </build>
+       </profile>
+       <profile>
+          <id>native-image</id>
+          <activation>
+             <activeByDefault>false</activeByDefault>
+          </activation>
+
+          <build>
+             <plugins>
+                <plugin>
+                   <groupId>org.graalvm.nativeimage</groupId>
+                   <artifactId>native-image-maven-plugin</artifactId>
+                   <version>21.2.0</version>
+                   <configuration>
+                      <imageName>${command.name}</imageName>
+                      <mainClass>${mainClass}</mainClass>
+                      <buildArgs>&#45;&#45;no-server &#45;&#45;no-fallback
+                      &#45;&#45;report-unsupported-elements-at-runtime
+                      &#45;&#45;allow-incomplete-classpath
+                      &#45;H:ReflectionConfigurationFiles=${project.basedir}/graal.json
+                      &#45;H:+ReportExceptionStackTraces
+                      &#45;H:+AddAllCharsets
+                      &#45;H:IncludeResources=.*/.*jsonld$</buildArgs>
+                   </configuration>
+                   <executions>
+                      <execution>
+                         <goals>
+                            <goal>native-image</goal>
+                         </goals>
+                         <phase>package</phase>
+                      </execution>
+                   </executions>
+                </plugin>
+                <plugin>
+                   <groupId>org.apache.maven.plugins</groupId>
+                   <artifactId>maven-shade-plugin</artifactId>
+                   <version>3.6.1</version>
+                   <executions>
+                      <execution>
+                         <phase>package</phase>
+                         <goals>
+                            <goal>shade</goal>
+                         </goals>
+                      </execution>
+                        </executions>
+                        <configuration>
+                           <finalName>${project.artifactId}-${project.version}</finalName>
+                        </configuration>
+                </plugin>
+             </plugins>
+          </build>
+       </profile>
+    </profiles>
 
 </project>
