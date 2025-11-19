@@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
 import net.sf.saxon.s9api.Processor;
 
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
@@ -23,11 +25,6 @@ import de.wwu.scdh.annotation.selection.RewriterConfig;
 abstract class AbstractNormalize {
 
     protected static final Processor PROC = new Processor();
-
-    enum DOMParser {
-	XML,
-	HTML
-    }
 
     enum Normalizer {
 	FROM_ROOT_CLARK,
@@ -50,7 +47,7 @@ abstract class AbstractNormalize {
     @Option(names = { "--parser" },
 	    paramLabel = "PARSER",
 	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    DOMParser parser = DOMParser.XML;
+    Parser parser = Parser.XML;
 
     @Option(names = { "--mode" },
 	    paramLabel = "MODE",
@@ -68,6 +65,20 @@ abstract class AbstractNormalize {
     String normalizerXPath = null;
 
 
+    protected URI resolveInCurrDir(URI resource) throws CliException {
+	if (resource.isAbsolute()) {
+	    return resource;
+	} else {
+	    try {
+		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+		return currentDir.resolve(resource);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		throw new CliException(e.getMessage());
+	    }
+	}
+    }
+
     protected DOMResource parseResource(URI resource) throws CliException {
 	// make relative paths absolute by resolving against the URI of the current working director
 	URI resourceResolved;
@@ -83,14 +94,14 @@ abstract class AbstractNormalize {
 	    }
 	}
 	// parse the resource
-	if (parser.equals(DOMParser.XML)) {
+	if (parser.equals(Parser.XML)) {
 	    try {
 		return DOMResource.fromXML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
-	} else if (parser.equals(DOMParser.HTML)) {
+	} else if (parser.equals(Parser.HTML)) {
 	    try {
 		return DOMResource.fromHTML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
