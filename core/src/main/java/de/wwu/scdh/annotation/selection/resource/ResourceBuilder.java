@@ -3,6 +3,7 @@ package de.wwu.scdh.annotation.selection.resource;
 import java.net.URI;
 import java.net.MalformedURLException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -13,8 +14,6 @@ import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltPackage;
-import net.sf.saxon.s9api.Serializer;
-import net.sf.saxon.s9api.Destination;
 
 import de.wwu.scdh.annotation.selection.Resource;
 import de.wwu.scdh.annotation.selection.ResourceException;
@@ -34,6 +33,8 @@ public class ResourceBuilder {
 	HTML
     }
 
+    public static final String TRACE_XSL = "/xslt/libtrace.xsl";
+
     private Processor processor;
 
     /**
@@ -47,7 +48,7 @@ public class ResourceBuilder {
     /**
      * Parses the contents of a given URI with a given {@link Parser}.
      */
-    protected Resource<?> parseResource(URI resource, Parser parser) throws ResourceException {
+    public Resource<?> parseResource(URI resource, Parser parser) throws ResourceException {
 	// parse the resource
 	if (parser.equals(Parser.XML)) {
 	    try {
@@ -70,11 +71,15 @@ public class ResourceBuilder {
     }
 
     /**
-     * Makes a {@link MappedDOMResource} from a preimage and an XSLT
+     * Derives a {@link MappedDOMResource} from a preimage and an XSLT
      * stylesheet.
      *
+     * @param preimage - the resource deriving from
+     * @param stylesheet - {@link URI} of the XSLT stylesheet used for deriving
+     * @param traceStream - an input stream made of the the XSLT package for adding the mapping information
+     * @param traceSystemId - the path of the XSLT package for adding the mapping information
      */
-    public static MappedDOMResource mapWithXsltTracePackage(DOMResource preimage, URI stylesheet, URI tracePkg)
+    public static MappedDOMResource mapWithXsltTracePackage(DOMResource preimage, URI stylesheet, InputStream traceStream, String traceSystemId)
 	throws ResourceException {
 	// load the XSLT stylesheet
 	StreamSource xsl;
@@ -86,15 +91,7 @@ public class ResourceBuilder {
 	    throw new ResourceException(e.getMessage());
 	}
 
-	// load the trace XSLT package
-	StreamSource traceSource;
-	try {
-	    traceSource = new StreamSource(tracePkg.toURL().openStream(), tracePkg.toString());
-	} catch (MalformedURLException e) {
-	    throw new ResourceException(e.getMessage());
-	} catch (IOException e) {
-		throw new ResourceException(e.getMessage());
-	}
+	StreamSource traceSource = new StreamSource(traceStream, traceSystemId);
 
 	try {
 	    // transform preimage to image
@@ -115,6 +112,41 @@ public class ResourceBuilder {
 	    throw new ResourceException(e.getMessage());
 	}
     }
-    
+
+
+    /**
+     * Makes a {@link MappedDOMResource} from a preimage and an XSLT
+     * stylesheet.
+     *
+     * @param preimage - the resource deriving from
+     * @param stylesheet - {@link URI} of the XSLT stylesheet used for deriving
+     * @param tracePkg - {@link URI} of the the XSLT package for adding the mapping information
+     */
+    public static MappedDOMResource mapWithXsltTracePackage(DOMResource preimage, URI stylesheet, URI tracePkg)
+	throws ResourceException {
+	// load the trace XSLT package
+	try {
+	    InputStream traceStream = tracePkg.toURL().openStream();
+	    return ResourceBuilder.mapWithXsltTracePackage(preimage, stylesheet, traceStream, tracePkg.toString());
+	} catch (MalformedURLException e) {
+	    throw new ResourceException(e.getMessage());
+	} catch (IOException e) {
+	    throw new ResourceException(e.getMessage());
+	}
+    }
+
+    /**
+     * Makes a {@link MappedDOMResource} from a preimage and an XSLT
+     * stylesheet.
+     *
+     * This method uses the internal XSLT package for adding mapping information.
+     *
+     * @param preimage - the resource deriving from
+     * @param stylesheet - {@link URI} of the XSLT stylesheet used for deriving
+     */
+    public static MappedDOMResource mapWithXsltTracePackage(DOMResource preimage, URI stylesheet)
+	throws ResourceException {
+	return ResourceBuilder.mapWithXsltTracePackage(preimage, stylesheet, ResourceBuilder.class.getResourceAsStream(TRACE_XSL), TRACE_XSL);
+    }
 
 }
