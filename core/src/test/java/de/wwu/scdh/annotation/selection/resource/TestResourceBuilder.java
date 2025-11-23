@@ -1,8 +1,5 @@
 package de.wwu.scdh.annotation.selection.resource;
 
-import java.io.IOException;
-import java.util.Optional;
-
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,11 +9,6 @@ import java.nio.file.Paths;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XsltCompiler;
-import net.sf.saxon.s9api.Xslt30Transformer;
-import net.sf.saxon.s9api.XsltExecutable;
-import net.sf.saxon.s9api.XdmValue;
-import net.sf.saxon.s9api.XsltPackage;
 
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
@@ -25,7 +17,6 @@ import net.sf.saxon.s9api.XdmSequenceIterator;
 import net.sf.saxon.s9api.Axis;
 
 import de.wwu.scdh.annotation.selection.*;
-import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 
 public class TestResourceBuilder {
 
@@ -35,21 +26,13 @@ public class TestResourceBuilder {
 
     public static final Processor PROC = new Processor(false);
 
-    public static final File LIBTRACE_XML = Paths.get("src", "main", "resources", "xslt", "libtrace-xml.xsl").toFile();
+    public static final URI LIBTRACE_XML = Paths.get("src", "main", "resources", "xslt", "libtrace-xml.xsl").toFile().toURI();
 
     public static final File TEST_DIR = Paths.get("..", "test").toFile();
 
     public static final URI GESANG_XML  = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
     public static final URI ID_XSL = Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile().toURI();
-
-    // @Disabled
-    // @Test
-    // public void testGesantParsedWithSAX() throws IOException, SaxonApiException {
-    // 	ResourceBuilder resourceBuilder = new ResourceBuilder(PROC);
-    // 	Resource<?> source = resourceBuilder.parseResource(GESANG_XML, ResourceBuilder.Parser.XML);
-    // 	assertThrows(ResourceException.class, () -> new MappedDOMResource(source));
-    // }
 
     @Test
     public void testGesangParsedWithXerces() throws ResourceException {
