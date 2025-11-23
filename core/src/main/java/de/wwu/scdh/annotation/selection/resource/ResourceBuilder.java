@@ -22,10 +22,15 @@ import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.Resource;
 import de.wwu.scdh.annotation.selection.ResourceException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A {@link ResourceBuilder} makes {@link Resource} from a URI.
  */
 public class ResourceBuilder {
+
+    private static Logger Log = LoggerFactory.getLogger(ResourceBuilder.class);
 
     /**
      * There are some resource parsers available, that this class
@@ -111,9 +116,7 @@ public class ResourceBuilder {
 	    if (imagePointClass != null) {
 		pointClass = imagePointClass;
 	    } else {
-		// get default output method from the stylesheet and set point class from it
-		String outputMethod = transformer.newSerializer().getOutputProperty(Serializer.Property.METHOD);
-		pointClass = ResourceBuilder.pointerClassFromOutputMethod(outputMethod);
+		pointClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
 	    }
 
 	    // transform to XdmValue, which keeps the nodes from the source
@@ -168,6 +171,11 @@ public class ResourceBuilder {
     }
 
 
+    /**
+     * Returns the point class for the output method, i.e. the
+     * serialization method. In XSLT, the output method is set by
+     * <code>xsl:output/@method</code>.
+     */
     public static Class<? extends Point> pointerClassFromOutputMethod(String method) throws ResourceException {
 	switch (method) {
 	case "text":
@@ -177,7 +185,24 @@ public class ResourceBuilder {
 	case "xml":
 	    return XPathRefinedByRFC5147CharScheme.class;
 	default:
+	    Log.error("no point for output method {}", method);
 	    throw new ResourceException("unsupported output method" + method);
+	}
+    }
+
+    /**
+     * 	Gets the default output method from the stylesheet and returns
+     * 	the point class for it.  The output method is set by
+     * 	<code>xsl:output/@method</code> or is <code>xml</code> if this
+     * 	declaration is missing.
+     */
+    public static Class<? extends Point> pointerClassFromOutputMethod(Xslt30Transformer transformer) throws ResourceException {
+	String outputMethod = transformer.newSerializer().getOutputProperty(Serializer.Property.METHOD);
+	// method may be null, when the stylesheet does not declare xsl:output/@method
+	if (outputMethod == null) {
+	    return ResourceBuilder.pointerClassFromOutputMethod("xml");
+	} else {
+	    return ResourceBuilder.pointerClassFromOutputMethod(outputMethod);
 	}
     }
 
