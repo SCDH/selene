@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URI;
 import org.apache.commons.lang3.tuple.Pair;
 import javax.xml.transform.stream.StreamSource;
+import java.util.List;
+import java.util.Iterator;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -21,7 +23,20 @@ import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
+import de.wwu.scdh.annotation.selection.RewriterFactory;
+import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
+import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
+import de.wwu.scdh.annotation.selection.Rewriter;
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.Component;
+import de.wwu.scdh.annotation.selection.component.XPathComponent;
+import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
+import de.wwu.scdh.annotation.selection.NoSuchComponentException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Command(name = "transforms",
@@ -29,6 +44,7 @@ import de.wwu.scdh.annotation.selection.RewriterConfig;
 	 description = "transforms a *s*imple pair of XPath selector and RFC5147 character scheme selector along with a XSL transformation")
 public class TransformSimple extends AbstractNormalize implements Callable<Integer> {
 
+    private static Logger log = LoggerFactory.getLogger(TransformSimple.class);
 
     @Parameters(paramLabel = "RESOURCE",
 		description = "The file (preimage) the selector selects from")
@@ -45,6 +61,11 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	    paramLabel = "POSITION",
 	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
     int character;
+
+    @Option(names = { "-b", "--backward" },
+	    required = false,
+	    description = "Switch for transforming the pointer back.")
+    boolean backward = false;
 
     @Option(names = { "--xsl" },
 	    required = true,
@@ -78,53 +99,76 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	Resource<?> parsed = resourceBuilder.parseResource(resolveInCurrDir(resource), parser);
 	DOMResource dom = null;
 	if (!(parsed instanceof DOMResource)) {
-	    System.err.printf("resources cannot be mapped with XSLT");
+	    log.error("resources cannot be mapped with XSLT");
 	    return 2;
 	}
 	dom = (DOMResource) parsed;
-	System.err.printf("parsed %s\n", resource.toString());
+	log.info("parsed {}", resource.toString());
 
 	// derive the image
 	URI xslResolved = resolveInCurrDir(xsl);
-	MappedDOMResource preimage = ResourceBuilder.mapWithXsltTracePackage(dom, xslResolved);
-	System.err.printf("transformed with %s\n", xsl.toString());
+	MappedDOMResource preimage = ResourceBuilder.mapWithXsltTracePackage(dom, xslResolved, null);
+	log.info("transformed with {}", xsl.toString());
 	//System.err.printf(preimage.getImage().getContents().toString());
 
-	System.exit(0);
-
-
-	System.err.printf("normalizing %s refined by char=%s\n", xpath, character);
-
-	XPathNormalizerWithXPath xpathNormalizer;
-	if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
-	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 2;
-	    }
-	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
-	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 2;
-	    }
+	// make the point from the given cli arguments
+	Point point;
+	if (backward && RFC5147CharScheme.class.isAssignableFrom(preimage.getImage().getPointClass())) {
+	    point = new RFC5147CharScheme(character);
 	} else {
-	    System.err.printf("unknown normalizer %s\n", normalizer.name());
-	    return 2;
+	    point = new XPathRefinedByRFC5147CharScheme(xpath, character);
 	}
+	log.info("mapping {}, {}", point.getClass().getName(), TransformSimple.pointToString(point));
+
+	// get the rewriter
+	RewriterFactory factory;
+	Rewriter rewriter;
+	if (backward) {
+	    factory = new BackwardMappingFactory();
+	    rewriter = factory.getRewriter
+		(preimage.getImage().getPointClass(),
+		 XPathRefinedByRFC5147CharScheme.class,
+		 getRewriterConfig());
+	} else {
+	    factory = new ForwardMappingFactory();
+	    rewriter = factory.getRewriter
+		(XPathRefinedByRFC5147CharScheme.class,
+		 preimage.getImage().getPointClass(),
+		 getRewriterConfig());
+	}
+	log.info("rewriter: {}", rewriter.getClass());
+
+	log.info("config xpath {}", getRewriterConfig().getXPath());
 	try {
-	    XPathRefinedByRFC5147CharScheme input, normalized;
-	    input = new XPathRefinedByRFC5147CharScheme(xpath, character);
-	    normalized = xpathNormalizer.rewrite(dom, input, getRewriterConfig()).get(0);
-	    System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
+	    List<Point> mapped = rewriter.rewrite(preimage, point, getRewriterConfig());
+	    log.info("mapped to {} points", mapped.size());
+	    for (Point p : mapped) {
+		System.out.println(TransformSimple.pointToString(p));
+	    }
 	} catch (Exception e) {
-	    System.err.println(e.getMessage());
+	    log.error(e.getMessage());
 	    return 3;
 	}
 	return 0;
     }
+
+    public static <P extends Point> String pointToString(P point) {
+	String rc = "";
+	try {
+	    if (point instanceof XPathRefinedByRFC5147CharScheme) {
+		rc += String.valueOf(point.getComponent(XPathComponent.class));
+		rc += ";char=";
+		rc += String.valueOf(point.getComponent(RFC5147CharComponent.class));
+	    } else if (point instanceof RFC5147CharScheme) {
+		rc += "char=";
+		rc += String.valueOf(point.getComponent(RFC5147CharComponent.class));
+	    }
+	} catch (NoSuchComponentException e) {
+	    log.error(e.getMessage());
+	}
+	return rc;
+    }
+	    
 
     public static void main(String... args) {
 	System.exit(new CommandLine(new Normalize()).execute(args));

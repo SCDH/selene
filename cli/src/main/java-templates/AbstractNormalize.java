@@ -31,6 +31,11 @@ abstract class AbstractNormalize {
 	FROM_DEEPEST_ID_CLARK
     }
 
+    enum Direction {
+	FORWARD,
+	BACKWARD
+    }
+
     public class CliException extends Exception {
 	public CliException(String msg) {
 	    super(msg);
