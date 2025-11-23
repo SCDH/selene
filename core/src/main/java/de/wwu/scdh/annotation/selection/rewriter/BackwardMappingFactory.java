@@ -25,7 +25,7 @@ public class BackwardMappingFactory implements RewriterFactory {
 	RW rc;
 	if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1) && XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
 	    rc = (RW) new XPathRefinedByRFC5147CharSchemeBackwardMapper(config.getXPath());
-	} else if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1) && RFC5147CharScheme.class.isAssignableFrom(point2)) {
+	} else if (RFC5147CharScheme.class.isAssignableFrom(point1) && XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
 	    rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(config.getXPath());
 	} else {
 	    Log.error("no backward mapping for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
