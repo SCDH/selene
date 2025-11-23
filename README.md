@@ -106,6 +106,12 @@ export GRAALVM_HOMT=graalvm-...
 ```
 
 
+```shell
+cli/target/bin/selwr transforms --xpath='//*:head[1]/text()[1]' --character=5 --xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml --normalizer-xpath="path(.)" --config=saxon-config.xml
+```
+
+
+
 ## Further Reading
 
 - [JSON-LD compact in RIOT](https://github.com/apache/jena/issues/2031)
