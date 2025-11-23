@@ -18,7 +18,8 @@ import java.util.concurrent.Callable;
 	 version = "${revision}${changelist}",
 	 subcommands = {
 	     Normalize.class,
-	     NormalizeWADM.class
+	     NormalizeWADM.class,
+	     TransformSimple.class
 	 })
 public class SelectionEngine {
 
