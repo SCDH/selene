@@ -3,6 +3,7 @@ package de.wwu.scdh.annotation.selection.cli;
 import java.io.File;
 import java.net.URI;
 import org.apache.commons.lang3.tuple.Pair;
+import javax.xml.transform.stream.StreamSource;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -13,6 +14,9 @@ import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 
+import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
@@ -42,14 +46,14 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
     int character;
 
-    @Option(names = { "--xsl:" },
+    @Option(names = { "--xsl" },
 	    required = true,
 	    paramLabel = "FILE",
 	    description = "the XSLT stylesheet")
     URI xsl;
 
     @Option(names = { "-s", "--config" },
-	    required = true,
+	    required = false,
 	    paramLabel = "FILE",
 	    description = "the Saxon configuration file for the XSL  transformations")
     URI saxonConfig;
@@ -58,12 +62,35 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 
     @Override
     public Integer call() throws Exception {
-	// make relative paths absolute by resolving against the URI of the current working director
-	DOMResource dom = parseResource(resource);
+
+	// construct a Saxon Processor based on the config file
+	Processor processor;
+	if (saxonConfig == null) {
+		processor = new Processor();
+	} else {
+	    URI saxonConfigResolved = resolveInCurrDir(saxonConfig);
+	    StreamSource configStream = new StreamSource(saxonConfigResolved.toURL().openStream());
+	    processor = new Processor(configStream);
+	}
+
+	// build the resource
+	ResourceBuilder resourceBuilder = new ResourceBuilder(processor);
+	Resource<?> parsed = resourceBuilder.parseResource(resolveInCurrDir(resource), parser);
+	DOMResource dom = null;
+	if (!(parsed instanceof DOMResource)) {
+	    System.err.printf("resources cannot be mapped with XSLT");
+	    return 2;
+	}
+	dom = (DOMResource) parsed;
 	System.err.printf("parsed %s\n", resource.toString());
 
-	URI saxonConfigResolved = resolveInCurrDir(saxonConfig);
+	// derive the image
 	URI xslResolved = resolveInCurrDir(xsl);
+	MappedDOMResource preimage = ResourceBuilder.mapWithXsltTracePackage(dom, xslResolved);
+	System.err.printf("transformed with %s\n", xsl.toString());
+	//System.err.printf(preimage.getImage().getContents().toString());
+
+	System.exit(0);
 
 
 	System.err.printf("normalizing %s refined by char=%s\n", xpath, character);
