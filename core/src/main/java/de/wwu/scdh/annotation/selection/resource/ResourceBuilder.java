@@ -42,7 +42,7 @@ public class ResourceBuilder {
 	HTML
     }
 
-    public static final String TRACE_XSL = "/xslt/libtrace.xsl";
+    public static final String TRACE_XSL = "/xslt/libtrace-xml.xsl";
 
     private Processor processor;
 
