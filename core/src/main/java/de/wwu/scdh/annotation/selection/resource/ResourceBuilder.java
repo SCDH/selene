@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ResourceBuilder {
 
-    private static Logger Log = LoggerFactory.getLogger(ResourceBuilder.class);
+    private static Logger log = LoggerFactory.getLogger(ResourceBuilder.class);
 
     /**
      * There are some resource parsers available, that this class
@@ -185,7 +185,7 @@ public class ResourceBuilder {
 	case "xml":
 	    return XPathRefinedByRFC5147CharScheme.class;
 	default:
-	    Log.error("no point for output method {}", method);
+	    log.error("no point for output method {}", method);
 	    throw new ResourceException("unsupported output method" + method);
 	}
     }
