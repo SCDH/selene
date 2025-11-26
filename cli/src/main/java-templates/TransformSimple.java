@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.xml.transform.stream.StreamSource;
 import java.util.List;
 import java.util.Iterator;
+import java.io.InputStream;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -90,8 +91,11 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 		processor = new Processor();
 	} else {
 	    URI saxonConfigResolved = resolveInCurrDir(saxonConfig);
-	    StreamSource configStream = new StreamSource(saxonConfigResolved.toURL().openStream());
-	    processor = new Processor(configStream);
+	    log.debug("loading saxon config file {}", saxonConfigResolved.toString());
+	    InputStream configStream = saxonConfigResolved.toURL().openStream();
+	    StreamSource configSource = new StreamSource(configStream);
+	    processor = ResourceBuilder.processorFromModifiedConfig(configSource);
+	    log.debug("modified the Saxon config file");
 	}
 
 	// build the resource
@@ -103,12 +107,12 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	    return 2;
 	}
 	dom = (DOMResource) parsed;
-	log.info("parsed {}", resource.toString());
+	log.debug("parsed {}", resource.toString());
 
 	// derive the image
 	URI xslResolved = resolveInCurrDir(xsl);
 	MappedDOMResource preimage = ResourceBuilder.mapWithXsltTracePackage(dom, xslResolved, null);
-	log.info("transformed with {}", xsl.toString());
+	log.debug("transformed with {}", xsl.toString());
 	//System.err.printf(preimage.getImage().getContents().toString());
 
 	// make the point from the given cli arguments
@@ -118,7 +122,7 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	} else {
 	    point = new XPathRefinedByRFC5147CharScheme(xpath, character);
 	}
-	log.info("mapping {}, {}", point.getClass().getName(), TransformSimple.pointToString(point));
+	log.debug("mapping {}, {}", point.getClass().getName(), TransformSimple.pointToString(point));
 
 	// get the rewriter
 	RewriterFactory factory;
@@ -136,9 +140,9 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 		 preimage.getImage().getPointClass(),
 		 getRewriterConfig());
 	}
-	log.info("rewriter: {}", rewriter.getClass());
+	log.debug("rewriter: {}", rewriter.getClass());
 
-	log.info("config xpath {}", getRewriterConfig().getXPath());
+	log.debug("config xpath {}", getRewriterConfig().getXPath());
 	try {
 	    List<Point> mapped = rewriter.rewrite(preimage, point, getRewriterConfig());
 	    log.info("mapped to {} points", mapped.size());

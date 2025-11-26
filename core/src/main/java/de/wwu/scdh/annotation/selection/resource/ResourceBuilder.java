@@ -4,7 +4,11 @@ import java.net.URI;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.s9api.Processor;
@@ -15,6 +19,7 @@ import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltPackage;
 import net.sf.saxon.s9api.Serializer;
+import net.sf.saxon.s9api.QName;
 
 import de.wwu.scdh.annotation.selection.Point;
 import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
@@ -42,7 +47,13 @@ public class ResourceBuilder {
 	HTML
     }
 
+    public static final String MODIFY_CONFIG_XSL = "/xslt/modify-config.xsl";
+
     public static final String TRACE_XSL = "/xslt/libtrace-xml.xsl";
+
+    public static final String TRACE_PKG_NAME = "http://wwu.de/scdh/selection-engine/node-tracing";
+
+    public static final String TRACE_PKG_PARAM = "trace-location";
 
     private Processor processor;
 
@@ -81,7 +92,16 @@ public class ResourceBuilder {
 
     /**
      * Derives a {@link MappedDOMResource} from a preimage and an XSLT
-     * stylesheet.
+     * stylesheet.<P>
+     *
+     * Note: When a saxon config file with XSLT packages is used (by
+     * reading it when constructing the {@link Processor}), only
+     * compiling the right XSLT tracing package is not
+     * enough. Transforming the config file and changing the
+     * <code>resourceLocation</code> is required.<P>
+     *
+     * {@link ResourceException.processorFromModifiedConfig(Source)}
+     * has a solution.
      *
      * @param preimage - the resource deriving from
      * @param stylesheet - {@link URI} of the XSLT stylesheet used for deriving
@@ -108,9 +128,13 @@ public class ResourceBuilder {
 	    Processor proc = preimage.getProcessor();
 	    XsltCompiler compiler = proc.newXsltCompiler();
 	    XsltPackage tracePackage = compiler.compilePackage(traceSource);
-	    compiler.importPackage(tracePackage, null, null);
+	    compiler.importPackage(tracePackage, TRACE_PKG_NAME, "1.0.0");
+	    proc = compiler.getProcessor();
+	    log.debug("trace package URI: {}", ResourceBuilder.class.getResource(TRACE_XSL));
+	    log.debug("trace package imported");
 	    XsltExecutable executable = compiler.compile(xsl);
 	    Xslt30Transformer transformer = executable.load30();
+
 
 	    Class<? extends Point> pointClass;
 	    if (imagePointClass != null) {
@@ -203,6 +227,73 @@ public class ResourceBuilder {
 	    return ResourceBuilder.pointerClassFromOutputMethod("xml");
 	} else {
 	    return ResourceBuilder.pointerClassFromOutputMethod(outputMethod);
+	}
+    }
+
+    /**
+     * Returns a {@link Processor} made with the Saxon config given in
+     * as the second argument after modifying it following the
+     * internal requirements for the tracing package.
+     *
+     * @param config - a saxon config file as {@link Source}
+     */
+    public static Processor processorFromModifiedConfig(Source config)
+	throws ResourceException {
+	try {
+	    Processor processor = new Processor();
+	    XsltCompiler compiler = processor.newXsltCompiler();
+	    compiler.setParameter(new QName(TRACE_PKG_PARAM), XdmValue.makeValue(ResourceBuilder.class.getResource(TRACE_XSL).toURI()));
+	    StreamSource source = new StreamSource(ResourceBuilder.class.getResourceAsStream(MODIFY_CONFIG_XSL));
+	    XsltExecutable executable = compiler.compile(source);
+	    Xslt30Transformer transformer = executable.load30();
+	    // transform the config file and make the processor
+
+	    // approach plug byte array streams
+	    ByteArrayOutputStream modifiedStream = new ByteArrayOutputStream();
+	    Serializer serializer = transformer.newSerializer(modifiedStream);
+	    transformer.transform(config, serializer);
+	    log.debug("modified Saxon config file: {}", modifiedStream.toByteArray());
+	    InputStream modified = new ByteArrayInputStream(modifiedStream.toByteArray());
+	    return new Processor(new StreamSource(modified));
+
+	    // // piped stream approach: java.io.IOException: Pipe broken
+	    // Source modifiedSource;
+	    // PipedInputStream in = new PipedInputStream();
+	    // PipedOutputStream out = new PipedOutputStream(in);
+	    // modifiedSource = new StreamSource(in);
+	    // new Thread(new Runnable() {
+	    // 	    public void run() {
+	    // 		try {
+	    // 		    Serializer serializer = transformer.newSerializer(out);
+	    // 		    transformer.transform(config, serializer);
+	    // 		} catch (SaxonApiException e) {
+	    // 		    log.error("{}", e);
+	    // 		}
+	    // 	    }
+	    // 	}).start();
+	    // log.info("{}", in.readAllBytes());
+	    // return new Processor(modifiedSource);
+
+	    // // tempfile approach: Problem: resolving relative paths
+	    // Path tempPath = Files.createTempFile("modified", ".xml");
+	    // File tempFile = tempPath.toFile();
+	    // Serializer serializer = transformer.newSerializer(tempFile);
+	    // transformer.transform(config, serializer);
+	    // log.info("modified config {}", Files.readString(tempPath));
+	    //return new Processor(new StreamSource(tempFile));
+
+	} catch (SaxonApiException e) {
+	    log.error("failed to modify Saxon config file {} with {}",
+		      config.getSystemId(),
+		      ResourceBuilder.class.getResource(MODIFY_CONFIG_XSL));
+	    throw new ResourceException(e);
+	} catch (URISyntaxException e) {
+	    log.error("failed to load XSLT for modifying Saxon config {}",
+		      ResourceBuilder.class.getResource(MODIFY_CONFIG_XSL));
+	    throw new ResourceException(e);
+	// } catch (IOException e) {
+	//     log.error("failed to transform for Saxon config");
+	//     throw new ResourceException(e);
 	}
     }
 
