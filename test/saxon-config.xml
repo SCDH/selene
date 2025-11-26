@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This is a Saxon configuration file.
+
+This file is to be used from .., and thus the relative paths are based on ..!
+
+cli/target/bin/selwr transforms \
+     -/-xpath='//*:head[1]/text()[1]' \
+     -/-character=5 \
+     -/-xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml \
+     -/-normalizer-xpath="path(.)" \
+     -/-config=test/saxon-config.xml
+
+-->
+<configuration edition="HE" xmlns="http://saxon.sf.net/ns/configuration">
+
+     <xsltPackages>
+          <package name="http://example.org/toc" version="1.0" sourceLocation="test/toc.xsl"/>
+          <package name="http://wwu.de/scdh/selection-engine/node-tracing" version="1.0.0"
+               sourceLocation="core/src/main/resources/xslt/libtrace.xsl"/>
+     </xsltPackages>
+
+</configuration>
