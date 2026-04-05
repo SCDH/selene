@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.rewriter;
 
 import java.io.IOException;
 import org.junit.jupiter.api.*;
@@ -18,7 +18,8 @@ import net.sf.saxon.s9api.XPathSelector;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
+import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
 
 
 /**

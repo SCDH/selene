@@ -18,8 +18,9 @@ import net.sf.saxon.s9api.SaxonApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+
 
 /**
  * Normalize an <code>oa:Target</code>.<P>
@@ -37,18 +38,21 @@ public class NormalizeTarget implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeTarget.class);
 
-    protected final Optional<DOMResource> dom;
+    protected final Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom;
     protected Model model;
-    protected final XPathNormalizer normalizer;
+	protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = Optional.empty();
 
-    public NormalizeTarget(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
+    public NormalizeTarget(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
 	this.model = model;
-	this.normalizer = normalizer;
+	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
 	this.processor = processor;
+	this.normalizerConfig = normalizerConfig;
+
     }
 
     public Optional<Exception> getError() {
@@ -90,7 +94,7 @@ public class NormalizeTarget implements Consumer<Resource> {
 	// a Source was passed into the constructor or we get a
 	// Source from the target; if neither is the case, it
 	// would lack of information in the model
-	DOMResource source;
+	de.wwu.scdh.annotation.selection.Resource<?> source;
 	// Note: We are using the pattern
 	// ..listProperties(...).toSet().isEmpty() because toSet()
 	// *exhaustively* consumes the iterator returned by
@@ -122,7 +126,7 @@ public class NormalizeTarget implements Consumer<Resource> {
 		    return !model.listStatements(selector, RDF.type, OA.RangeSelector).toSet().isEmpty();
 		})
 	    // exceptions are not propagated from selector normalizations
-	    .forEach(new NormalizeRangeSelector(processor, normalizer, model, source));
+	    .forEach(new NormalizeRangeSelector(processor, rewriterFactory, normalizerConfig, model, source));
 
 	// TODO: normalize other selectors
     }

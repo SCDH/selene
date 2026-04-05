@@ -3,8 +3,6 @@ package de.wwu.scdh.annotation.selection.wadm;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.OA;
@@ -21,10 +19,10 @@ import net.sf.saxon.s9api.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizer.Mode;
-import de.wwu.scdh.annotation.selection.SelectorException;
+import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+
 
 /**
  * This class can be used to normalize the model of all WADM
@@ -45,20 +43,33 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
     public static final String RFC5147 = "http://tools.ietf.org/rfc/rfc5147";
 
 
-    protected final DOMResource dom;
+    protected DOMResource dom;
     protected Model model;
-    protected final XPathNormalizer normalizer;
+    protected final RewriterFactory rewriterFactory;
+    protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> rewriter = null;
     protected final Processor processor;
-    protected final Mode normalizerMode;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, XPathNormalizer normalizer, Model model, DOMResource dom, XPathNormalizer.Mode mode) {
+    public NormalizeXPathSelectorRefinedByRFC5147CharScheme(Processor processor, RewriterFactory rewriterFactory, Model model, de.wwu.scdh.annotation.selection.Resource<?> dom, RewriterConfig normalizerConfig) {
 	this.model = model;
-	this.normalizer = normalizer;
-	this.dom = dom;
+	this.rewriterFactory = rewriterFactory;
+	try {
+	    this.dom = (DOMResource) dom;
+	} catch (Exception e) {
+	    LOG.error("failed to cast resource to DOM resource");
+	}
+	LOG.debug("dom present");
 	this.processor = processor;
-	this.normalizerMode = mode;
+	this.normalizerConfig = normalizerConfig;
+	try {
+	    this.rewriter = rewriterFactory.getRewriter(XPathRefinedByRFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class, normalizerConfig);
+	    LOG.debug("rewriting an oa:XPathSelector which is refined by RFC5147 character scheme with rewriter {}", rewriter.getClass().getCanonicalName());
+	} catch (ConfigurationException e) {
+	    LOG.error(e.getMessage());
+	    error = Optional.of(e);
+	}
     }
 
     /**
@@ -134,17 +145,22 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 
 	// 3. normalize the components
 	LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
-	Pair<String, Integer> normalized = normalizer.normalizeXPathRefinedByCharScheme(dom, xpath, startPos, normalizerMode);
-	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
-	LOG.debug("normalized to {};{}", normalized.getLeft(), normalized.getRight());
+	XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
+	for (XPathRefinedByRFC5147CharScheme p : rewriter.rewrite(dom, point, normalizerConfig)) {
+	    if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
+		XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
+		LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
+		
+		// 4. write the normalized values back to the model
+		model.remove(xpathStatement);
+		Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
+		model.add(xpathStmt);
+		model.remove(refinementValueStatement);
+		Statement charStatement = model.createLiteralStatement(refinement, RDF.value,
+								       "char=" + String.valueOf(normalized.getChar()));
+		model.add(charStatement);
+	    }
+	}
 
-	// 4. write the normalized values back to the model
-	model.remove(xpathStatement);
-	Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getLeft());
-	model.add(xpathStmt);
-	model.remove(refinementValueStatement);
-	Statement charStatement = model.createLiteralStatement(refinement, RDF.value,
-							       "char=" + String.valueOf(normalized.getRight()));
-	model.add(charStatement);
     }
 }

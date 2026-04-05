@@ -13,23 +13,27 @@ import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
-
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
+import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 abstract class AbstractNormalize {
 
     protected static final Processor PROC = new Processor();
 
-    enum DOMParser {
-	XML,
-	HTML
-    }
-
     enum Normalizer {
 	FROM_ROOT_CLARK,
 	FROM_DEEPEST_ID_CLARK
+    }
+
+    enum Direction {
+	FORWARD,
+	BACKWARD
     }
 
     public class CliException extends Exception {
@@ -48,12 +52,12 @@ abstract class AbstractNormalize {
     @Option(names = { "--parser" },
 	    paramLabel = "PARSER",
 	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    DOMParser parser = DOMParser.XML;
+    Parser parser = Parser.XML;
 
     @Option(names = { "--mode" },
 	    paramLabel = "MODE",
 	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    XPathNormalizer.Mode mode = XPathNormalizer.Mode.DEEP_NODE_STOP_AT_END;
+    Mode mode = Mode.DEEP_NODE_STOP_AT_END;
 
     @Option(names = { "-n", "--normalizer" },
 	    paramLabel = "NORMALIZER",
@@ -65,6 +69,20 @@ abstract class AbstractNormalize {
 	    description = "The normalizer for the XPath part of the selector in the second normalization step. This will override NORMALIZER.")
     String normalizerXPath = null;
 
+
+    protected URI resolveInCurrDir(URI resource) throws CliException {
+	if (resource.isAbsolute()) {
+	    return resource;
+	} else {
+	    try {
+		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+		return currentDir.resolve(resource);
+	    } catch (Exception e) {
+		System.err.println(e.getMessage());
+		throw new CliException(e.getMessage());
+	    }
+	}
+    }
 
     protected DOMResource parseResource(URI resource) throws CliException {
 	// make relative paths absolute by resolving against the URI of the current working director
@@ -81,14 +99,14 @@ abstract class AbstractNormalize {
 	    }
 	}
 	// parse the resource
-	if (parser.equals(DOMParser.XML)) {
+	if (parser.equals(Parser.XML)) {
 	    try {
 		return DOMResource.fromXML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
-	} else if (parser.equals(DOMParser.HTML)) {
+	} else if (parser.equals(Parser.HTML)) {
 	    try {
 		return DOMResource.fromHTML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
@@ -101,24 +119,24 @@ abstract class AbstractNormalize {
 	}
     }
 
-    protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
+    protected String getNormalizerXPath() throws CliException {
 	if (normalizerXPath != null) {
 	    try {
-		return new XPathNormalizerWithXPath(normalizerXPath);
+		return normalizerXPath;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
 	} else if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
 	    try {
-		return new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		return XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
 	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
 	    try {
-		return new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+		return XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH;
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
@@ -127,6 +145,18 @@ abstract class AbstractNormalize {
 	    System.err.printf("unknown normalizer %s\n", normalizer.name());
 	    throw new CliException("unknown normalizer " + normalizer.name());
 	}
+    }
+
+    protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
+	return new XPathNormalizerWithXPath(getNormalizerXPath());
+    }
+
+    protected NormalizerFactory getNormalizerFactory() {
+	return new NormalizerFactory();
+    }
+
+    protected RewriterConfig getRewriterConfig() throws CliException {
+	return new RewriterConfig(mode, false, getNormalizerXPath());
     }
 
 }

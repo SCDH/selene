@@ -13,14 +13,17 @@ import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
-@Command(name = "simple",
+@Command(name = "normalizes",
 	 mixinStandardHelpOptions = true,
-	 description = "normalize a simple pair of XPath selector and RFC5147 character scheme selector")
+	 description = "normalize a *s*imple pair of XPath selector and RFC5147 character scheme selector")
 public class Normalize extends AbstractNormalize implements Callable<Integer> {
 
 
@@ -58,14 +61,14 @@ public class Normalize extends AbstractNormalize implements Callable<Integer> {
 	}
 	// parse the resource
 	DOMResource dom;
-	if (parser.equals(DOMParser.XML)) {
+	if (parser.equals(Parser.XML)) {
 	    try {
 		dom = DOMResource.fromXML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 1;
 	    }
-	} else if (parser.equals(DOMParser.HTML)) {
+	} else if (parser.equals(Parser.HTML)) {
 	    try {
 		dom = DOMResource.fromHTML(resourceResolved, null, PROC);
 	    } catch (Exception e) {
@@ -100,8 +103,10 @@ public class Normalize extends AbstractNormalize implements Callable<Integer> {
 	    return 2;
 	}
 	try {
-	    Pair<String, Integer> normalized = xpathNormalizer.normalizeXPathRefinedByCharScheme(dom, xpath, character, mode);
-	    System.out.printf("%s,%s\n", normalized.getLeft(), normalized.getRight());
+	    XPathRefinedByRFC5147CharScheme input, normalized;
+	    input = new XPathRefinedByRFC5147CharScheme(xpath, character);
+	    normalized = xpathNormalizer.rewrite(dom, input, getRewriterConfig()).get(0);
+	    System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 3;

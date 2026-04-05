@@ -1,9 +1,11 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.resource;
 
 import java.net.URI;
 import java.io.InputStream;
 import java.io.IOException;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import javax.xml.transform.sax.SAXSource;
@@ -18,17 +20,19 @@ import net.sf.saxon.s9api.SaxonApiException;
 
 import nu.validator.htmlparser.sax.HtmlParser;
 
+import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.ResourceException;
+
+
 /**
  * A {@link DOMResource} is a web {@link Resource} that can be parsed
  * to a DOM representation, e.g., an HTML or an XML document.
  */
-public class DOMResource implements Resource {
+public class DOMResource implements S9ApiResource<XdmNode> {
 
     private final URI uri;
 
     private final XdmNode document;
-
-    private final Resource preimage;
 
     private final Processor processor;
 
@@ -37,13 +41,11 @@ public class DOMResource implements Resource {
      *
      * @param uri a {@link URI} identifying the resource
      * @param document  the document node (root node)
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor a saxon {@link Processor} that was used by the document builder
      */
-    public DOMResource(URI uri, XdmNode document, Resource preimage, Processor processor) {
+    public DOMResource(URI uri, XdmNode document, Processor processor) {
 	this.uri = uri;
 	this.document = document;
-	this.preimage = preimage;
 	this.processor = processor;
     }
 
@@ -59,15 +61,13 @@ public class DOMResource implements Resource {
      *
      * @param uri a {@link URI} identifying the resource
      * @param source  the document as a JAXP {@link Source}
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public DOMResource(URI uri, Source source, Resource preimage, Processor processor) throws SaxonApiException {
+    public DOMResource(URI uri, Source source, Processor processor) throws SaxonApiException {
 	this.uri = uri;
 	source.setSystemId(uri.toString()); // assert that systemId is set
-	this.preimage = preimage;
 	this.processor = processor;
 	DocumentBuilder documentBuilder = processor.newDocumentBuilder();
 	XdmNode docNode = documentBuilder.build(source);
@@ -81,19 +81,18 @@ public class DOMResource implements Resource {
      *
      * @param uri  a {@link URI} identifying the resource
      * @param inputStream  {@link InputStream} with the HTML document
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromHTML(URI uri, InputStream inputStream, Resource preimage, Processor processor) throws SaxonApiException {
+    public static DOMResource fromHTML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
 	// encapsulate input stream in InputSource
 	InputSource inputSource = new InputSource(inputStream);
 	inputSource.setSystemId(uri.toString());
 	// use HTML parser
 	Source source = new SAXSource(new HtmlParser(), inputSource);
 	// hand over to just DOM handling
-	return new DOMResource(uri, source, preimage, processor);
+	return new DOMResource(uri, source, processor);
     }
 
     /**
@@ -104,14 +103,13 @@ public class DOMResource implements Resource {
      * but gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromHTML(URI uri, Resource preimage, Processor processor) throws IOException, SaxonApiException {
+    public static DOMResource fromHTML(URI uri, Processor processor) throws IOException, SaxonApiException {
 	InputStream in = uri.toURL().openStream();
-	return fromHTML(uri, in, preimage, processor);
+	return fromHTML(uri, in, processor);
     }
 
 
@@ -122,15 +120,14 @@ public class DOMResource implements Resource {
      *
      * @param uri  a {@link URI} identifying the resource
      * @param inputStream  {@link InputStream} with the XML document
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromXML(URI uri, InputStream inputStream, Resource preimage, Processor processor) throws SaxonApiException {
+    public static DOMResource fromXML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
 	Source source = new StreamSource(inputStream);
 	source.setSystemId(uri.toString());
-	return new DOMResource(uri, source, preimage, processor);
+	return new DOMResource(uri, source, processor);
     }
 
     /**
@@ -140,23 +137,66 @@ public class DOMResource implements Resource {
      * gets the input from the URI.
      *
      * @param uri  a {@link URI} identifying the resource
-     * @param preimage  the preimage of the resource if it is a projection of a preimage
      * @param processor  a saxon {@link Processor} to be used by the document builder
      *
      * @throws SaxonApiException when the document builder fails
      */
-    public static DOMResource fromXML(URI uri, Resource preimage, Processor processor) throws IOException, SaxonApiException {
+    public static DOMResource fromXML(URI uri, Processor processor) throws IOException, SaxonApiException {
 	InputStream in = uri.toURL().openStream();
-	return fromXML(uri, in, preimage, processor);
+	return fromXML(uri, in, processor);
     }
 
+    /**
+     * Make a {@link MappedDOMResource} from XML input given as an
+     * {@link InputStream} using the Xerces DOM parser. The parsed
+     * document is wrapped in XDM nodes, but the underlying nodes are
+     * <code>w3c.xml.dom</code> nodes.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param inputStream  {@link InputStream} with the XML document
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
+     */
+    public static DOMResource fromXMLwithXerces(URI uri, InputStream inputStream, Processor processor) throws ResourceException {
+	try {
+	    InputSource inputSource = new InputSource(inputStream);
+	    inputSource.setSystemId(uri.toString());
+	    org.apache.xerces.parsers.DOMParser parser = new org.apache.xerces.parsers.DOMParser();
+	    parser.parse(inputSource);
+	    Document doc = parser.getDocument();
+	    // wrap w3c document in XDM node, see
+	    // https://www.saxonica.com/documentation12/index.html#!sourcedocs/tree-models/thirdparty
+	    // and
+	    // https://stackoverflow.com/questions/49829126/what-is-idiomatic-way-to-serialize-dom-document-with-s9api-serializer
+	    XdmNode xdmDoc = processor.newDocumentBuilder().wrap(doc);
+	    return new DOMResource(uri, xdmDoc, processor);
+	} catch (SAXException e) {
+	    throw new ResourceException(e.getMessage());
+	} catch (IOException e) {
+	    throw new ResourceException(e.getMessage());
+	}
+    }
 
     /**
-     * {@inheritDoc}
+     * Same as
+     *
+     * {@link DOMResource#fromXMLwithXerces(URI, InputStream, Processor)},
+     *
+     * but gets the input from the URI.
+     *
+     * @param uri  a {@link URI} identifying the resource
+     * @param processor  a saxon {@link Processor} to be used by the document builder
+     *
+     * @throws SaxonApiException when the document builder fails
      */
-    @Override
-    public Resource getPreImage() {
-	return this.preimage;
+    public static DOMResource fromXMLwithXerces(URI uri, Processor processor) throws ResourceException {
+	try {
+	InputStream in = uri.toURL().openStream();
+	return fromXMLwithXerces(uri, in, processor);
+	} catch (IOException e) {
+	    throw new ResourceException(e.getMessage());
+	}
     }
 
     /**
@@ -171,15 +211,15 @@ public class DOMResource implements Resource {
      * Returns the document node of the DOM resource.
      * @return an {@link XdmNode}
      */
-    public XdmNode getDOM() {
+    @Override
+    public XdmNode getContents() {
 	return this.document;
     }
 
     /**
-     * Returns the Saxon {@link Processor} the resource was parsed
-     * with.
-     * @return a Saxon {@link Processor}
+     * {@inheritDoc}
      */
+    @Override
     public Processor getProcessor() {
 	return this.processor;
     }

@@ -49,7 +49,7 @@
        <xml-apis.version>1.4.01</xml-apis.version>
        <apache-commons.version>3.13.0</apache-commons.version>
        <apache-jena.version>5.2.0</apache-jena.version>
-       <junit.version>5.7.2</junit.version>
+       <junit.version>6.0.1</junit.version>
        <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
 
        <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
@@ -97,6 +97,11 @@
            <version>${xmlresolver.version}</version>
 	</dependency>
 	<dependency>
+	    <groupId>xerces</groupId>
+	    <artifactId>xercesImpl</artifactId>
+	    <version>2.12.2</version>
+	</dependency>
+	<dependency>
 	    <!-- a HTML parser -->
 	    <groupId>nu.validator</groupId>
 	    <artifactId>htmlparser</artifactId>
@@ -107,19 +112,35 @@
 	   <artifactId>xml-apis</artifactId>
 	   <version>${xml-apis.version}</version>
 	</dependency>
+	<dependency>
+	    <groupId>org.hamcrest</groupId>
+	    <artifactId>hamcrest</artifactId>
+	    <version>3.0</version>
+	    <scope>test</scope>
+	</dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+	<dependencies>
+            <dependency>
+		<groupId>org.junit</groupId>
+		<artifactId>junit-bom</artifactId>
+		<version>${junit.version}</version>
+		<type>pom</type>
+		<scope>import</scope>
+            </dependency>
+	</dependencies>
+    </dependencyManagement>
 
     <repositories>
        <repository>
@@ -184,6 +205,16 @@
                       <additionalOption>-Xdoclint:none</additionalOption>
                   </additionalOptions>
               </configuration>
+          </plugin>
+
+
+          <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>3.5.4</version>
+          </plugin>
+          <plugin>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <version>3.5.4</version>
           </plugin>
 
        </plugins>

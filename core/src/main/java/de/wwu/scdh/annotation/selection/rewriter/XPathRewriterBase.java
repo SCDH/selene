@@ -1,4 +1,4 @@
-package de.wwu.scdh.annotation.selection;
+package de.wwu.scdh.annotation.selection.rewriter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +13,8 @@ import net.sf.saxon.s9api.XPathExecutable;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.XdmItem;
+import net.sf.saxon.s9api.XdmEmptySequence;
 import net.sf.saxon.s9api.Axis;
 import net.sf.saxon.s9api.XdmNodeKind;
 import net.sf.saxon.s9api.XPathSelector;
@@ -23,201 +25,30 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.S9ApiResource;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.XdmValueResource;
+
+
 /**
- * The same position (or range) in a {@link DOMResource} can be
- * selected by different pairs of XPaths and RFC 5147 character
- * schemes (or range schemes), i.e. *referentially equal* selectors
- * may have different values. Normalization maps referentially equal
- * selectors to the same selector.<P>
- *
- * Normalization of selectors is a 2-stage process: 1) In the first
- * stage, the text position (or range) which is referenced by the
- * selector, has to be found. A pair containing a text node and a RFC
- * 5147 character scheme position is returned. 2) In the second stage,
- * this position is expressed as a selector again, i.e., the node is
- * referenced with an XPath, where the XPath may be written as a path
- * expression descending from the root element, or from the deepest
- * element with an XML-ID, etc., and even the character scheme
- * component of the selector may be recalculated.<P>
- *
- * There is **not** the one and only normalization. Both stages of the
- * normalization process may be implemented differently, leading to
- * different results. For corner cases, even the first stage may lead
- * to different results.<P>
- *
- * This class implements the first stage of the normalization
- * process. The algorithm is selected by values of the {@link Mode}
- * enum type, which is passed to the normalization methods. The second
- * stage of the normalization process has to be implemented by
- * subclasses of the abstract base class.<P>
- *
- * XPath expressions to be normalized may be arbitrary XPath 4.0
- * expressions which select a single node from the
- * {@link DOMResource}. Expressions selecting not exactly one node
- *  result in an {@link SelectorException}.
+ * This class provides methods common to normalizers and mappers, that
+ * operate on XPath selectors refined by RFC5147 character schemes.
  */
-public abstract class XPathNormalizer {
+public abstract class XPathRewriterBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XPathRewriterBase.class);
 
-    /**
-     * The {@link XPathNormalizer.Mode} is an enum type for selecting
-     * an algorithm for the first stage of the normalization.<P>
-     *
-     * For corner cases, normalization is ambigous.<P>
-     *
-     * Case 1: For the simple, but wellformed XML document
-     * <code>&lt;r>Sol&lt;t>ar&lt;/t>!&lt;/r></code> the normalization
-     * of the XPath pointer `/r` refined by the character scheme
-     * `char=3` is ambigous:
-     *
-     * <pre>
-     *              &lt;r>|S|o|l|&lt;t>|a|r|&lt;/t>|!|&lt;/r>
-     * /r;char=        0 1 2 3   3 4 5    5 6
-     * /r/t[1];char=             0 1 2
-     * </pre>
-     *
-     * Valid normalization results would be
-     * <code>/r[1]/text()[1}</code> refined by <code>char=3</code>,
-     * and also <code>/r[1]/t[1]/text()[1]</code> refined by
-     * <code>char=0</code>.<P>
-     *
-     * Case 2: For the XML document
-     * <code>&lt;r>Sol&lt;t>ar&lt;/t>&lt;g>pan&lt;/g>el!&lt;/r></code>,
-     * the selector <code>/r;char=5</code> may select the position
-     * after the character <code>r</code> in the node
-     * <code>/r/t[1]/text()[1]</code> <b>or</b> the position before the
-     * character <code>p</code> in the node
-     * <code>/r/g[1]/text()[1]</code>.
-     */
-    public enum Mode {
-
-	/**
-	 * Always take the first text node with the position, i.e.,
-	 * the first one in document order.<P>
-	 *
-	 * If the selector selects the first/last position in a
-	 * subtree, this algorithm checks for the first text node on
-	 * the preceding/following axis of the node selected by the
-	 * XPath component.
-	 */
-	FIRST,
-
-	/**
-	 * Always take the second text node with the position, i.e.,
-	 * the second in document order.
-	 *
-	 * If the selector selects the first/last position in a
-	 * subtree, this algorithm checks for the first text node on
-	 * the preceding/following axis of the node selected by the
-	 * XPath component.
-	 */
-	SECOND,
-
-	/**
-	 * Descend to the deepest text node. In corner cases, stop at
-	 * the first text node, that contains the position.<P>
-	 *
-	 * This will return <code>/r;char3</code> for the first corner
-	 * case described in {@link Mode}.
-	 */
-	DEEP_NODE_STOP_AT_END,
-
-	/**
-	 * Descend to the deepest text node. In corner cases, step
-	 * over the end of a text node and try to get the position
-	 * from the next text node.
-	 *
-	 * This will return <code>/r/t[1];char=0</code> for the first
-	 * corner case described in {@link Mode}.
-	 */
-	DEEP_NODE_STEP_OVER_END,
-
-	/**
-	 * Descend to the deepest text node. In corner cases, take the
-	 * deepest text node. If there are equally deep text nodes,
-	 * take the first one in document order.
-	 *
-	 * This will return <code>/r/t[1];char=0</code> for the first
-	 * corner case described in {@link Mode}. For case 2, it
-	 * selects the text node in the <code>t</code> element.
-	 */
-	FIRST_OF_DEEPEST_NODES,
-
-	/**
-	 * Descend to the deepest text node. In corner cases, take the
-	 * deepest text node. If there are equally deep text nodes,
-	 * take the last one in document order.
-	 *
-	 * This will return <code>/r/t[1];char=0</code> for the first
-	 * corner case described in {@link Mode}. For case 2, it
-	 * selects the text node in the <code>g</code> element.
-	 */
-	LAST_OF_DEEPEST_NODES
-
-    }
 
     //protected final DOMResource resource;
 
     /**
      * Make a new {@link XPathNormalizer} for a {@link DOMResource}.
      */
-    public XPathNormalizer() {
+    public XPathRewriterBase() {
     }
 
-    /**
-     * Same as
-     * {@link #normalizeXPathRefinedByCharScheme(String,int,boolean)},
-     * but returns an escaped string.
-     * @param resource  the {@link DOMResource} on the base of which the normalization is done
-     * @param xpath  a XPath expression selecting a single node
-     * @param position  the inter-character position following the character scheme from RFC5147
-     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
-     * @return a {@link Pair} of XPath expression and character scheme position
-     * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
-     */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(DOMResource resource, String xpath, int position, Mode mode)
-	throws SelectorException {
-	return normalizeXPathRefinedByCharScheme(resource, xpath, position, mode, true);
-    }
 
-    /**
-     * Normalize an XPath Selector refined by an RFC5147 character
-     * scheme. The position must be a valid character position
-     * *inside* the fragment selected by the XPath expression. If the
-     * fragment's text (its concatenated text nodes) is shorter than
-     * the position's value, a {@link SelectorException} is thrown.<P>
-     *
-     * In general, this method will result in a recalculated pair of
-     * XPath *and* position.
-     *
-     * @param resource  the {@link DOMResource} on the base of which the normalization is done
-     * @param xpath  a XPath expression selecting a single node
-     * @param position  the inter-character position following the character scheme from RFC5147
-     * @param escaped   whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
-     * @param stepOverEnd  how to resolve positional ambiguity at changeover between text nodes
-     * @return a {@link Pair} of XPath expression and character scheme position
-     */
-    public Pair<String, Integer> normalizeXPathRefinedByCharScheme(DOMResource resource, String xpath, int position, Mode mode, boolean escaped)
-	throws SelectorException {
-	Pair<XdmNode, Integer> textNode = getTextNodeAtPosition(resource, xpath, position, mode);
-	// call the normalization function
-	String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), escaped);
-	XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
-	Integer normalizedPos = posInNormalizedNode(resource, textNode.getLeft(), textNode.getRight(), normalizedNode);
-	return new ImmutablePair<String, Integer>(normalizedXPath, normalizedPos);
-    }
-
-    /**
-     * This abstract method must be implemented by normalizers. It
-     * returns the normalized path to the node given as argument.
-     *
-     * @param node  an {@link XdmNode} to which the normlized path must be generated to
-     * @param escaped  whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
-     * @return the normalized XPath expression as a String
-     * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
-     */
-    protected abstract String getNormalizedXPath(DOMResource resource, XdmNode node, boolean escaped) throws SelectorException;
 
     /**
      * This method run the first stage of the normalization
@@ -244,7 +75,7 @@ public abstract class XPathNormalizer {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected Pair<XdmNode, Integer> getTextNodeAtPosition(DOMResource resource, String xpath, int position, Mode mode) throws SelectorException {
+    protected Pair<XdmNode, Integer> getTextNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position, Mode mode) throws SelectorException {
 	return switch(mode) {
 	case FIRST -> getFirstNodeAtPosition(resource, xpath, position);
 	case SECOND -> getSecondNodeAtPosition(resource, xpath, position);
@@ -263,8 +94,8 @@ public abstract class XPathNormalizer {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#FIRST}.
      */
-    protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -277,8 +108,8 @@ public abstract class XPathNormalizer {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#SECOND}.
      */
-    protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -293,8 +124,8 @@ public abstract class XPathNormalizer {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#FIRST_OF_DEEPEST_NODES}.
      */
-    protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -314,8 +145,8 @@ public abstract class XPathNormalizer {
      * The implementation of step 1 of the normalization algorithm in
      * in mode {@link Mode#LAST_OF_DEEPEST_NODES}.
      */
-    protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -342,8 +173,8 @@ public abstract class XPathNormalizer {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -362,8 +193,8 @@ public abstract class XPathNormalizer {
      * @throws {@link SelectorException}
      * @return a pair of node and position
      */
-    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(DOMResource resource, String xpath, int position) throws SelectorException {
-	XdmNode fragment = getNode(resource, xpath);
+    protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
+	XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
 	List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 	if (nodesAtPosition.isEmpty()) {
 	    return reportNotFound(xpath, position);
@@ -389,7 +220,7 @@ public abstract class XPathNormalizer {
 	try {
 	    XPathExecutable executable = compiler.compile(xpath);
 	    XPathSelector selector = executable.load();
-	    selector.setContextItem(resource.getDOM());
+	    selector.setContextItem(resource.getContents());
 	    XdmValue nodes = selector.evaluate();
 	    // assert that the XPath selects exactly 1 node
 	    if (nodes.size() != 1) {
@@ -404,6 +235,49 @@ public abstract class XPathNormalizer {
 		throw new SelectorException("XPath '" + xpath + "' does not select a node");
 	    } else {
 		return (XdmNode) nodes.itemAt(0);
+	    }
+	} catch (SaxonApiException e) {
+	    LOG.error(e.getMessage());
+	    throw new SelectorException(e);
+	}
+    }
+
+    /**
+     * Get the node from the XDM value resource given by the the XPath
+     * passed as argument. If the XPath does not evaluate to a single
+     * node, this method raises an {@link SelectorException}.
+     *
+     * @param resource  the {@link XdmValueResource} on the base of which the normalization is done
+     * @param xpath  the XPath as {@link String}
+     * @return an {@link XdmNode} which the XPath points to
+     */
+    protected final XdmNode getNode(XdmValueResource resource, String xpath) throws SelectorException {
+	return getNode(resource.getContents(), xpath, resource.getProcessor());
+    }
+
+    /**
+     * Get the node from the DOM resource given by the the XPath
+     * passed as argument. If the XPath does not evaluate to a single
+     * node, this method raises an {@link SelectorException}.
+     */
+    protected final XdmNode getNode(XdmValue value, String xpath, Processor processor) throws SelectorException {
+	XPathCompiler compiler = processor.newXPathCompiler();
+	try {
+	    XPathExecutable executable = compiler.compile(xpath);
+	    XdmValue result = XdmEmptySequence.getInstance();
+	    for (XdmItem item : value.stream().asList()) {
+		XPathSelector selector = executable.load();
+		selector.setContextItem(item);
+		result = result.append(selector.evaluate());
+	    }
+	    if (result.size() != 1) {
+		LOG.error("XPath '{}' does not select exaclty one node in XdmValueResource: selects {} nodes", xpath, result.size());
+		throw new SelectorException("XPath '" + xpath + "' does not select exactly one node in XdmValueResource");
+	    } else if (!result.itemAt(0).isNode()) {
+		LOG.error("XPath '{}' does not select a node", xpath, result.size());
+		throw new SelectorException("XPath '" + xpath + "' does not select a node");
+	    } else {
+		return (XdmNode) result.itemAt(0);
 	    }
 	} catch (SaxonApiException e) {
 	    LOG.error(e.getMessage());
@@ -529,7 +403,7 @@ public abstract class XPathNormalizer {
      * @param fragment the {@link XdmNode} selected by the XPath resulting from step 2
      * @return the position from step 2
      */
-    protected int posInNormalizedNode(DOMResource resource, XdmNode textNode, int pos, XdmNode fragment) throws SelectorException {
+    protected int posInNormalizedNode(XdmNode textNode, int pos, XdmNode fragment) throws SelectorException {
 	if (textNode.equals(fragment)) {
 	    return pos;
 	}
@@ -592,6 +466,52 @@ public abstract class XPathNormalizer {
      */
     protected String unespace(String in) {
 	return in.replace("&apos;", "'");
+    }
+
+
+    /**
+     * Get the path to the {@link XdmNode} given as parameter by using
+     * the provided XPath for generating a path expression.<P>
+     *
+     * This is typically used in step 2 of normalization.
+     *
+     * @param xpath    the XPath for generating a path expression, e.g., fn:xpath()
+     * @param node     the {@link XdmNode} for which to generate the path expression
+     * @param escaped  whether or not the generated path expression is to be escaped
+     * @param processor  a Saxon {@link Processor}
+     */
+    protected String pathExpressionWithXPath(String xpath, XdmNode node, boolean escaped, Processor processor)
+	throws SelectorException {
+	XPathCompiler compiler = processor.newXPathCompiler();
+	XdmValue nodes;
+	try {
+	    XPathExecutable executable = compiler.compile(xpath);
+	    XPathSelector selector = executable.load();
+	    selector.setContextItem(node);
+	    nodes = selector.evaluate();
+	} catch (SaxonApiException e) {
+	    LOG.error("failed to normalize XPath using '{}': ", xpath, e.getMessage());
+	    throw new SelectorException(e);
+	}
+	if (nodes.size() != 1) {
+	    LOG.error("normalizing XPath '{}' did not return exactly one item: returned {} items", xpath, nodes.size());
+	    throw new SelectorException("normalizing XPath '" +
+					xpath +
+					"' did not return exactly one item: returned " +
+					String.valueOf(nodes.size()) +
+					" item");
+	} else if (!nodes.itemAt(0).isAtomicValue()) {
+	    LOG.error("normalizing XPath '{}' did not return an atomic value", xpath, nodes.size());
+	    throw new SelectorException("normalizing XPath '" +
+					xpath +
+					"' did not return an atomic value");
+	} else {
+	    if (escaped) {
+		return nodes.itemAt(0).getStringValue();
+	    } else {
+		return nodes.itemAt(0).getUnderlyingValue().getUnicodeStringValue().toString();
+	    }
+	}
     }
 
 }

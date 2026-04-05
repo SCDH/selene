@@ -20,8 +20,7 @@ import net.sf.saxon.s9api.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
+import de.wwu.scdh.annotation.selection.*;
 
 
 /**
@@ -41,18 +40,20 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizeAnnotation.class);
 
-    protected Optional<DOMResource> dom;
+    protected Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom;
     protected Model model;
-    protected final XPathNormalizer normalizer;
+    protected final RewriterFactory rewriterFactory;
     protected final Processor processor;
+    protected final RewriterConfig normalizerConfig;
 
     protected Optional<Exception> error = null;
 
-    public NormalizeAnnotation(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
+    public NormalizeAnnotation(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
 	this.model = model;
-	this.normalizer = normalizer;
+	this.rewriterFactory = rewriterFactory;
 	this.dom = dom;
 	this.processor = processor;
+	this.normalizerConfig = normalizerConfig;
     }
 
     /**
@@ -64,7 +65,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	LOG.debug("normalizing annotation '{}'", annotation.getURI());
 	annotation.listProperties(OA.hasTarget)
 	    .mapWith(stmt -> stmt.getResource())
-	    .forEach(new NormalizeTarget(processor, normalizer, model, dom));
+	    .forEach(new NormalizeTarget(processor, rewriterFactory, normalizerConfig, model, dom));
     }
 
     /**
@@ -81,11 +82,11 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param processor  a Saxon {@link Processor} for parsing and processing the target source
      * @param normalizer  the normalizer
      * @parma model  the RDF model (graph) containing the annotations
-     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
+     * @param dom  a optional {@link de.wwu.scdh.annotation.selection.Resource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, Model model, Optional<DOMResource> dom) {
-	NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(processor, normalizer, model, dom);
+    public static Model normalize(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, Model model, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
+	NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(processor, rewriterFactory, normalizerConfig,  model, dom);
 	ResIterator annots = model.listResourcesWithProperty(RDF.type, OA.Annotation);
 	annots.forEach(normalizeAnnotation);
 	return normalizeAnnotation.getModel();
@@ -100,17 +101,17 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param normalizer  the normalizer
      * @param uri  the URI where to read the RDF from
      * @param lang the serialization language of the graph at the URI
-     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
+     * @param dom  a optional {@link de.wwu.scdh.annotation.selection.Resource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, String uri, Optional<String> lang, Optional<DOMResource> dom) {
+    public static Model normalize(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, String uri, Optional<String> lang, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
 	Model model;
 	if (lang.isEmpty()) {
 	    model = RDFDataMgr.loadModel(uri);
 	} else {
 	    model = RDFDataMgr.loadModel(uri, RDFLanguages.nameToLang(lang.get()));
 	}
-	return normalize(processor, normalizer, model, dom);
+	return normalize(processor, rewriterFactory, normalizerConfig, model, dom);
     }
 
     /**
@@ -122,10 +123,10 @@ public class NormalizeAnnotation implements Consumer<Resource> {
      * @param input  the {@link InputStream}
      * @param modelBase  a base URI of the model, given as {@link String}
      * @param lang  optionally the serialization language of stream data; if not provided, NTriples are assumed
-     * @param dom  a optional {@link DOMResource} which instead the one given by the target's hasSource property
+     * @param dom  a optional {@link de.wwu.scdh.annotation.selection.Resource} which instead the one given by the target's hasSource property
      * @return the normalized {@link Model}
      */
-    public static Model normalize(Processor processor, XPathNormalizer normalizer, InputStream input, Optional<String> lang, Optional<String> modelBase, Optional<DOMResource> dom) {
+    public static Model normalize(Processor processor, RewriterFactory rewriterFactory, RewriterConfig normalizerConfig, InputStream input, Optional<String> lang, Optional<String> modelBase, Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
 	Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
 	Lang langHint;
 	if (lang.isEmpty()) {
@@ -139,7 +140,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	} else {
 	    RDFDataMgr.read(model, input, modelBase.get(), langHint);
 	}
-	return normalize(processor, normalizer, model, dom);
+	return normalize(processor, rewriterFactory, normalizerConfig, model, dom);
     }
 
 }

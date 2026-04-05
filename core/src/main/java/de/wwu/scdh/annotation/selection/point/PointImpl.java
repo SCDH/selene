@@ -1,0 +1,87 @@
+package de.wwu.scdh.annotation.selection.point;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
+import de.wwu.scdh.annotation.selection.Component;
+import de.wwu.scdh.annotation.selection.Point;
+import de.wwu.scdh.annotation.selection.NoSuchComponentException;
+
+
+public class PointImpl implements Point {
+
+    /**
+     * We are using the canonical name of the compononent class as
+     * keys in this {@link Map} of {@link Component}s.
+     */
+    private Map<String, Component<?>> components =
+	new HashMap<String, Component<?>>();
+
+    // private Map<Class<Component<?>>, Component<?>> components =
+    // 	new HashMap<Class<Component<?>>, Component<?>>();
+
+    // private Map<Class<Component>, Component> components =
+    // 	new HashMap<Class<Component>, Component>();
+
+    /**
+     * Make a {@link PointImpl} from as many {@link Component}s as you
+     * want. Note: When multiple components of the same type are
+     * given, only one is used.
+     *
+     * @param components  an open number of components
+     */
+    public PointImpl(Component<?> ... components) {
+	for (Component<?> c: components) {
+	    this.components.put(c.getClass().getCanonicalName(), c);
+	}
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <C extends Component<?>> boolean hasComponent(Class<C> component) {
+	return components.containsKey(component.getCanonicalName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int size() {
+	return components.size();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <C extends Component<?>> Set<Class<C>> dimensions() {
+	Set<Class<C>> dims = new HashSet<Class<C>>();
+	for (String c : components.keySet()) {
+	    dims.add((Class<C>) components.get(c).getClass());
+	}
+	return dims;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <T, C extends Component<T>> T getComponent(Class<C> component)
+	throws NoSuchComponentException {
+	if (components.containsKey(component.getCanonicalName())) {
+	    try {
+		return (T) components.get(component.getCanonicalName()).getValue();
+	    } catch (Exception e) {
+		throw new NoSuchComponentException("failed to cast component " + component.getCanonicalName() + ": " + e.getMessage());
+	    }
+	} else {
+	    throw new NoSuchComponentException(component.getCanonicalName());
+	}
+    }
+
+}

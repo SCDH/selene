@@ -51,10 +51,10 @@ import jakarta.json.JsonWriter;
 import jakarta.json.JsonWriterFactory;
 import jakarta.json.stream.JsonGenerator;
 
-import de.wwu.scdh.annotation.selection.DOMResource;
-import de.wwu.scdh.annotation.selection.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.XPathNormalizerWithXPath;
+import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
 @Command(name = "normalize",
@@ -95,20 +95,13 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
     @Override
     public Integer call() throws Exception {
 
-	Optional<DOMResource> dom = Optional.empty();
+	Optional<Resource<?>> dom = Optional.empty();
 	if (resource != null) {
 	    try {
 		dom = Optional.of(parseResource(resource));
 	    } catch (CliException e) {
 		return 1;
 	    }
-	}
-
-	XPathNormalizerWithXPath xpathNormalizer;
-	try {
-	    xpathNormalizer = getXPathNormalizer();
-	} catch (CliException e) {
-	    return 2;
 	}
 
 	// make relative paths absolute by resolving against the URI of the current working director
@@ -133,7 +126,7 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	// do the normalization
 	Model model;
 	try {
-	    model = NormalizeAnnotation.normalize(PROC, xpathNormalizer, selectorsResolved.toString(), lang, dom);
+	    model = NormalizeAnnotation.normalize(PROC, getNormalizerFactory(), getRewriterConfig(), selectorsResolved.toString(), lang, dom);
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 10;
