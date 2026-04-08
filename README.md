@@ -1,3 +1,5 @@
+[![Tests](https://github.com/SCDH/selene/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/selene/actions/workflows/test.yaml)
+
 # Selene Selection Engine
 
 *Selene* is a tool of processing **references to portions** of
