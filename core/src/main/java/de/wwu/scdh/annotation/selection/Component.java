@@ -1,6 +1,5 @@
 package de.wwu.scdh.annotation.selection;
 
-
 /**
  * A {@link Point} has one or multiple {@link Component}s. Each
  * component has a type. This interface is for type-safe programming
@@ -15,14 +14,13 @@ package de.wwu.scdh.annotation.selection;
  */
 public interface Component<T> {
 
-    /**
-     * Returns the type of component.
-     */
-    Class<T> getType();
+	/**
+	 * Returns the type of component.
+	 */
+	Class<T> getType();
 
-    /**
-     * Returns the value of the component as type T.
-     */
-    T getValue();
-
+	/**
+	 * Returns the value of the component as type T.
+	 */
+	T getValue();
 }

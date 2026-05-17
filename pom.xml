@@ -1,223 +1,267 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.wwu.scdh.annotations.selections</groupId>
-    <artifactId>selection-engine</artifactId>
-    <version>${revision}${changelist}</version>
+  <groupId>de.wwu.scdh.annotations.selections</groupId>
+  <artifactId>selection-engine</artifactId>
+  <version>${revision}${changelist}</version>
 
-    <name>Selection Engine</name>
-    <url>https://zivgitlab.uni-muenster.de/SCDH/selectors/selection-engine</url>
+  <packaging>pom</packaging>
 
-    <packaging>pom</packaging>
+  <name>Selection Engine</name>
+  <url>https://zivgitlab.uni-muenster.de/SCDH/selectors/selection-engine</url>
 
-    <developers>
-        <developer>
-            <name>Christian Lück</name>
-            <organization>SCDH, University of Münster</organization>
-        </developer>
-    </developers>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
 
-    <licenses>
-        <license>
-            <name>MIT</name>
-            <url>https://opensource.org/licenses/mit-license.php</url>
-        </license>
-    </licenses>
+  <developers>
+    <developer>
+      <name>Christian Lück</name>
+      <organization>SCDH, University of Münster</organization>
+    </developer>
+  </developers>
 
-    <scm>
-        <connection>scm:git:${project.url}.git</connection>
-        <developerConnection>scm:git:${project.url}.git</developerConnection>
-        <url>scm:git:${project.url}.git</url>
-        <tag>HEAD</tag>
-    </scm>
+  <modules>
+    <module>core</module>
+    <module>cli</module>
+    <module>mapping</module>
+  </modules>
 
+  <scm>
+    <connection>scm:git:${project.url}.git</connection>
+    <developerConnection>scm:git:${project.url}.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>scm:git:${project.url}.git</url>
+  </scm>
 
-    <properties>
-       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-       <compiler-plugin.version>3.8.1</compiler-plugin.version>
-       <failsafe.useModulePath>false</failsafe.useModulePath>
-       <maven.compiler.source>17</maven.compiler.source>
-       <maven.compiler.target>17</maven.compiler.target>
-       <antlr.version>4.12.0</antlr.version>
-       <antlr.test.version>1.21</antlr.test.version>
-       <slf4j.version>2.0.6</slf4j.version>
-       <saxon.version>12.3</saxon.version>
-       <xmlresolver.version>4.5.1</xmlresolver.version>
-       <xml-apis.version>1.4.01</xml-apis.version>
-       <apache-commons.version>3.13.0</apache-commons.version>
-       <apache-jena.version>5.2.0</apache-jena.version>
-       <junit.version>6.0.1</junit.version>
-       <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
+  <!-- get the build artifacts into the gitlab maven package registry -->
+  <distributionManagement>
+    <repository>
+      <id>gitlab-maven</id>
+      <url>${distribution.url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>gitlab-maven</id>
+      <url>${distribution.url}</url>
+    </snapshotRepository>
+  </distributionManagement>
 
-       <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
-       <graal.version>25.0.1</graal.version>
-       <picocli.version>4.7.7</picocli.version>
-       <picocli-jansi-graalvm.version>1.2.0</picocli-jansi-graalvm.version>
-    </properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <compiler-plugin.version>3.8.1</compiler-plugin.version>
+    <failsafe.useModulePath>false</failsafe.useModulePath>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <antlr.version>4.12.0</antlr.version>
+    <antlr.test.version>1.21</antlr.test.version>
+    <slf4j.version>2.0.6</slf4j.version>
+    <saxon.version>12.3</saxon.version>
+    <xmlresolver.version>4.5.1</xmlresolver.version>
+    <xml-apis.version>1.4.01</xml-apis.version>
+    <apache-commons.version>3.13.0</apache-commons.version>
+    <apache-jena.version>5.2.0</apache-jena.version>
+    <junit.version>6.0.1</junit.version>
+    <spotless.version>3.4.0</spotless.version>
+    <palantir-java-format.version>2.90.0</palantir-java-format.version>
+    <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
 
-    <!-- dependencies needed everywhere -->
+    <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
+    <graal.version>25.0.1</graal.version>
+    <picocli.version>4.7.7</picocli.version>
+    <picocli-jansi-graalvm.version>1.2.0</picocli-jansi-graalvm.version>
+  </properties>
+
+  <dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-	<dependency>
-	  <groupId>org.apache.jena</groupId>
-	  <artifactId>jena-core</artifactId>
-	  <version>${apache-jena.version}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.jena</groupId>
-	  <artifactId>jena-arq</artifactId>
-	  <version>${apache-jena.version}</version>
-	</dependency>
-	<dependency>
-	  <groupId>org.apache.commons</groupId>
-	  <artifactId>commons-lang3</artifactId>
-	  <version>${apache-commons.version}</version>
-	</dependency>
-        <dependency>
-            <groupId>net.sf.saxon</groupId>
-            <artifactId>Saxon-HE</artifactId>
-            <version>${saxon.version}</version>
-        </dependency>
-	<dependency>
-           <!-- required by Saxon >= 11 -->
-           <groupId>org.xmlresolver</groupId>
-           <artifactId>xmlresolver</artifactId>
-           <version>${xmlresolver.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>xerces</groupId>
-	    <artifactId>xercesImpl</artifactId>
-	    <version>2.12.2</version>
-	</dependency>
-	<dependency>
-	    <!-- a HTML parser -->
-	    <groupId>nu.validator</groupId>
-	    <artifactId>htmlparser</artifactId>
-	    <version>1.4.16</version>
-	</dependency>
-	<dependency>
-	   <groupId>xml-apis</groupId>
-	   <artifactId>xml-apis</artifactId>
-	   <version>${xml-apis.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.hamcrest</groupId>
-	    <artifactId>hamcrest</artifactId>
-	    <version>3.0</version>
-	    <scope>test</scope>
-	</dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
 
-    <dependencyManagement>
-	<dependencies>
-            <dependency>
-		<groupId>org.junit</groupId>
-		<artifactId>junit-bom</artifactId>
-		<version>${junit.version}</version>
-		<type>pom</type>
-		<scope>import</scope>
-            </dependency>
-	</dependencies>
-    </dependencyManagement>
+  <!-- dependencies needed everywhere -->
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-core</artifactId>
+      <version>${apache-jena.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>${apache-jena.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${apache-commons.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.saxon</groupId>
+      <artifactId>Saxon-HE</artifactId>
+      <version>${saxon.version}</version>
+    </dependency>
+    <dependency>
+      <!-- required by Saxon >= 11 -->
+      <groupId>org.xmlresolver</groupId>
+      <artifactId>xmlresolver</artifactId>
+      <version>${xmlresolver.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.12.2</version>
+    </dependency>
+    <dependency>
+      <!-- a HTML parser -->
+      <groupId>nu.validator</groupId>
+      <artifactId>htmlparser</artifactId>
+      <version>1.4.16</version>
+    </dependency>
+    <dependency>
+      <groupId>xml-apis</groupId>
+      <artifactId>xml-apis</artifactId>
+      <version>${xml-apis.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-    <repositories>
-       <repository>
-	  <id>gitlab-maven</id>
-	  <url>${distribution.url}</url>
-       </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>gitlab-maven</id>
+      <url>${distribution.url}</url>
+    </repository>
+  </repositories>
 
-    <!-- get the build artifacts into the gitlab maven package registry -->
-    <distributionManagement>
-       <repository>
-	  <id>gitlab-maven</id>
-	  <url>${distribution.url}</url>
-       </repository>
-       <snapshotRepository>
-	  <id>gitlab-maven</id>
-	  <url>${distribution.url}</url>
-       </snapshotRepository>
-    </distributionManagement>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <configuration/>
+        <executions>
+          <!-- pom flattening -->
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+        </executions>
+      </plugin>
 
-    <modules>
-       <module>core</module>
-       <module>cli</module>
-       <module>mapping</module>
-    </modules>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <additionalOptions>
+            <!-- do not fail on errors -->
+            <additionalOption>-Xdoclint:none</additionalOption>
+          </additionalOptions>
+        </configuration>
+      </plugin>
 
-    <build>
-       <plugins>
-	  <plugin>
-             <groupId>org.codehaus.mojo</groupId>
-             <artifactId>flatten-maven-plugin</artifactId>
-             <version>1.5.0</version>
-             <configuration>
-             </configuration>
-             <executions>
-		<!-- pom flattening -->
-		<execution>
-		   <id>flatten</id>
-		   <phase>process-resources</phase>
-		   <goals>
-		      <goal>flatten</goal>
-		   </goals>
-		</execution>
-		<!-- ensure proper cleanup -->
-		<execution>
-		   <id>flatten.clean</id>
-		   <phase>clean</phase>
-		   <goals>
-		      <goal>clean</goal>
-		   </goals>
-		</execution>
-             </executions>
-	  </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.4</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.5.4</version>
+      </plugin>
 
-	  <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>3.6.0</version>
-              <configuration>
-                  <additionalOptions>
-                      <!-- do not fail on errors -->
-                      <additionalOption>-Xdoclint:none</additionalOption>
-                  </additionalOptions>
-              </configuration>
-          </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <formats>
+            <!-- you can define as many formats as you want, each is independent -->
+            <format>
+              <!-- define the files to apply to -->
+              <includes>
+                <include>.gitattributes</include>
+                <include>.gitignore</include>
+              </includes>
+              <!-- define the steps to apply to those files -->
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <tabs>true</tabs>
+                <spacesPerTab>4</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+          <java>
+            <palantirJavaFormat>
+              <version>${palantir-java-format.version}</version>
+              <style>PALANTIR</style>
+              <formatJavadoc>false</formatJavadoc>
+            </palantirJavaFormat>
+            <indent>
+              <tabs>true</tabs>
+              <spacesPerTab>4</spacesPerTab>
+            </indent>
+            <!-- <licenseHeader> -->
+            <!--     <content>/* (C)$YEAR */</content> -->
+            <!-- </licenseHeader> -->
+          </java>
+          <pom>
+            <includes>
+              <include>pom.xml</include>
+            </includes>
+            <sortPom/>
+            <!-- has its own section below -->
+          </pom>
+        </configuration>
+      </plugin>
 
-
-          <plugin>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <version>3.5.4</version>
-          </plugin>
-          <plugin>
-              <artifactId>maven-failsafe-plugin</artifactId>
-              <version>3.5.4</version>
-          </plugin>
-
-       </plugins>
-    </build>
+    </plugins>
+  </build>
 
 </project>

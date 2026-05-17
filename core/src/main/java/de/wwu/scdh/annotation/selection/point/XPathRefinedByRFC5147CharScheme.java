@@ -1,9 +1,8 @@
 package de.wwu.scdh.annotation.selection.point;
 
 import de.wwu.scdh.annotation.selection.Point;
-import de.wwu.scdh.annotation.selection.component.XPathComponent;
 import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
-
+import de.wwu.scdh.annotation.selection.component.XPathComponent;
 
 /**
  * A {@link Point} represented by an <code>oa:XPathSelector</code>
@@ -13,29 +12,28 @@ import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
  */
 public class XPathRefinedByRFC5147CharScheme extends PointImpl {
 
-    private final String xpath;
+	private final String xpath;
 
-    private final int chr;
+	private final int chr;
 
-    /**
-     * Make a {@link XPathRefinedByRFC5147CharScheme} from an xpath
-     * and a inter-character position.
-     *
-     * @param xpath  the XPath component
-     * @param chr    the character scheme component
-     */
-    public XPathRefinedByRFC5147CharScheme(String xpath, int chr) {
-	super(new XPathComponent(xpath), new RFC5147CharComponent(chr));
-	this.xpath = xpath;
-	this.chr = chr;
-    }
+	/**
+	 * Make a {@link XPathRefinedByRFC5147CharScheme} from an xpath
+	 * and a inter-character position.
+	 *
+	 * @param xpath  the XPath component
+	 * @param chr    the character scheme component
+	 */
+	public XPathRefinedByRFC5147CharScheme(String xpath, int chr) {
+		super(new XPathComponent(xpath), new RFC5147CharComponent(chr));
+		this.xpath = xpath;
+		this.chr = chr;
+	}
 
-    public String getXPath() {
-	return xpath;
-    }
+	public String getXPath() {
+		return xpath;
+	}
 
-    public int getChar() {
-	return chr;
-    }
-
+	public int getChar() {
+		return chr;
+	}
 }

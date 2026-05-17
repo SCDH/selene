@@ -19,32 +19,31 @@ import java.util.Set;
  */
 public interface Point {
 
-    /**
-     * A predicate, that returns True if and only if the point has the
-     * component of the given type.
-     * @param component  the component as {@link Class}
-     */
-    public <C extends Component<?>> boolean hasComponent(Class<C> component);
+	/**
+	 * A predicate, that returns True if and only if the point has the
+	 * component of the given type.
+	 * @param component  the component as {@link Class}
+	 */
+	public <C extends Component<?>> boolean hasComponent(Class<C> component);
 
-    /**
-     * Returns the number of components.
-     */
-    public int size();
+	/**
+	 * Returns the number of components.
+	 */
+	public int size();
 
-    /**
-     * Returns the components of the point as a {@link Set}.
-     */
-    public <C extends Component<?>> Set<Class<C>> dimensions();
+	/**
+	 * Returns the components of the point as a {@link Set}.
+	 */
+	public <C extends Component<?>> Set<Class<C>> dimensions();
 
-    /**
-     * Returns the value of the requested component in a type-safe
-     * manner. If the component is not present or if the value does
-     * not match the components type, a {@link NoSuchComponentException}
-     * is thrown.
-     *
-     * @param component  the requested component as {@link Class}
-     * @return the value of the component in its type T
-     */
-    public <T, C extends Component<T>> T getComponent(Class<C> component) throws NoSuchComponentException;
-
+	/**
+	 * Returns the value of the requested component in a type-safe
+	 * manner. If the component is not present or if the value does
+	 * not match the components type, a {@link NoSuchComponentException}
+	 * is thrown.
+	 *
+	 * @param component  the requested component as {@link Class}
+	 * @return the value of the component in its type T
+	 */
+	public <T, C extends Component<T>> T getComponent(Class<C> component) throws NoSuchComponentException;
 }
