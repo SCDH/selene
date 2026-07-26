@@ -51,6 +51,8 @@
   </distributionManagement>
 
   <properties>
+    <distribution.url>https://maven.pkg.github.com/scdh/selene</distribution.url>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
@@ -68,8 +70,6 @@
     <junit.version>6.0.1</junit.version>
     <spotless.version>3.4.0</spotless.version>
     <palantir-java-format.version>2.90.0</palantir-java-format.version>
-    <distribution.url>https://zivgitlab.uni-muenster.de/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</distribution.url>
-
     <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
     <graal.version>25.0.1</graal.version>
     <picocli.version>4.7.7</picocli.version>
@@ -162,7 +162,7 @@
 
   <repositories>
     <repository>
-      <id>gitlab-maven</id>
+      <id>github</id>
       <url>${distribution.url}</url>
     </repository>
   </repositories>

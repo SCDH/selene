@@ -1,8 +1,10 @@
+<!-- maven setting for pushing into gitlab package registry with -Ddistribution.url=${env.CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven -->
 <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
   <servers>
     <server>
-      <id>gitlab-maven</id>
+      <!-- id must correspond to distribution repository id in pom.xml -->
+      <id>github</id>
       <configuration>
         <httpHeaders>
           <property>

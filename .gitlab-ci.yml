@@ -45,8 +45,7 @@ javadocs:
 push-packages:
   stage: deploy
   script:
-    - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS verify
-    - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" $MAVEN_CLI_OPTS deploy -s ci_settings.xml
+    - ./mvnw -Drevision=$CI_COMMIT_TAG -Dchangelist="" -Ddistribution.url=$CI_API_V4_URL/projects/CI_PROJECT_ID/packages/maven $MAVEN_CLI_OPTS deploy -s ci_settings.xml
   only:
     # https://gitlab.com/gitlab-org/gitlab-foss/-/issues/27818
     variables:

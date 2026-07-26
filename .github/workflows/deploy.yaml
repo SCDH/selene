@@ -1,0 +1,38 @@
+name: Create release
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-?**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK, for pushing into github package registry
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Push to Github package registry
+        run: mvn -Drevision=${{ github.ref_name }} -Dchangelist="" --batch-mode --update-snapshots deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release with release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              core/target/*.tar.gz \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${GITHUB_REPOSITORY#*/} ${tag}" \
+              --generate-notes
