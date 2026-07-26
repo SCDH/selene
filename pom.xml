@@ -38,14 +38,13 @@
     <url>scm:git:${project.url}.git</url>
   </scm>
 
-  <!-- get the build artifacts into the gitlab maven package registry -->
   <distributionManagement>
     <repository>
-      <id>gitlab-maven</id>
+      <id>github</id>
       <url>${distribution.url}</url>
     </repository>
     <snapshotRepository>
-      <id>gitlab-maven</id>
+      <id>github</id>
       <url>${distribution.url}</url>
     </snapshotRepository>
   </distributionManagement>
