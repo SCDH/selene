@@ -124,6 +124,45 @@ public class ResourceBuilder {
 		}
 	}
 
+	/**
+	 * Derives a {@link MappedDOMResource} from a preimage and an XSLT
+	 * stylesheet.<P>
+	 *
+	 * Note: When a saxon config file with XSLT packages is used (by
+	 * reading it when constructing the {@link Processor}), only
+	 * compiling the right XSLT tracing package is not
+	 * enough. Transforming the config file and changing the
+	 * <code>resourceLocation</code> is required.<P>
+	 *
+	 * {@link ResourceBuilder#processorFromModifiedConfig(Source)}
+	 * has a solution.
+	 *
+	 * @param preimage - the resource deriving from
+	 * @param imagePointClass - the class of the point used for the image, or <code>null</code> for concluding from the stylesheet's default output method
+	 */
+	public static MappedDOMResource mapWithXsltTracePackage(
+			DOMResource preimage, Xslt30Transformer transformer, Class<? extends Point> imagePointClass)
+			throws ResourceException {
+
+		Class<? extends Point> pointClass;
+		if (imagePointClass != null) {
+			pointClass = imagePointClass;
+		} else {
+			pointClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
+		}
+		try {
+			// transform to XdmValue, which keeps the nodes from the source
+			XdmValue imageValue = transformer.applyTemplates(preimage.getContents());
+			XdmValueResource image = new XdmValueResource(
+					null, imageValue, transformer.newSerializer().getProcessor(), pointClass);
+			// make mapped resource from preimage and image
+			MappedDOMResource mappedDOMResource = new MappedDOMResource(preimage);
+			mappedDOMResource.setImage(image);
+			return mappedDOMResource;
+		} catch (SaxonApiException e) {
+			throw new ResourceException(e.getMessage());
+		}
+	}
 
 	/**
 	 * Derives a {@link MappedDOMResource} from a preimage and an XSLT
@@ -164,7 +203,7 @@ public class ResourceBuilder {
 		StreamSource traceSource = new StreamSource(traceStream, traceSystemId);
 
 		try {
-			// transform preimage to image
+			// make XSLT transformer
 			Processor proc = preimage.getProcessor();
 			XsltCompiler compiler = proc.newXsltCompiler();
 			XsltPackage tracePackage = compiler.compilePackage(traceSource);
@@ -174,22 +213,8 @@ public class ResourceBuilder {
 			log.debug("trace package imported");
 			XsltExecutable executable = compiler.compile(xsl);
 			Xslt30Transformer transformer = executable.load30();
-
-			Class<? extends Point> pointClass;
-			if (imagePointClass != null) {
-				pointClass = imagePointClass;
-			} else {
-				pointClass = ResourceBuilder.pointerClassFromOutputMethod(transformer);
-			}
-
-			// transform to XdmValue, which keeps the nodes from the source
-			XdmValue imageValue = transformer.applyTemplates(preimage.getContents());
-			XdmValueResource image = new XdmValueResource(null, imageValue, proc, pointClass);
-
-			// make mapped resource from preimage and image
-			MappedDOMResource mappedDOMResource = new MappedDOMResource(preimage);
-			mappedDOMResource.setImage(image);
-			return mappedDOMResource;
+			// transform preimage to image
+			return ResourceBuilder.mapWithXsltTracePackage(preimage, transformer, imagePointClass);
 		} catch (SaxonApiException e) {
 			throw new ResourceException(e.getMessage());
 		}
@@ -232,7 +257,11 @@ public class ResourceBuilder {
 	public static MappedDOMResource mapWithXsltTracePackage(
 			DOMResource preimage, URI stylesheet, Class<? extends Point> imagePointClass) throws ResourceException {
 		return ResourceBuilder.mapWithXsltTracePackage(
-				preimage, stylesheet, ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML), LIBTRACE_XML, imagePointClass);
+				preimage,
+				stylesheet,
+				ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML),
+				LIBTRACE_XML,
+				imagePointClass);
 	}
 
 	/**
@@ -351,14 +380,14 @@ public class ResourceBuilder {
 	 * @throws SaxonApiException when a compilation error occurred
 	 * @throws ResourceException e.g. when the requested output method is not supported
 	 */
-	public static XsltPackage compileTracingPackage(XsltCompiler compiler, OutputMethod method) throws SaxonApiException, ResourceException {
+	public static XsltPackage compileTracingPackage(XsltCompiler compiler, OutputMethod method)
+			throws SaxonApiException, ResourceException {
 		StreamSource source;
 		if (method.equals(OutputMethod.XML)) {
 			source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML));
 		} else {
 			throw new ResourceException("output method not yet supported: " + method);
 		}
-        return compiler.compilePackage(source);
+		return compiler.compilePackage(source);
 	}
-
 }
