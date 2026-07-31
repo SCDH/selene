@@ -28,7 +28,6 @@
   <modules>
     <module>core</module>
     <module>cli</module>
-    <module>mapping</module>
   </modules>
 
   <scm>
@@ -131,7 +130,7 @@
       <version>2.12.2</version>
     </dependency>
     <dependency>
-      <!-- a HTML parser -->
+      <!-- an HTML parser -->
       <groupId>nu.validator</groupId>
       <artifactId>htmlparser</artifactId>
       <version>1.4.16</version>
