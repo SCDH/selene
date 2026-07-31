@@ -43,6 +43,17 @@ public class ResourceBuilder {
 		HTML
 	}
 
+	/**
+	 *
+	 */
+	public enum OutputMethod {
+		XML,
+		HTML,
+		XHTML,
+		TEXT,
+		JSON
+	}
+
 	public static final String MODIFY_CONFIG_XSL = "/xslt/modify-config.xsl";
 
 	public static final String LIBTRACE_XML = "/xslt/libtrace-xml.xsl";
@@ -89,6 +100,32 @@ public class ResourceBuilder {
 	}
 
 	/**
+	 * Parses the contents of a given URI with a given {@link Parser}.
+	 */
+	public Resource<?> parseResource(URI resource, InputStream inputStream, Parser parser) throws ResourceException {
+		// parse the resource
+		if (parser.equals(Parser.XML)) {
+			try {
+				return DOMResource.fromXML(resource, inputStream, processor);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new ResourceException(e);
+			}
+		} else if (parser.equals(Parser.HTML)) {
+			try {
+				return DOMResource.fromHTML(resource, inputStream, processor);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new ResourceException(e);
+			}
+		} else {
+			System.err.printf("unknown parser %s\n", parser.toString());
+			throw new ResourceException("unknown parser " + parser.toString());
+		}
+	}
+
+
+	/**
 	 * Derives a {@link MappedDOMResource} from a preimage and an XSLT
 	 * stylesheet.<P>
 	 *
@@ -98,7 +135,7 @@ public class ResourceBuilder {
 	 * enough. Transforming the config file and changing the
 	 * <code>resourceLocation</code> is required.<P>
 	 *
-	 * {@link ResourceException.processorFromModifiedConfig(Source)}
+	 * {@link ResourceBuilder#processorFromModifiedConfig(Source)}
 	 * has a solution.
 	 *
 	 * @param preimage - the resource deriving from
@@ -305,10 +342,23 @@ public class ResourceBuilder {
 		}
 	}
 
-	public static XsltPackage compileTracingPackage(XsltCompiler compiler) {
-		StreamSource source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_PARAM));
-		XsltPackage pkg = compiler.compilePackage(source);
-		return pkg;
+	/**
+	 * This compiles the XSLT tracing library for the given output method.
+	 *
+	 * @param compiler - an {@link XsltCompiler} for compiling the tracing library
+	 * @param method - the output method <code>xsl:output/@method</code> of the stylesheet
+	 * @return the compiled package
+	 * @throws SaxonApiException when a compilation error occurred
+	 * @throws ResourceException e.g. when the requested output method is not supported
+	 */
+	public static XsltPackage compileTracingPackage(XsltCompiler compiler, OutputMethod method) throws SaxonApiException, ResourceException {
+		StreamSource source;
+		if (method.equals(OutputMethod.XML)) {
+			source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML));
+		} else {
+			throw new ResourceException("output method not yet supported: " + method);
+		}
+        return compiler.compilePackage(source);
 	}
 
 }
