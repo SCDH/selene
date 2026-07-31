@@ -49,7 +49,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 
 	@Test
 	public void testTextToOneNodeWithXPathAndPos5() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -71,7 +71,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 
 	@Test
 	public void testAmbiguityWithModeFirst() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -95,7 +95,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 	@Test
 	public void testAmbiguityWithModeDeepNodeStepOverEnd()
 			throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -124,7 +124,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				"/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]",
 				5);
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image =
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML), PROC);
@@ -146,7 +146,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				"/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]/Q{http://www.w3.org/1999/xhtml}div[2]/Q{http://www.w3.org/1999/xhtml}div[1]/Q{http://www.w3.org/1999/xhtml}h2[1]",
 				5);
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image =
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML), PROC);

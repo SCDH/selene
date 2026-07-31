@@ -81,14 +81,14 @@ public class ResourceBuilder {
 		// parse the resource
 		if (parser.equals(Parser.XML)) {
 			try {
-				return DOMResource.fromXML(resource, null, processor);
+				return DOMResource.fromXML(resource, processor);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				throw new ResourceException(e);
 			}
 		} else if (parser.equals(Parser.HTML)) {
 			try {
-				return DOMResource.fromHTML(resource, null, processor);
+				return DOMResource.fromHTML(resource, processor);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				throw new ResourceException(e);
@@ -102,18 +102,19 @@ public class ResourceBuilder {
 	/**
 	 * Parses the contents of a given URI with a given {@link Parser}.
 	 */
-	public Resource<?> parseResource(URI resource, InputStream inputStream, Parser parser) throws ResourceException {
+	public Resource<?> parseResource(URI resource, InputStream inputStream, String systemId, Parser parser)
+			throws ResourceException {
 		// parse the resource
 		if (parser.equals(Parser.XML)) {
 			try {
-				return DOMResource.fromXML(resource, inputStream, processor);
+				return DOMResource.fromXML(resource, inputStream, systemId, processor);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				throw new ResourceException(e);
 			}
 		} else if (parser.equals(Parser.HTML)) {
 			try {
-				return DOMResource.fromHTML(resource, inputStream, processor);
+				return DOMResource.fromHTML(resource, inputStream, systemId, processor);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
 				throw new ResourceException(e);

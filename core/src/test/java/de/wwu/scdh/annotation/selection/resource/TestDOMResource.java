@@ -25,33 +25,33 @@ public class TestDOMResource {
 	@Test
 	void testFromHTMLonGesangHtml() throws IOException, SaxonApiException {
 		// parsing HTML with the HTML parser does not fail
-		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, null, PROC);
+		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, PROC);
 		assertEquals(resource.getUri(), GESANG_HTML);
 	}
 
 	@Test
 	void testFromHTMLonGesangXml() throws IOException, SaxonApiException {
 		// HTML parser is not suitable for XML
-		assertThrows(Exception.class, () -> DOMResource.fromHTML(GESANG_XML, null, PROC));
+		assertThrows(Exception.class, () -> DOMResource.fromHTML(GESANG_XML, PROC));
 	}
 
 	@Test
 	void testFromXMLonGesangHtml() throws IOException, SaxonApiException {
 		// parsing XML with the XML parser does not fail
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		assertEquals(resource.getUri(), GESANG_XML);
 	}
 
 	@Test
 	void testFromXMLonGesangXml() throws IOException, SaxonApiException {
 		// XML parser is not suitable for HTML
-		assertThrows(Exception.class, () -> DOMResource.fromXML(GESANG_HTML, null, PROC));
+		assertThrows(Exception.class, () -> DOMResource.fromXML(GESANG_HTML, PROC));
 	}
 
 	// @Test
 	void testGetPreImage() throws IOException, SaxonApiException {
 		// without any validation: test the getPreImage() getter
-		DOMResource preimage = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource preimage = DOMResource.fromXML(GESANG_XML, PROC);
 		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, PROC);
 		// assertEquals(preimage, resource.getPreImage());
 	}
@@ -59,7 +59,7 @@ public class TestDOMResource {
 	@Test
 	void testHTMLParserOnGesangHtml() throws IOException, SaxonApiException {
 		// assert that the HTML parser provides a correct DOM
-		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, null, PROC);
+		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, PROC);
 		assertEquals(resource.getUri(), GESANG_HTML);
 		// correct document node
 		assertEquals("DOCUMENT", resource.getContents().getNodeKind().name());
@@ -77,7 +77,7 @@ public class TestDOMResource {
 		// assert that the HTML parser ignores white space nodes before <head>
 		// see https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
 		// see https://stackoverflow.com/questions/26800626/what-whitespaces-in-html-are-considered-whitespace-nodes
-		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, null, PROC);
+		DOMResource resource = DOMResource.fromHTML(GESANG_HTML, PROC);
 		assertEquals(resource.getUri(), GESANG_HTML);
 		// correct document node
 		assertEquals("DOCUMENT", resource.getContents().getNodeKind().name());

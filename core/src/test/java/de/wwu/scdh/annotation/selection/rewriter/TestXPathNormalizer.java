@@ -60,7 +60,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathRootElement() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "/*";
@@ -76,7 +76,7 @@ public class TestXPathNormalizer {
 	@Disabled
 	@Test
 	public void testPathExpressionXPathRootElementChar4() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "/*";
@@ -92,7 +92,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathRootElementPos39() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "/*";
@@ -109,7 +109,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathVerse1() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "id('v2')/text()[2]";
@@ -126,7 +126,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathVerse1Char10() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "id('v2')";
@@ -143,7 +143,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathVerse1Char16() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "id('v2')";
@@ -160,7 +160,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathVerse1CaesuraThrows() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "id('v1')/*:caesura[1]";
@@ -171,7 +171,7 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testPathExpressionXPathVerse1Char100Throws() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		String xpath;
 		xpath = "id('v1')";
@@ -183,14 +183,14 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testAmbiguityOnSolarXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(SOLAR_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(SOLAR_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminary(normalizer, resource, "Sol");
 	}
 
 	@Test
 	public void testAmbiguityOnLunarXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(LUNAR_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(LUNAR_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminary(normalizer, resource, "Lun");
 	}
@@ -238,14 +238,14 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testDeepestNodeOnSolarpanelXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminaryPanel(normalizer, resource, "Sol");
 	}
 
 	@Test
 	public void testDeepestNodeOnLunarpanelXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminaryPanel(normalizer, resource, "Lun");
 	}
@@ -321,14 +321,14 @@ public class TestXPathNormalizer {
 
 	@Test
 	public void testFirstSecondOnSolarpanelXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminaryPanelWithFirstSecond(normalizer, resource, "Sol");
 	}
 
 	@Test
 	public void testFirstSecondOnLunarpanelXML() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(LUNARPANEL_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		assertLuminaryPanelWithFirstSecond(normalizer, resource, "Lun");
 	}
@@ -409,7 +409,7 @@ public class TestXPathNormalizer {
 	 * text node.
 	 */
 	void assertAmbiguityClass2(Mode mode) throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(SOLARPANEL_XML, PROC);
 		XPathNormalizer normalizer = new DummyNormalizer();
 		Pair<XdmNode, Integer> result1 =
 				normalizer.getTextNodeAtPosition(resource, "/*:r[1]/*:t1[1]/text()[1]", 2, mode);

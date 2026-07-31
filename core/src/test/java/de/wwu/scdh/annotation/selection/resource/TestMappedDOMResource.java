@@ -51,13 +51,13 @@ public class TestMappedDOMResource {
 	@Disabled
 	@Test
 	public void testGesantParsedWithSAX() throws IOException, SaxonApiException {
-		DOMResource source = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXML(GESANG_XML, PROC);
 		assertThrows(ResourceException.class, () -> new MappedDOMResource(source));
 	}
 
 	@Test
 	public void testGesangParsedWithXerces() throws ResourceException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmNode doc = preimage.getContents();
 		// assertTrue(MappedDOMResource.getNodeTrace(doc, MappedDOMResource.ID_XPATH).isPresent());
@@ -83,7 +83,7 @@ public class TestMappedDOMResource {
 
 	@Test
 	public void testGesangMappedWithIdentity() throws ResourceException, SaxonApiException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -109,7 +109,7 @@ public class TestMappedDOMResource {
 
 	@Test
 	public void testGesangForwardMapping() throws ResourceException, SaxonApiException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -131,7 +131,7 @@ public class TestMappedDOMResource {
 
 	@Test
 	public void testGesangBackwardMapping() throws ResourceException, SaxonApiException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 		preimage.setImage(image);

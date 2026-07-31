@@ -63,14 +63,14 @@ public class Normalize extends AbstractNormalize implements Callable<Integer> {
 	DOMResource dom;
 	if (parser.equals(Parser.XML)) {
 	    try {
-		dom = DOMResource.fromXML(resourceResolved, null, PROC);
+		dom = DOMResource.fromXML(resourceResolved, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 1;
 	    }
 	} else if (parser.equals(Parser.HTML)) {
 	    try {
-		dom = DOMResource.fromHTML(resourceResolved, null, PROC);
+		dom = DOMResource.fromHTML(resourceResolved, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		return 1;

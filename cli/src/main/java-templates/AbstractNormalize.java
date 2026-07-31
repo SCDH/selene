@@ -101,14 +101,14 @@ abstract class AbstractNormalize {
 	// parse the resource
 	if (parser.equals(Parser.XML)) {
 	    try {
-		return DOMResource.fromXML(resourceResolved, null, PROC);
+		return DOMResource.fromXML(resourceResolved, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);
 	    }
 	} else if (parser.equals(Parser.HTML)) {
 	    try {
-		return DOMResource.fromHTML(resourceResolved, null, PROC);
+		return DOMResource.fromHTML(resourceResolved, PROC);
 	    } catch (Exception e) {
 		System.err.println(e.getMessage());
 		throw new CliException(e);

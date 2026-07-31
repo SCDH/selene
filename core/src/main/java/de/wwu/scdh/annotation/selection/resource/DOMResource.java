@@ -44,23 +44,26 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 
 	/**
 	 * Create a new {@link DOMResource} from a parsed JAXP
-	 *
 	 * {@link Source}. The source is fed to Saxon's
-	 *
 	 * {@link DocumentBuilder}. Please notice the information on JAXP
 	 * source types in the <a
 	 * href="https://www.saxonica.com/html/documentation10/sourcedocs/jaxpsources.html">Saxon
-	 * documentation</a>.
+	 * documentation</a>.<P/>
+	 *
+	 * The <code>uri</code> is not <code>systemId</code>: The <code>systemId</code> is related to the physical
+	 * location of the source and may be important for processing XIncludes or the like and determines the Base URI
+	 * of the resulting nodes of the document. It should be set to the source, if required. In contrast,
+	 * the <code>uri</code> must be seen as the IRI of the resource in a linked open data context. It is used to
+	 * filter out selectors into the resource.
 	 *
 	 * @param uri a {@link URI} identifying the resource
 	 * @param source  the document as a JAXP {@link Source}
-	 * @param processor a saxon {@link Processor} to be used by the document builder
+	 * @param processor a Saxon {@link Processor} to be used by the document builder
 	 *
 	 * @throws SaxonApiException when the document builder fails
 	 */
 	public DOMResource(URI uri, Source source, Processor processor) throws SaxonApiException {
 		this.uri = uri;
-		source.setSystemId(uri.toString()); // assert that systemId is set
 		this.processor = processor;
 		DocumentBuilder documentBuilder = processor.newDocumentBuilder();
 		XdmNode docNode = documentBuilder.build(source);
@@ -72,16 +75,18 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 	 * InputStream}. This uses the {@link HtmlParser} for parsing the
 	 * HTML input, which may be tag soup.
 	 *
-	 * @param uri  a {@link URI} identifying the resource
-	 * @param inputStream  {@link InputStream} with the HTML document
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
+	 * @param uri - a {@link URI} identifying the resource in a linked open data context
+	 * @param inputStream - {@link InputStream} with the HTML document
+	 * @param systemId - the physical location of the input stream, may be used for processing XIncludes
+	 * @param processor  a Saxon {@link Processor} to be used by the document builder
 	 *
 	 * @throws SaxonApiException when the document builder fails
 	 */
-	public static DOMResource fromHTML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
+	public static DOMResource fromHTML(URI uri, InputStream inputStream, String systemId, Processor processor)
+			throws SaxonApiException {
 		// encapsulate input stream in InputSource
 		InputSource inputSource = new InputSource(inputStream);
-		inputSource.setSystemId(uri.toString());
+		inputSource.setSystemId(systemId);
 		// use HTML parser
 		Source source = new SAXSource(new HtmlParser(), inputSource);
 		// hand over to just DOM handling
@@ -90,19 +95,17 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 
 	/**
 	 * Same as
-	 *
-	 * {@link DOMResource#fromHTML(URI, InputStream, Resource, Processor)},
-	 *
+	 * {@link DOMResource#fromHTML(URI, InputStream, String, Processor)},
 	 * but gets the input from the URI.
 	 *
-	 * @param uri  a {@link URI} identifying the resource
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
+	 * @param uri - a {@link URI} identifying the resource
+	 * @param processor - a Saxon {@link Processor} to be used by the document builder
 	 *
 	 * @throws SaxonApiException when the document builder fails
 	 */
 	public static DOMResource fromHTML(URI uri, Processor processor) throws IOException, SaxonApiException {
 		InputStream in = uri.toURL().openStream();
-		return fromHTML(uri, in, processor);
+		return fromHTML(uri, in, uri.toString(), processor);
 	}
 
 	/**
@@ -110,32 +113,33 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 	 *
 	 * {@link InputStream}.
 	 *
-	 * @param uri  a {@link URI} identifying the resource
-	 * @param inputStream  {@link InputStream} with the XML document
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
+	 * @param uri - a {@link URI} identifying the resource
+	 * @param inputStream - {@link InputStream} with the XML document
+	 * @param systemId - the systemId of the input stream, may be used to process XIncludes
+	 * @param processor - a Saxon {@link Processor} to be used by the document builder
 	 *
 	 * @throws SaxonApiException when the document builder fails
 	 */
-	public static DOMResource fromXML(URI uri, InputStream inputStream, Processor processor) throws SaxonApiException {
+	public static DOMResource fromXML(URI uri, InputStream inputStream, String systemId, Processor processor)
+			throws SaxonApiException {
 		Source source = new StreamSource(inputStream);
-		source.setSystemId(uri.toString());
+		source.setSystemId(systemId);
 		return new DOMResource(uri, source, processor);
 	}
 
 	/**
 	 * Same as
 	 *
-	 * {@link DOMResource#fromXML(URI, InputStream, Resource, Processor)}, but
+	 * {@link DOMResource#fromXML(URI, InputStream, String, Processor)}, but
 	 * gets the input from the URI.
 	 *
-	 * @param uri  a {@link URI} identifying the resource
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
-	 *
+	 * @param uri - a {@link URI} identifying the resource
+	 * @param processor - a Saxon {@link Processor} to be used by the document builder
 	 * @throws SaxonApiException when the document builder fails
 	 */
 	public static DOMResource fromXML(URI uri, Processor processor) throws IOException, SaxonApiException {
 		InputStream in = uri.toURL().openStream();
-		return fromXML(uri, in, processor);
+		return fromXML(uri, in, uri.toString(), processor);
 	}
 
 	/**
@@ -144,17 +148,18 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 	 * document is wrapped in XDM nodes, but the underlying nodes are
 	 * <code>w3c.xml.dom</code> nodes.
 	 *
-	 * @param uri  a {@link URI} identifying the resource
-	 * @param inputStream  {@link InputStream} with the XML document
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
+	 * @param uri - a {@link URI} identifying the resource
+	 * @param inputStream - {@link InputStream} with the XML document
+	 * @param systemId - the systemId of the input stream, may be used to process XIncludes
+	 * @param processor - a Saxon {@link Processor} to be used by the document builder
 	 *
-	 * @throws SaxonApiException when the document builder fails
+	 * @throws ResourceException when the document builder fails
 	 */
-	public static DOMResource fromXMLwithXerces(URI uri, InputStream inputStream, Processor processor)
+	public static DOMResource fromXMLwithXerces(URI uri, InputStream inputStream, String systemId, Processor processor)
 			throws ResourceException {
 		try {
 			InputSource inputSource = new InputSource(inputStream);
-			inputSource.setSystemId(uri.toString());
+			inputSource.setSystemId(systemId);
 			org.apache.xerces.parsers.DOMParser parser = new org.apache.xerces.parsers.DOMParser();
 			parser.parse(inputSource);
 			Document doc = parser.getDocument();
@@ -164,29 +169,24 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 			// https://stackoverflow.com/questions/49829126/what-is-idiomatic-way-to-serialize-dom-document-with-s9api-serializer
 			XdmNode xdmDoc = processor.newDocumentBuilder().wrap(doc);
 			return new DOMResource(uri, xdmDoc, processor);
-		} catch (SAXException e) {
-			throw new ResourceException(e.getMessage());
-		} catch (IOException e) {
+		} catch (SAXException | IOException e) {
 			throw new ResourceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * Same as
-	 *
-	 * {@link DOMResource#fromXMLwithXerces(URI, InputStream, Processor)},
-	 *
+	 * {@link DOMResource#fromXMLwithXerces(URI, InputStream, String, Processor)},
 	 * but gets the input from the URI.
 	 *
 	 * @param uri  a {@link URI} identifying the resource
-	 * @param processor  a saxon {@link Processor} to be used by the document builder
-	 *
-	 * @throws SaxonApiException when the document builder fails
+	 * @param processor - a sSaxon {@link Processor} to be used by the document builder
+	 * @throws ResourceException when the document builder fails
 	 */
 	public static DOMResource fromXMLwithXerces(URI uri, Processor processor) throws ResourceException {
 		try {
 			InputStream in = uri.toURL().openStream();
-			return fromXMLwithXerces(uri, in, processor);
+			return fromXMLwithXerces(uri, in, uri.toString(), processor);
 		} catch (IOException e) {
 			throw new ResourceException(e.getMessage());
 		}

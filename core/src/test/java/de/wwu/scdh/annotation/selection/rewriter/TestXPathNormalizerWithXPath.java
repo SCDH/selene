@@ -27,7 +27,7 @@ public class TestXPathNormalizerWithXPath {
 
 	@Test
 	public void testWithPathFunction() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath("path(.)");
 		assertEquals("path(.)", normalizer.getXPath());
 		String xpath;
@@ -54,7 +54,7 @@ public class TestXPathNormalizerWithXPath {
 
 	@Test
 	public void testWithDeepestIdClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
 				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 		String xpath;
@@ -72,7 +72,7 @@ public class TestXPathNormalizerWithXPath {
 
 	@Test
 	public void testWithDeepestIdClarkXPathVerse2AppChar6() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
 				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 		String xpath;
@@ -91,7 +91,7 @@ public class TestXPathNormalizerWithXPath {
 
 	@Test
 	public void testPathExpressionClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
 				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 		String xpath;
@@ -110,7 +110,7 @@ public class TestXPathNormalizerWithXPath {
 	@Test
 	public void testPathExpressionClarkXPathOnVerse2AppChar6()
 			throws SelectorException, SaxonApiException, IOException {
-		DOMResource resource = DOMResource.fromXML(GESANG_XML, null, PROC);
+		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
 				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 		String xpath;

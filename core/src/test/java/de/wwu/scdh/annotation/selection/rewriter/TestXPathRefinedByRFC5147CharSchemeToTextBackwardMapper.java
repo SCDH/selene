@@ -61,7 +61,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 
 	@Test
 	public void testSerializedToPlainText() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -72,7 +72,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 
 	@Test
 	public void testTextToOneNodeWithXPathAndPos5() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -92,7 +92,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 
 	@Test
 	public void testTextToOneNodeWithXPathAndPos0() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -112,7 +112,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 	@Test
 	public void testTextToOneNodeWithXPathAndPos0WithDeepestConfig()
 			throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -132,7 +132,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 
 	@Test
 	public void testTextToOneNodeWithPos0Char() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
@@ -149,7 +149,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 
 	@Test
 	public void testTextToNoneNode() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, NO_HEADER_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);

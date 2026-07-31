@@ -51,7 +51,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 
 	@Test
 	public void testGesangMappedWithIdentity() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -72,7 +72,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		// we transform a point that occurs twice in the output
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -107,7 +107,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		// we transform a point that occurs twice in the output
 		XPathRefinedByRFC5147CharScheme preimagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/*:TEI[1]/*:teiHeader[1]/*:fileDesc[1]/*:titleStmt[1]/*:author[1]", 5);
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -119,7 +119,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 
 	@Test
 	public void testTextToOneNode() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
@@ -136,7 +136,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 
 	@Test
 	public void testTextToOneNodeWithRootOffset() throws ResourceException, SaxonApiException, SelectorException {
-		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, null, PROC);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
