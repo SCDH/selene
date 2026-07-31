@@ -137,11 +137,13 @@ public class ResourceBuilder {
 	 * {@link ResourceBuilder#processorFromModifiedConfig(Source)}
 	 * has a solution.
 	 *
+	 * @param imageUri - the {@link URI} of the image
 	 * @param preimage - the resource deriving from
+	 * @param transformer - an {@link Xslt30Transformer} to derive the image with
 	 * @param imagePointClass - the class of the point used for the image, or <code>null</code> for concluding from the stylesheet's default output method
 	 */
 	public static MappedDOMResource mapWithXsltTracePackage(
-			DOMResource preimage, Xslt30Transformer transformer, Class<? extends Point> imagePointClass)
+			URI imageUri, DOMResource preimage, Xslt30Transformer transformer, Class<? extends Point> imagePointClass)
 			throws ResourceException {
 
 		Class<? extends Point> pointClass;
@@ -154,7 +156,7 @@ public class ResourceBuilder {
 			// transform to XdmValue, which keeps the nodes from the source
 			XdmValue imageValue = transformer.applyTemplates(preimage.getContents());
 			XdmValueResource image = new XdmValueResource(
-					null, imageValue, transformer.newSerializer().getProcessor(), pointClass);
+					imageUri, imageValue, transformer.newSerializer().getProcessor(), pointClass);
 			// make mapped resource from preimage and image
 			MappedDOMResource mappedDOMResource = new MappedDOMResource(preimage);
 			mappedDOMResource.setImage(image);
@@ -214,7 +216,7 @@ public class ResourceBuilder {
 			XsltExecutable executable = compiler.compile(xsl);
 			Xslt30Transformer transformer = executable.load30();
 			// transform preimage to image
-			return ResourceBuilder.mapWithXsltTracePackage(preimage, transformer, imagePointClass);
+			return ResourceBuilder.mapWithXsltTracePackage(null, preimage, transformer, imagePointClass);
 		} catch (SaxonApiException e) {
 			throw new ResourceException(e.getMessage());
 		}
