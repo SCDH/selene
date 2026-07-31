@@ -6,7 +6,7 @@
     "source": "https://global.scdh.uni-muenster.de/comment/1"
   },
   "target": {
-    "source": "scdh.span.42.html",
+    "source": "https://docs.org/scdh.span.42.html",
     "selector": {
         "type": "RangeSelector",
         "startSelector": {

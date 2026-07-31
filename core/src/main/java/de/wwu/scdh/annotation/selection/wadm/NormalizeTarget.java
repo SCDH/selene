@@ -7,7 +7,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.function.Consumer;
-import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
@@ -33,24 +32,25 @@ public class NormalizeTarget implements Consumer<Resource> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NormalizeTarget.class);
 
-	protected final Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom;
+	protected final de.wwu.scdh.annotation.selection.Resource<?> resource;
+	protected final URI iri;
+
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
-	protected final Processor processor;
 	protected final RewriterConfig normalizerConfig;
 
 	protected Optional<Exception> error = Optional.empty();
 
 	public NormalizeTarget(
-			Processor processor,
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
 			RewriterFactory rewriterFactory,
 			RewriterConfig normalizerConfig,
-			Model model,
-			Optional<de.wwu.scdh.annotation.selection.Resource<?>> dom) {
+			Model model) {
+		this.resource = resource;
+		this.iri = iri;
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
-		this.dom = dom;
-		this.processor = processor;
 		this.normalizerConfig = normalizerConfig;
 	}
 
@@ -93,33 +93,20 @@ public class NormalizeTarget implements Consumer<Resource> {
 	public void acceptThrows(Resource target)
 			throws ModelException, URISyntaxException, IOException, SaxonApiException {
 		LOG.debug("normalizing target '{}'", target.toString());
-		// a Source was passed into the constructor or we get a
-		// Source from the target; if neither is the case, it
-		// would lack of information in the model
-		de.wwu.scdh.annotation.selection.Resource<?> source;
-		// Note: We are using the pattern
-		// ..listProperties(...).toSet().isEmpty() because toSet()
-		// *exhaustively* consumes the iterator returned by
-		// listStatements; using .hasNext() would not close the
-		// iterator and thus cause a memory leak.
-		if (dom.isEmpty() && target.listProperties(OA.hasSource).toSet().isEmpty()) {
-			// bad
-			throw new ModelException("annotation target is missing the OA:hasSource property");
-		}
-		if (dom.isEmpty()) {
-			// get target source from annotation
-			String targetSource = target.getProperty(OA.hasSource).getObject().toString();
-			LOG.debug("getting and parsing source '{}'", targetSource);
-			URI targetUri = new URI(targetSource);
-			try {
-				source = DOMResource.fromXML(targetUri, processor);
-			} catch (Exception e) {
-				source = DOMResource.fromHTML(targetUri, processor);
-			}
+		RDFNode sourceNode = target.getProperty(OA.hasSource).getObject();
+		String targetSource;
+		if (sourceNode.isLiteral()) {
+			targetSource = sourceNode.asLiteral().getString();
+		} else if (sourceNode.isURIResource()) {
+			targetSource = sourceNode.asResource().getURI();
 		} else {
-			source = dom.get();
+			targetSource = sourceNode.toString();
 		}
-
+		// guard: if the oa:hasSource does not match the IRI, we are done
+		if (!targetSource.equals(iri.toString())) {
+			LOG.info("target source {} does not match IRI {}", targetSource, iri);
+			return;
+		}
 		// normalize RangeSelectors
 		model.listStatements(target, OA.hasSelector, (RDFNode) null)
 				.mapWith((stmt) -> stmt.getResource())
@@ -129,7 +116,7 @@ public class NormalizeTarget implements Consumer<Resource> {
 							.isEmpty();
 				})
 				// exceptions are not propagated from selector normalizations
-				.forEach(new NormalizeRangeSelector(processor, rewriterFactory, normalizerConfig, model, source));
+				.forEach(new NormalizeRangeSelector(resource, iri, rewriterFactory, normalizerConfig, model));
 
 		// TODO: normalize other selectors
 	}

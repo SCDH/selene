@@ -95,10 +95,10 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
     @Override
     public Integer call() throws Exception {
 
-	Optional<Resource<?>> dom = Optional.empty();
+	Resource<?> dom = null;
 	if (resource != null) {
 	    try {
-		dom = Optional.of(parseResource(resource));
+		dom = parseResource(resource);
 	    } catch (CliException e) {
 		return 1;
 	    }
@@ -126,7 +126,7 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 	// do the normalization
 	Model model;
 	try {
-	    model = NormalizeAnnotation.normalize(PROC, getNormalizerFactory(), getRewriterConfig(), selectorsResolved.toString(), lang, dom);
+	    model = NormalizeAnnotation.normalize(dom, resource, getNormalizerFactory(), getRewriterConfig(), selectorsResolved.toString(), lang);
 	} catch (Exception e) {
 	    System.err.println(e.getMessage());
 	    return 10;

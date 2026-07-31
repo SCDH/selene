@@ -1,9 +1,9 @@
 package de.wwu.scdh.annotation.selection.wadm;
 
 import de.wwu.scdh.annotation.selection.*;
+import java.net.URI;
 import java.util.Optional;
 import java.util.function.Consumer;
-import net.sf.saxon.s9api.Processor;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -20,24 +20,24 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 	public static final Mode START_XPATH_SELECTOR_MODE = Mode.LAST_OF_DEEPEST_NODES;
 	public static final Mode END_XPATH_SELECTOR_MODE = Mode.FIRST_OF_DEEPEST_NODES;
 
-	protected final de.wwu.scdh.annotation.selection.Resource<?> dom;
+	protected final de.wwu.scdh.annotation.selection.Resource<?> resource;
+	protected final URI iri;
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
-	protected final Processor processor;
 	protected final RewriterConfig normalizerConfig;
 
 	protected Optional<Exception> error = null;
 
 	public NormalizeRangeSelector(
-			Processor processor,
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
 			RewriterFactory rewriterFactory,
 			RewriterConfig normalizerConfig,
-			Model model,
-			de.wwu.scdh.annotation.selection.Resource<?> dom) {
+			Model model) {
+		this.resource = resource;
+		this.iri = iri;
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
-		this.dom = dom;
-		this.processor = processor;
 		this.normalizerConfig = normalizerConfig;
 	}
 
@@ -72,10 +72,10 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 								.toSet()
 								.isEmpty())
 				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
-						processor,
+						resource,
+						iri,
 						rewriterFactory,
 						model,
-						dom,
 						RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
 
 		selector.listProperties(OA.hasEndSelector)
@@ -101,10 +101,10 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 								.toSet()
 								.isEmpty())
 				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
-						processor,
+						resource,
+						iri,
 						rewriterFactory,
 						model,
-						dom,
 						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
 	}
 }

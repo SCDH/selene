@@ -3,8 +3,14 @@ package de.wwu.scdh.annotation.selection.wadm;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Optional;
 import net.sf.saxon.s9api.Processor;
@@ -18,18 +24,36 @@ import org.junit.jupiter.api.*;
  */
 public class TestNormalizeAnnotation {
 
+	public static final String IRI = "https://docs.org/scdh.span.42.html";
+
 	public static final File TEST_DIR = Paths.get("..", "test").toFile();
 	public static final File SAMPLE_DIR =
 			Paths.get("src", "test", "resources", "samples").toFile();
 
 	public static final String P1_1_JSON = new File(SAMPLE_DIR, "p1.1.json").toString();
 
-	private RewriterFactory rewriterFactory = new NormalizerFactory();
+	public static final URI SPAN_HTML = new File(SAMPLE_DIR, "scdh.span.42.html").toURI();
+
+	private final RewriterFactory rewriterFactory = new NormalizerFactory();
 	private RewriterConfig normalizerConfig;
 
-	private Processor processor = new Processor();
-
 	private Model model;
+
+	private de.wwu.scdh.annotation.selection.Resource<?> resource;
+
+	private URI iri;
+
+	@BeforeEach
+	public void setupResource() throws URISyntaxException, ResourceException, MalformedURLException {
+		iri = new URI(IRI);
+		ResourceBuilder resourceBuilder = new ResourceBuilder(new Processor());
+		try (InputStream inputStream = SPAN_HTML.toURL().openStream()) {
+			resource =
+					resourceBuilder.parseResource(iri, inputStream, SPAN_HTML.toString(), ResourceBuilder.Parser.HTML);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	private static RewriterConfig makeConfig(String xpath) {
 		return new RewriterConfig(null, false, xpath);
@@ -41,7 +65,7 @@ public class TestNormalizeAnnotation {
 	public void testAcceptP11WithPath() {
 		normalizerConfig = makeConfig("path(.)");
 		model = NormalizeAnnotation.normalize(
-				processor, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+				resource, iri, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"));
 		assertEquals(21, model.size());
 		assertEquals(
 				1,
@@ -72,7 +96,7 @@ public class TestNormalizeAnnotation {
 	public void testAcceptP11WithPathParent() {
 		normalizerConfig = makeConfig("path(parent::*)");
 		model = NormalizeAnnotation.normalize(
-				processor, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+				resource, iri, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"));
 		assertEquals(21, model.size());
 		assertEquals(
 				1,
@@ -103,7 +127,7 @@ public class TestNormalizeAnnotation {
 	public void testAcceptP11WithPathParentParent() {
 		normalizerConfig = makeConfig("path(parent::*/parent::*)");
 		model = NormalizeAnnotation.normalize(
-				processor, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"), Optional.empty());
+				resource, iri, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"));
 		assertEquals(21, model.size());
 		assertEquals(
 				1,

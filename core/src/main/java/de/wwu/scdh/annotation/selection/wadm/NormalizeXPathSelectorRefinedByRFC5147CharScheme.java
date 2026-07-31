@@ -3,9 +3,9 @@ package de.wwu.scdh.annotation.selection.wadm;
 import de.wwu.scdh.annotation.selection.*;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import java.net.URI;
 import java.util.Optional;
 import java.util.function.Consumer;
-import net.sf.saxon.s9api.Processor;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
@@ -37,30 +37,25 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 
 	public static final String RFC5147 = "http://tools.ietf.org/rfc/rfc5147";
 
-	protected DOMResource dom;
+	protected final de.wwu.scdh.annotation.selection.Resource<?> resource;
+	protected final URI iri;
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
 	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> rewriter = null;
-	protected final Processor processor;
 	protected final RewriterConfig normalizerConfig;
 
 	protected Optional<Exception> error = null;
 
 	public NormalizeXPathSelectorRefinedByRFC5147CharScheme(
-			Processor processor,
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
 			RewriterFactory rewriterFactory,
 			Model model,
-			de.wwu.scdh.annotation.selection.Resource<?> dom,
 			RewriterConfig normalizerConfig) {
+		this.resource = resource;
+		this.iri = iri;
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
-		try {
-			this.dom = (DOMResource) dom;
-		} catch (Exception e) {
-			LOG.error("failed to cast resource to DOM resource");
-		}
-		LOG.debug("dom present");
-		this.processor = processor;
 		this.normalizerConfig = normalizerConfig;
 		try {
 			this.rewriter = rewriterFactory.getRewriter(
@@ -95,6 +90,13 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	 */
 	public void acceptThrows(Resource selector) throws ModelException, NumberFormatException, SelectorException {
 		LOG.debug("normalizing XPathSelector '{}'", selector);
+
+		DOMResource domResource;
+		if (resource instanceof DOMResource) {
+			domResource = (DOMResource) resource;
+		} else {
+			throw new SelectorException("cannot rewrite XPathSelector without a DOM resource");
+		}
 
 		// 1. get XPath component
 		String xpath;
@@ -154,7 +156,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		// 3. normalize the components
 		LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
-		for (XPathRefinedByRFC5147CharScheme p : rewriter.rewrite(dom, point, normalizerConfig)) {
+		for (XPathRefinedByRFC5147CharScheme p : rewriter.rewrite(domResource, point, normalizerConfig)) {
 			if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
 				XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
 				LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
