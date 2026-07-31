@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * A {@link Rewriter} is a utility for rewriting a representation of a
- * {@link Point} in {@link Resource} to an other representation. There
+ * {@link Point} in {@link Resource} to another representation. There
  * are different types of rewriters: normalizers, forward mappers, and
  * reverse mappers, which all do some kind of rewriting a
  * representation of a point. This common interface offers type-safe
@@ -17,9 +17,9 @@ public interface Rewriter<R extends Resource<?>, P1 extends Point, P2 extends Po
 	 * point, but with a different (or potentially different)
 	 * representation.<P>
 	 *
-	 * A normalizer will typically return one recalculated point. A so
-	 * called forward mapper, which maps a point from a preimage
-	 * resource to a direved resource, the image, may return zero, one
+	 * A normalizer will typically return one recalculated point. A
+	 * so-called forward mapper, which maps a point from a preimage
+	 * resource to a derived resource, the image, may return zero, one
 	 * or multiple points, depending on how many times a point in the
 	 * preimage was mapped to the image. Thus, the return type is
 	 * {@link List} of {@link Point}s.<P>
@@ -29,7 +29,7 @@ public interface Rewriter<R extends Resource<?>, P1 extends Point, P2 extends Po
 	 * use, e.g., the identity monad for normalizers, the list monad
 	 * for forward mappers, the maybe monad {@link java.util.Optional}
 	 * for reverse mappers. However, that cannot be expressed in the
-	 * Java type system. Since the implied arities can easly be covered
+	 * Java type system. Since the implied arities can easily be covered
 	 * with an iterable, we use a {@link List}.
 	 *
 	 * @param resource   the {@link Resource} to operate on

@@ -5,7 +5,7 @@ import java.net.URI;
 /**
  * A {@link Resource} is a Java representation of a web resource
  * identified by a URI. A {@link Resource} is parametrized with the
- * parsed content type, returned by the {@link Resource.getContent}
+ * parsed content type, returned by the {@link Resource#getContents()}
  * method.
  */
 public interface Resource<T> {
