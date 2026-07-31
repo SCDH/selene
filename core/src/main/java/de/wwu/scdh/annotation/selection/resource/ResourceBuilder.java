@@ -45,7 +45,9 @@ public class ResourceBuilder {
 
 	public static final String MODIFY_CONFIG_XSL = "/xslt/modify-config.xsl";
 
-	public static final String TRACE_XSL = "/xslt/libtrace-xml.xsl";
+	public static final String LIBTRACE_XML = "/xslt/libtrace-xml.xsl";
+
+	public static final String LIBTRACE_PARAM = "/xslt/libtrace-param.xsl";
 
 	public static final String TRACE_PKG_NAME = "http://wwu.de/scdh/selection-engine/node-tracing";
 
@@ -131,7 +133,7 @@ public class ResourceBuilder {
 			XsltPackage tracePackage = compiler.compilePackage(traceSource);
 			compiler.importPackage(tracePackage, TRACE_PKG_NAME, "1.0.0");
 			proc = compiler.getProcessor();
-			log.debug("trace package URI: {}", ResourceBuilder.class.getResource(TRACE_XSL));
+			log.debug("trace package URI: {}", ResourceBuilder.class.getResource(LIBTRACE_XML));
 			log.debug("trace package imported");
 			XsltExecutable executable = compiler.compile(xsl);
 			Xslt30Transformer transformer = executable.load30();
@@ -193,7 +195,7 @@ public class ResourceBuilder {
 	public static MappedDOMResource mapWithXsltTracePackage(
 			DOMResource preimage, URI stylesheet, Class<? extends Point> imagePointClass) throws ResourceException {
 		return ResourceBuilder.mapWithXsltTracePackage(
-				preimage, stylesheet, ResourceBuilder.class.getResourceAsStream(TRACE_XSL), TRACE_XSL, imagePointClass);
+				preimage, stylesheet, ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML), LIBTRACE_XML, imagePointClass);
 	}
 
 	/**
@@ -246,7 +248,7 @@ public class ResourceBuilder {
 			compiler.setParameter(
 					new QName(TRACE_PKG_PARAM),
 					XdmValue.makeValue(
-							ResourceBuilder.class.getResource(TRACE_XSL).toURI()));
+							ResourceBuilder.class.getResource(LIBTRACE_XML).toURI()));
 			StreamSource source = new StreamSource(ResourceBuilder.class.getResourceAsStream(MODIFY_CONFIG_XSL));
 			XsltExecutable executable = compiler.compile(source);
 			Xslt30Transformer transformer = executable.load30();
@@ -302,4 +304,11 @@ public class ResourceBuilder {
 			//     throw new ResourceException(e);
 		}
 	}
+
+	public static XsltPackage compileTracingPackage(XsltCompiler compiler) {
+		StreamSource source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_PARAM));
+		XsltPackage pkg = compiler.compilePackage(source);
+		return pkg;
+	}
+
 }
