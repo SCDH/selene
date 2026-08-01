@@ -4,6 +4,7 @@ import de.wwu.scdh.annotation.selection.*;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.jena.rdf.model.Literal;
@@ -156,7 +157,9 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		// 3. normalize the components
 		LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
-		for (XPathRefinedByRFC5147CharScheme p : rewriter.rewrite(domResource, point, normalizerConfig)) {
+		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
+		LOG.debug("{} points rewritten", points.size());
+		for (XPathRefinedByRFC5147CharScheme p : points) {
 			if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
 				XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
 				LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());

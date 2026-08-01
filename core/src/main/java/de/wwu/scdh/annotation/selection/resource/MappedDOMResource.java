@@ -164,6 +164,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 					if (nodeId == null || !idToPreimageNode.containsKey(nodeId.getStringValue())) {
 						// if no user data present, we can only set the reverse map
 						reverseMap.put(node, null);
+						LOG.debug("read traces: node only on reverse map");
 						continue;
 					}
 					XdmNode preimageNode = idToPreimageNode.get(nodeId.getStringValue());
@@ -178,9 +179,10 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 						imageNodes.add(node);
 						forwardMap.put(preimageNode, imageNodes);
 					}
+					LOG.debug("read traces: node on both maps: {}", nodeId.getStringValue());
 				} catch (SaxonApiException e) {
 					LOG.error("failed to generate Id for image node");
-					throw new ResourceException("failed to generate Id for imae node");
+					throw new ResourceException("failed to generate Id for image node");
 				}
 			}
 		}

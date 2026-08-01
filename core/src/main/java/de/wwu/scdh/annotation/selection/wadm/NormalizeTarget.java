@@ -104,9 +104,10 @@ public class NormalizeTarget implements Consumer<Resource> {
 		}
 		// guard: if the oa:hasSource does not match the IRI, we are done
 		if (!targetSource.equals(iri.toString())) {
-			LOG.info("target source {} does not match IRI {}", targetSource, iri);
+			LOG.debug("target source {} does not match IRI {}", targetSource, iri);
 			return;
 		}
+		LOG.debug("found annotation on {} to be rewritten", iri);
 		// normalize RangeSelectors
 		model.listStatements(target, OA.hasSelector, (RDFNode) null)
 				.mapWith((stmt) -> stmt.getResource())

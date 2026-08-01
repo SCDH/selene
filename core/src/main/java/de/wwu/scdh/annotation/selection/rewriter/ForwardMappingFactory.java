@@ -20,7 +20,7 @@ public class ForwardMappingFactory implements RewriterFactory {
 	public <R extends Resource<?>, P1 extends Point, P2 extends Point, RW extends Rewriter<R, P1, P2>> RW getRewriter(
 			Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException {
 
-		Log.debug("locking up logger for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
+		Log.debug("looking up mapper for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
 
 		// return null;
 		RW rc;
