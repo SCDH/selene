@@ -14,15 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.QName;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.Serializer;
-import net.sf.saxon.s9api.XdmValue;
-import net.sf.saxon.s9api.Xslt30Transformer;
-import net.sf.saxon.s9api.XsltCompiler;
-import net.sf.saxon.s9api.XsltExecutable;
-import net.sf.saxon.s9api.XsltPackage;
+import net.sf.saxon.s9api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +135,7 @@ public class ResourceBuilder {
 	 * @param transformer - an {@link Xslt30Transformer} to derive the image with
 	 * @param imagePointClass - the class of the point used for the image, or <code>null</code> for concluding from the stylesheet's default output method
 	 */
-	public static MappedDOMResource mapWithXsltTracePackage(
+	public static MappedDOMResource mapWithXslTransformation(
 			URI imageUri, DOMResource preimage, Xslt30Transformer transformer, Class<? extends Point> imagePointClass)
 			throws ResourceException {
 
@@ -156,8 +148,8 @@ public class ResourceBuilder {
 		try {
 			// transform to XdmValue, which keeps the nodes from the source
 			XdmValue imageValue = transformer.applyTemplates(preimage.getContents());
-			XdmValueResource image = new XdmValueResource(
-					imageUri, imageValue, transformer.newSerializer().getProcessor(), pointClass);
+			XdmValueResource image = new XdmValueResource(imageUri, imageValue, preimage.getProcessor(), pointClass);
+			log.debug("image serialization {}", image.getContents().stream().map(XdmItem::getStringValue));
 			// make mapped resource from preimage and image
 			MappedDOMResource mappedDOMResource = new MappedDOMResource(preimage);
 			mappedDOMResource.setImage(image);
@@ -217,7 +209,7 @@ public class ResourceBuilder {
 			XsltExecutable executable = compiler.compile(xsl);
 			Xslt30Transformer transformer = executable.load30();
 			// transform preimage to image
-			return ResourceBuilder.mapWithXsltTracePackage(null, preimage, transformer, imagePointClass);
+			return ResourceBuilder.mapWithXslTransformation(null, preimage, transformer, imagePointClass);
 		} catch (SaxonApiException e) {
 			throw new ResourceException(e.getMessage());
 		}
