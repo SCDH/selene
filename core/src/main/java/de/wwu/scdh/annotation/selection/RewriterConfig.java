@@ -46,7 +46,7 @@ public class RewriterConfig {
 		return xpath;
 	}
 
-    public boolean isRewritesTraceLeaf() {
-        return rewritesTraceLeaf;
-    }
+	public boolean rewritesTraceLeaf() {
+		return rewritesTraceLeaf;
+	}
 }
