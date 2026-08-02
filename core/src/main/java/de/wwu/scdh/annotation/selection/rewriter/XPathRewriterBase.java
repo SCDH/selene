@@ -39,9 +39,32 @@ public abstract class XPathRewriterBase {
 	public static final Pattern TRACE_TEXT_LEAF =
 			Pattern.compile("Q\\{http://wwu.de/scdh/selection-engine/node-tracing}text\\[(\\d+)]$");
 
+	public static Pattern TEXT_LEAF = Pattern.compile("text\\(\\)\\[(\\d+)]$");
+
 	public static String replaceTraceTextLeaf(String xpath) {
 		Matcher matcher = TRACE_TEXT_LEAF.matcher(xpath);
 		return matcher.replaceAll("text()[$1]");
+	}
+
+	public static String replaceTraceTextLeaf(String xpath, RewriterConfig config) {
+		if (config.rewritesTraceLeaf()) {
+			return replaceTraceTextLeaf(xpath);
+		} else {
+			return xpath;
+		}
+	}
+
+	public static String replaceTextLeaf(String xpath) {
+		Matcher matcher = TEXT_LEAF.matcher(xpath);
+		return matcher.replaceAll("Q{http://wwu.de/scdh/selection-engine/node-tracing}text[$1]");
+	}
+
+	public static String replaceTextLeaf(String xpath, RewriterConfig config) {
+		if (config.rewritesTraceLeaf()) {
+			return replaceTextLeaf(xpath);
+		} else {
+			return xpath;
+		}
 	}
 
 	// protected final DOMResource resource;

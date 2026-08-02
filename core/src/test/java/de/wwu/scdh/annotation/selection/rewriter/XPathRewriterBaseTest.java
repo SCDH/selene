@@ -24,4 +24,24 @@ public class XPathRewriterBaseTest {
 				XPathRewriterBase.replaceTraceTextLeaf(
 						"//Q{http://wwu.de/scdh/selection-engine/node-tracing}text[23]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]"));
 	}
+
+	@Test
+	public void testReplaceTextLeaf() {
+		assertEquals(
+				"Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]",
+				XPathRewriterBase.replaceTextLeaf("text()[1]"));
+		assertEquals(
+				"/html/body/div[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[0]",
+				XPathRewriterBase.replaceTextLeaf("/html/body/div[1]/text()[0]"));
+		assertEquals(
+				"id('schach')/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[42]",
+				XPathRewriterBase.replaceTextLeaf("id('schach')/text()[42]"));
+		assertEquals(
+				"//Q{http://wwu.de/scdh/selection-engine/node-tracing}text[23]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]",
+				XPathRewriterBase.replaceTextLeaf(
+						"//Q{http://wwu.de/scdh/selection-engine/node-tracing}text[23]/text()[1]"));
+		assertEquals(
+				"//text()[23]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]",
+				XPathRewriterBase.replaceTextLeaf("//text()[23]/text()[1]"));
+	}
 }
