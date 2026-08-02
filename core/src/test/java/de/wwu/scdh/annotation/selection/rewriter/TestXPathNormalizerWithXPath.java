@@ -23,7 +23,7 @@ public class TestXPathNormalizerWithXPath {
 	public static final URI GESANG_HTML = new File(TEST_DIR, "Gesang.tei.html").toURI();
 	public static final URI GESANG_XML = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
-	RewriterConfig config = new RewriterConfig(null, false, null);
+	RewriterConfig config = new RewriterConfig(null, false, null, false);
 
 	@Test
 	public void testWithPathFunction() throws SelectorException, SaxonApiException, IOException {

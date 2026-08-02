@@ -6,28 +6,32 @@ package de.wwu.scdh.annotation.selection;
  */
 public class RewriterConfig {
 
-	private Mode mode;
-	private boolean escaped;
-	private String xpath;
+	private final Mode mode;
+	private final boolean escaped;
+	private final String xpath;
+	private final boolean rewritesTraceLeaf;
 
 	/**
 	 * Make a new {@link RewriterConfig}.
 	 *
 	 * @param mode     a {@link Mode} used to cope with referential ambiguity
-	 * @param escaped  whether or not the output has to be escaped for XML
+	 * @param escaped  whether the output has to be escaped for XML
 	 * @param xpath    an XPath expression which will be evaluated on the context node for normalization
+	 * @param rewritesTraceLeaf - whether a <code>Q{http://wwu.de/scdh/selection-engine/node-tracing}text</code>
+	 *                             segment has to be rewritten with <code>text()</code>
 	 */
-	public RewriterConfig(Mode mode, boolean escaped, String xpath) {
+	public RewriterConfig(Mode mode, boolean escaped, String xpath, boolean rewritesTraceLeaf) {
 		this.mode = mode;
 		this.escaped = escaped;
 		this.xpath = xpath;
+		this.rewritesTraceLeaf = rewritesTraceLeaf;
 	}
 
 	/**
 	 * Clone the {@link RewriterConfig}, but set a new {@link Mode}.
 	 */
 	public static RewriterConfig withMode(RewriterConfig config, Mode mode) {
-		return new RewriterConfig(mode, config.escaped, config.xpath);
+		return new RewriterConfig(mode, config.escaped, config.xpath, config.rewritesTraceLeaf);
 	}
 
 	public Mode getMode() {
@@ -41,4 +45,8 @@ public class RewriterConfig {
 	public String getXPath() {
 		return xpath;
 	}
+
+    public boolean isRewritesTraceLeaf() {
+        return rewritesTraceLeaf;
+    }
 }
