@@ -67,7 +67,8 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
 			XdmNode normalizedNode =
 					getNode(preimage.getImage().getContents(), unespace(normalizedXPath), preimage.getProcessor());
 			Integer normalizedPos = posInNormalizedNode(imageNode, preimagePair.getRight(), normalizedNode);
-			transformed.add(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
+			transformed.add(
+					new XPathRefinedByRFC5147CharScheme(replaceTraceTextLeaf(normalizedXPath, config), normalizedPos));
 		}
 		return transformed;
 	}

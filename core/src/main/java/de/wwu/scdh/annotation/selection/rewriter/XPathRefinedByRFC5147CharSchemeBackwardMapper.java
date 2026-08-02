@@ -58,8 +58,11 @@ public class XPathRefinedByRFC5147CharSchemeBackwardMapper extends XPathRewriter
 			throws SelectorException {
 		// step 1: get text node in image where position is located we
 		// can use the standard method getTextNodeAtPosition().
-		Pair<XdmNode, Integer> imagePair =
-				getTextNodeAtPosition(preimage.getImage(), position.getXPath(), position.getChar(), config.getMode());
+		Pair<XdmNode, Integer> imagePair = getTextNodeAtPosition(
+				preimage.getImage(),
+				replaceTextLeaf(position.getXPath(), config),
+				position.getChar(),
+				config.getMode());
 		// text nodes are wrapped in trace:text and these wrappers are
 		// mapped to the preimage text nodes. So we have to get the
 		// wrapper node, i.e. the parent.
