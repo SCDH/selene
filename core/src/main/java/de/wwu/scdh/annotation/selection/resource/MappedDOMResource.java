@@ -164,7 +164,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 					if (nodeId == null || !idToPreimageNode.containsKey(nodeId.getStringValue())) {
 						// if no user data present, we can only set the reverse map
 						reverseMap.put(node, null);
-						LOG.debug("read traces: node only on reverse map");
+						LOG.debug("read traces: node only on reverse map: {}", nodeId);
 						continue;
 					}
 					XdmNode preimageNode = idToPreimageNode.get(nodeId.getStringValue());
