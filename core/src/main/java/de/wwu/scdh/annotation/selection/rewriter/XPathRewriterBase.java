@@ -10,6 +10,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.sf.saxon.s9api.Axis;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -33,6 +35,14 @@ import org.slf4j.LoggerFactory;
 public abstract class XPathRewriterBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(XPathRewriterBase.class);
+
+	public static final Pattern TRACE_TEXT_LEAF =
+			Pattern.compile("Q\\{http://wwu.de/scdh/selection-engine/node-tracing}text\\[(\\d+)]$");
+
+	public static String replaceTraceTextLeaf(String xpath) {
+		Matcher matcher = TRACE_TEXT_LEAF.matcher(xpath);
+		return matcher.replaceAll("text()[$1]");
+	}
 
 	// protected final DOMResource resource;
 
