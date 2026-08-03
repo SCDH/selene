@@ -62,16 +62,20 @@ Converting between different selector serialization formats.
 
 ## Roadmap
 
-- Fall 2025: core library with transformation of pointers and unit
-  tests, minimal CLI
-- Winter 2025/6: implement distributed text service (other project) as
-  a deployment platform for Selene
-- Spring 2026: add REST API endpoints for normalizing and transforming
-  pointers as an extension to distributed text services
-- Sommer 2026: Introduce the technology on conferences or workshops
+- ✅ Fall 2025: core library with transformation of pointers and unit
+  tests, minimal CLI 
+- ✅ Spring 2026: implement distributed text service (DTS) as a
+  deployment platform for Selene: See [SEED
+  DTS](https://github.com/scdh/seed-xc/dts)!
+- ✅ Sommer 2026: add REST API endpoints for normalizing and
+  transforming pointers as an extension to DTS. See [branch `selene`
+  of SEED DTS](https://github.com/SCDH/seed-xc/tree/selene) and
+  [Milestone 6](https://github.com/SCDH/seed-xc/milestone/6).
+- September 2026: Introduce the technology at Editopia conference
 
 
 ## Getting Started
+
 
 Java version required: OpenJDK 17+
 
