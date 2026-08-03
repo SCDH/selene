@@ -2,7 +2,7 @@
 
 # Selene Selection Engine
 
-*Selene* is a tool of processing **references to portions** of
+*Selene* is a tool of processing deep **references** into 
 resources like used in stand-off annotations. The [Web Annotation Data
 Model](https://www.w3.org/TR/annotation-model/#selectors) (WADM) calls
 the mechanisms for referencing a portion of a textual, pictorial
