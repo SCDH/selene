@@ -8,8 +8,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import net.sf.saxon.s9api.SaxonApiException;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
@@ -34,6 +33,7 @@ public class NormalizeTarget implements Consumer<Resource> {
 
 	protected final de.wwu.scdh.annotation.selection.Resource<?> resource;
 	protected final URI iri;
+	protected final Optional<URI> rewriteIri;
 
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
@@ -44,11 +44,13 @@ public class NormalizeTarget implements Consumer<Resource> {
 	public NormalizeTarget(
 			de.wwu.scdh.annotation.selection.Resource<?> resource,
 			URI iri,
+			Optional<URI> rewriteIri,
 			RewriterFactory rewriterFactory,
 			RewriterConfig normalizerConfig,
 			Model model) {
 		this.resource = resource;
 		this.iri = iri;
+		this.rewriteIri = rewriteIri;
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
 		this.normalizerConfig = normalizerConfig;
@@ -108,6 +110,16 @@ public class NormalizeTarget implements Consumer<Resource> {
 			return;
 		}
 		LOG.debug("found annotation on {} to be rewritten", iri);
+
+		// rewrite rewriteIri back to the model
+		if (rewriteIri.isPresent() && !iri.equals(rewriteIri.get())) {
+			LOG.debug("rewriting oa:hasSource from {} to {}", iri, rewriteIri.get());
+			model.remove(target, OA.hasSource, sourceNode);
+			Statement rewriteStatement = model.createStatement(
+					target, OA.hasSource, model.createResource(rewriteIri.get().toString()));
+			model.add(rewriteStatement);
+		}
+
 		// normalize RangeSelectors
 		model.listStatements(target, OA.hasSelector, (RDFNode) null)
 				.mapWith((stmt) -> stmt.getResource())

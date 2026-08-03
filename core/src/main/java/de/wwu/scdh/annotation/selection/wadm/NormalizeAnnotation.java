@@ -19,14 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link NormalizeAnnotation} can be used to normalize
+ * {@link NormalizeAnnotation} can be used to normalize or rewrite
  * the WADM annotations targeting a given resource in a graph.<P>
  *
  * This class implements the {@link Consumer} interface and can thus
  * be used in a functional style like <code>forEach(new
  * NormalizeAnnoation(...))</code> on some resource iterator. The
- * normalization will by side effect be written to the {@link Model}
- * which was passed into the constructor.
+ * normalization will--by side effect--be written to the {@link Model}
+ * which was passed into the constructor.<P/>
  *
  * USAGE: Use the static methods <code>normalize</code> to do the
  * normalization.
@@ -37,6 +37,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 
 	protected final de.wwu.scdh.annotation.selection.Resource<?> resource;
 	protected final URI iri;
+	protected final Optional<URI> rewriteIri;
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
 	protected final RewriterConfig normalizerConfig;
@@ -46,11 +47,13 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	public NormalizeAnnotation(
 			de.wwu.scdh.annotation.selection.Resource<?> resource,
 			URI iri,
+			Optional<URI> rewriteIri,
 			RewriterFactory rewriterFactory,
 			RewriterConfig normalizerConfig,
 			Model model) {
 		this.resource = resource;
 		this.iri = iri;
+		this.rewriteIri = rewriteIri;
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
 		this.normalizerConfig = normalizerConfig;
@@ -66,7 +69,7 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 		annotation
 				.listProperties(OA.hasTarget)
 				.mapWith(stmt -> stmt.getResource())
-				.forEach(new NormalizeTarget(resource, iri, rewriterFactory, normalizerConfig, model));
+				.forEach(new NormalizeTarget(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model));
 	}
 
 	/**
@@ -94,7 +97,35 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			RewriterConfig normalizerConfig,
 			Model model) {
 		NormalizeAnnotation normalizeAnnotation =
-				new NormalizeAnnotation(resource, iri, rewriterFactory, normalizerConfig, model);
+				new NormalizeAnnotation(resource, iri, Optional.empty(), rewriterFactory, normalizerConfig, model);
+		ResIterator annotations = model.listResourcesWithProperty(RDF.type, OA.Annotation);
+		annotations.forEach(normalizeAnnotation);
+		return normalizeAnnotation.getModel();
+	}
+
+	/**
+	 * Rewrite all annotations in the provided {@link Model}. In contrast to
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, Model)}
+	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
+	 * between representations.
+	 *
+	 * @param resource - the resource the rewriting has to done with, should be a {@link MappedResource}
+	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
+	 * @param rewriteIri - the new IRI of rewritten targets
+	 * @param rewriterFactory - a factory that returns a rewriter for a point
+	 * @param normalizerConfig - a configuration
+	 * @param model - the RDF model (graph) containing the annotations
+	 * @return the rewritten {@link Model}
+	 */
+	public static Model rewrite(
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
+			URI rewriteIri,
+			RewriterFactory rewriterFactory,
+			RewriterConfig normalizerConfig,
+			Model model) {
+		NormalizeAnnotation normalizeAnnotation = new NormalizeAnnotation(
+				resource, iri, Optional.of(rewriteIri), rewriterFactory, normalizerConfig, model);
 		ResIterator annotations = model.listResourcesWithProperty(RDF.type, OA.Annotation);
 		annotations.forEach(normalizeAnnotation);
 		return normalizeAnnotation.getModel();
@@ -109,8 +140,8 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
 	 * @param rewriterFactory - a factory that returns a rewriter for a point
 	 * @param normalizerConfig - a configuration
-	 * @param graph  the URI where to read the RDF from
-	 * @param lang the serialization language of the graph at the URI
+	 * @param graph - the URI where to read the RDF from
+	 * @param lang - the serialization language of the graph at the URI
 	 * @return the normalized {@link Model}
 	 */
 	public static Model normalize(
@@ -127,6 +158,38 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			model = RDFDataMgr.loadModel(graph, RDFLanguages.nameToLang(lang.get()));
 		}
 		return normalize(resource, iri, rewriterFactory, normalizerConfig, model);
+	}
+
+	/**
+	 * Rewrite all annotations in the provided {@link Model}. In contrast to
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, String, Optional)}
+	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
+	 * between representations.
+	 *
+	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
+	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
+	 * @param rewriteIri - the new IRI of rewritten targets
+	 * @param rewriterFactory - a factory that returns a rewriter for a point
+	 * @param normalizerConfig - a configuration
+	 * @param graph - the URI where to read the RDF from
+	 * @param lang - the serialization language of the graph at the URI
+	 * @return the rewritten {@link Model}
+	 */
+	public static Model rewrite(
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
+			URI rewriteIri,
+			RewriterFactory rewriterFactory,
+			RewriterConfig normalizerConfig,
+			String graph,
+			Optional<String> lang) {
+		Model model;
+		if (lang.isEmpty()) {
+			model = RDFDataMgr.loadModel(graph);
+		} else {
+			model = RDFDataMgr.loadModel(graph, RDFLanguages.nameToLang(lang.get()));
+		}
+		return rewrite(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model);
 	}
 
 	/**
@@ -164,5 +227,45 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			RDFDataMgr.read(model, input, modelBase.get(), langHint);
 		}
 		return normalize(resource, iri, rewriterFactory, normalizerConfig, model);
+	}
+
+	/**
+	 * Rewrite all annotations in the provided {@link Model}. In contrast to
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, InputStream, Optional, Optional)}
+	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
+	 * between representations.
+	 *
+	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
+	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
+	 * @param rewriterFactory - a factory that returns a rewriter for a point
+	 * @param normalizerConfig - a configuration
+	 * @param input - the {@link InputStream}
+	 * @param modelBase - a base URI of the model, given as {@link String}
+	 * @param lang - optionally the serialization language of stream data; if not provided, NTriples are assumed
+	 * @return the rewritten {@link Model}
+	 */
+	public static Model rewrite(
+			de.wwu.scdh.annotation.selection.Resource<?> resource,
+			URI iri,
+			URI rewriteIri,
+			RewriterFactory rewriterFactory,
+			RewriterConfig normalizerConfig,
+			InputStream input,
+			Optional<String> lang,
+			Optional<String> modelBase) {
+		Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
+		Lang langHint;
+		if (lang.isEmpty()) {
+
+			langHint = RDFLanguages.nameToLang(lang.get());
+		} else {
+			langHint = RDFLanguages.NTRIPLES;
+		}
+		if (modelBase.isEmpty()) {
+			RDFDataMgr.read(model, input, langHint);
+		} else {
+			RDFDataMgr.read(model, input, modelBase.get(), langHint);
+		}
+		return rewrite(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model);
 	}
 }

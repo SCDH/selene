@@ -15,7 +15,9 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import net.sf.saxon.s9api.Processor;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.*;
 
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.*;
 public class TestNormalizeAnnotation {
 
 	public static final String IRI = "https://docs.org/scdh.span.42.html";
+	public static final String REWRITE_IRI = "https://docs.org/scdh.span.42.xhtml";
 
 	public static final File TEST_DIR = Paths.get("..", "test").toFile();
 	public static final File SAMPLE_DIR =
@@ -41,11 +44,12 @@ public class TestNormalizeAnnotation {
 
 	private de.wwu.scdh.annotation.selection.Resource<?> resource;
 
-	private URI iri;
+	private URI iri, rewriteIri;
 
 	@BeforeEach
 	public void setupResource() throws URISyntaxException, ResourceException, MalformedURLException {
 		iri = new URI(IRI);
+		rewriteIri = new URI(REWRITE_IRI);
 		ResourceBuilder resourceBuilder = new ResourceBuilder(new Processor());
 		try (InputStream inputStream = SPAN_HTML.toURL().openStream()) {
 			resource =
@@ -152,5 +156,32 @@ public class TestNormalizeAnnotation {
 								"/Q{http://www.w3.org/1999/xhtml}html[1]/Q{http://www.w3.org/1999/xhtml}body[1]")
 						.toSet()
 						.size());
+	}
+
+	@Test
+	public void testRewriteP11WithPath() {
+		normalizerConfig = makeConfig("path(.)");
+		model = NormalizeAnnotation.rewrite(
+				resource, iri, rewriteIri, rewriterFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"));
+		assertEquals(
+				1,
+				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+						.toSet()
+						.size());
+		Resource specificResouce = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+				.next()
+				.getResource();
+		assertEquals(
+				1,
+				model.listStatements(specificResouce, OA.hasSource, (RDFNode) null)
+						.toSet()
+						.size());
+		assertEquals(
+				REWRITE_IRI,
+				specificResouce
+						.getProperty(OA.hasSource)
+						.getObject()
+						.asResource()
+						.toString());
 	}
 }
