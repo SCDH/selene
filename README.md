@@ -81,8 +81,9 @@ altar, Roman artwork, 2nd century CE. From Italy. Image:
 [Wikimedia](https://commons.wikimedia.org/wiki/File:Altar_Selene_Louvre_Ma508.jpg)](https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Altar_Selene_Louvre_Ma508.jpg/330px-Altar_Selene_Louvre_Ma508.jpg)
 *The Moon-goddess Selene or Luna accompanied by the Dioscuri, or
 Phosphoros (the Morning Star) and Hesperos (the Evening Star). Marble
-altar, Roman artwork, 2nd century CE. From Italy. Image:
-[Wikimedia](https://commons.wikimedia.org/wiki/File:Altar_Selene_Louvre_Ma508.jpg)*
+altar, Roman artwork, 2nd century CE. From Italy.* Image and
+subscription:
+[Wikimedia](https://commons.wikimedia.org/wiki/File:Altar_Selene_Louvre_Ma508.jpg)
 
 The Selene Selection Engine can track the identity of nodes over different
 representations of resource like the Moon goddess Selene can track the Venus appearing
