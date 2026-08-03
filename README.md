@@ -87,7 +87,7 @@ subscription:
 
 The Selene Selection Engine can track the identity of nodes over different
 representations of resource like the Moon goddess Selene can track the Venus appearing
-as the Morning Star and the Evening Star.
+as the Morning Star or the Evening Star.
 
 ## Getting Started
 
