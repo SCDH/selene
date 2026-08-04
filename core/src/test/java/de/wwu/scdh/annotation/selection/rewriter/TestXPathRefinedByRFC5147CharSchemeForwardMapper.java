@@ -44,6 +44,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 			Paths.get("src", "test", "resources", "xsl", "text.xsl").toFile();
 
 	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false);
+	public static final RewriterConfig CONFIG = new RewriterConfig(Mode.FIRST, false, null, false, false);
 
 	public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 		XsltCompiler compiler = PROC.newXsltCompiler();
@@ -64,7 +65,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				mapped.get(0).getXPath(),
@@ -84,7 +85,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(2, mapped.size());
 
 		assertEquals(
@@ -120,7 +121,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(0, mapped.size());
 	}
 
@@ -136,7 +137,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{}html[1]/Q{}body[1]/Q{}div[2]/Q{}div[1]/Q{}p[2]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]",
@@ -154,7 +155,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		// the XdmValue output looks a bit weird: all text containers are directly in document node
 		assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"));
@@ -172,7 +173,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				"path(ancestor-or-self::node()[ parent::node()[not(parent::node())]  ]) ");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"));
 		assertEquals(5, mapped.get(0).getChar());

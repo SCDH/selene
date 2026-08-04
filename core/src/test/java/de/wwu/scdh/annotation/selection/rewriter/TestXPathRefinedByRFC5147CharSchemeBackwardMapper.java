@@ -36,7 +36,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 	public static final File TEXT_WITH_TOC_XSL = Paths.get("src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
 			.toFile();
 
-	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false);
+	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false, false);
 
 	public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 		XsltCompiler compiler = PROC.newXsltCompiler();
