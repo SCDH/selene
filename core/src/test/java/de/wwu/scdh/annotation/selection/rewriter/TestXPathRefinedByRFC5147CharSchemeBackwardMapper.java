@@ -1,6 +1,5 @@
 package de.wwu.scdh.annotation.selection.rewriter;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import de.wwu.scdh.annotation.selection.*;
@@ -33,10 +32,15 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 	public static final File ID_XSL =
 			Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
 
-	public static final File TEXT_WITH_TOC_XSL =
-			Paths.get("src", "test", "resources", "xsl", "text-with-toc.xsl").toFile();
+	public static final File TEXT_WITH_TOC_XHTML_XSL = Paths.get(
+					"src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
+			.toFile();
 
-	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false);
+	public static final File TEXT_WITH_TOC_HTML_XSL = Paths.get(
+					"src", "test", "resources", "xsl", "text-with-toc-html.xsl")
+			.toFile();
+
+	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false, false);
 
 	public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 		XsltCompiler compiler = PROC.newXsltCompiler();
@@ -127,7 +131,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image =
-				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML), PROC);
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
@@ -149,7 +153,49 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
 		XdmValueResource image =
-				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML), PROC);
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML), PROC);
+		preimage.setImage(image);
+		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		assertEquals(1, mapped.size());
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
+				mapped.get(0).getXPath());
+		assertEquals(5, mapped.get(0).getChar());
+	}
+
+	@Test
+	public void testHtmlBackwardHeadNode() throws ResourceException, SaxonApiException, SelectorException {
+		// we transform a point from the H2, originating from a preimage node that occurs twice in the image
+		XPathRefinedByRFC5147CharScheme imagePoint =
+				new XPathRefinedByRFC5147CharScheme("/Q{}html[1]/Q{}body[1]/Q{}div[2]/Q{}div[1]/Q{}h2[1]", 5);
+		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image =
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML), PROC);
+		preimage.setImage(image);
+		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		assertEquals(1, mapped.size());
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
+				mapped.get(0).getXPath());
+		assertEquals(5, mapped.get(0).getChar());
+	}
+
+	@Test
+	public void testHtmlNoNsBackwardHeadNode() throws ResourceException, SaxonApiException, SelectorException {
+		// we transform a point from the H2, originating from a preimage node that occurs twice in the image
+		XPathRefinedByRFC5147CharScheme imagePoint =
+				new XPathRefinedByRFC5147CharScheme("/html[1]/body[1]/div[2]/div[1]/h2[1]", 5);
+		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image =
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");

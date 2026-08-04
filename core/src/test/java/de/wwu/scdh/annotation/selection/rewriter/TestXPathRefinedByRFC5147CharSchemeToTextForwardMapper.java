@@ -39,7 +39,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 	public static final File NO_HEADER_XSL =
 			Paths.get("src", "test", "resources", "xsl", "text-no-header.xsl").toFile();
 
-	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false);
+	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false, false);
 
 	public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 		XsltCompiler compiler = PROC.newXsltCompiler();

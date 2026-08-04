@@ -156,7 +156,7 @@ abstract class AbstractNormalize {
     }
 
     protected RewriterConfig getRewriterConfig() throws CliException {
-	return new RewriterConfig(mode, false, getNormalizerXPath(), true);
+	return new RewriterConfig(mode, false, getNormalizerXPath(), true, true);
     }
 
 }
