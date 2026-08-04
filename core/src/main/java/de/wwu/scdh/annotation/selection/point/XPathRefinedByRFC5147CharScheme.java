@@ -8,7 +8,7 @@ import de.wwu.scdh.annotation.selection.component.XPathComponent;
  * A {@link Point} represented by an <code>oa:XPathSelector</code>
  * which is refined by an <code>oa:FragmentSelector</code> conforming
  * to RFC5147 character scheme. This record is usually used to
- * reference content in a {@link DOMResource}.
+ * reference content in a {@link de.wwu.scdh.annotation.selection.resource.DOMResource}.
  */
 public class XPathRefinedByRFC5147CharScheme extends PointImpl {
 
@@ -17,8 +17,8 @@ public class XPathRefinedByRFC5147CharScheme extends PointImpl {
 	private final int chr;
 
 	/**
-	 * Make a {@link XPathRefinedByRFC5147CharScheme} from an xpath
-	 * and a inter-character position.
+	 * Make a {@link XPathRefinedByRFC5147CharScheme} from a xpath
+	 * and an inter-character position.
 	 *
 	 * @param xpath  the XPath component
 	 * @param chr    the character scheme component
