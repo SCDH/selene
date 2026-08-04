@@ -32,7 +32,12 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	public static final File ID_XSL =
 			Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
 
-	public static final File TEXT_WITH_TOC_XSL = Paths.get("src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
+	public static final File TEXT_WITH_TOC_XHTML_XSL = Paths.get(
+					"src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
+			.toFile();
+
+	public static final File TEXT_WITH_TOC_HTML_XSL = Paths.get(
+					"src", "test", "resources", "xsl", "text-with-toc-html.xsl")
 			.toFile();
 
 	public static final File TEXT_XSL =
@@ -74,7 +79,8 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
-		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML));
+		XdmValueResource image =
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
@@ -109,12 +115,33 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				"/*:TEI[1]/*:teiHeader[1]/*:fileDesc[1]/*:titleStmt[1]/*:author[1]", 5);
 		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
 		MappedDOMResource preimage = new MappedDOMResource(source);
-		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XSL, LIBTRACE_XML));
+		XdmValueResource image =
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
 		assertEquals(0, mapped.size());
+	}
+
+	@Test
+	public void testHtmlForwardToOneNode() throws ResourceException, SaxonApiException, SelectorException {
+		// we transform a point that occurs twice in the output
+		XPathRefinedByRFC5147CharScheme preimagePoint =
+				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:l[2]/text()[2]", 7);
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image =
+				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML));
+		preimage.setImage(image);
+		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
+				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		assertEquals(1, mapped.size());
+		assertEquals(
+				"/Q{}html[1]/Q{}body[1]/Q{}div[2]/Q{}div[1]/Q{}p[2]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[2]",
+				mapped.get(0).getXPath(),
+				"fn:path returns QNames for elements on the '' namespace as Q{}*.");
 	}
 
 	@Test
