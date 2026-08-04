@@ -41,12 +41,22 @@ public abstract class XPathRewriterBase {
 
 	public static Pattern TEXT_LEAF = Pattern.compile("text\\(\\)\\[(\\d+)]$");
 
+	public static final Pattern EMPTY_NAMESPACE = Pattern.compile("Q\\{}");
+
 	public static String replaceTraceTextLeaf(String xpath) {
 		Matcher matcher = TRACE_TEXT_LEAF.matcher(xpath);
 		return matcher.replaceAll("text()[$1]");
 	}
 
-	public static String replaceTraceTextLeaf(String xpath, RewriterConfig config) {
+	public static String replaceEmptyNamespace(String xpath) {
+		Matcher matcher = EMPTY_NAMESPACE.matcher(xpath);
+		return matcher.replaceAll("");
+	}
+
+	public static String postProcForwardPaths(String xpath, RewriterConfig config) {
+		if (config.removeEmptyNamespaces()) {
+			xpath = replaceEmptyNamespace(xpath);
+		}
 		if (config.rewritesTraceLeaf()) {
 			return replaceTraceTextLeaf(xpath);
 		} else {
