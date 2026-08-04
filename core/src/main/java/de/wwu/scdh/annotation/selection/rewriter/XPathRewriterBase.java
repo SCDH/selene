@@ -41,12 +41,22 @@ public abstract class XPathRewriterBase {
 
 	public static Pattern TEXT_LEAF = Pattern.compile("text\\(\\)\\[(\\d+)]$");
 
+	public static final Pattern EMPTY_NAMESPACE = Pattern.compile("Q\\{}");
+
 	public static String replaceTraceTextLeaf(String xpath) {
 		Matcher matcher = TRACE_TEXT_LEAF.matcher(xpath);
 		return matcher.replaceAll("text()[$1]");
 	}
 
-	public static String replaceTraceTextLeaf(String xpath, RewriterConfig config) {
+	public static String replaceEmptyNamespace(String xpath) {
+		Matcher matcher = EMPTY_NAMESPACE.matcher(xpath);
+		return matcher.replaceAll("");
+	}
+
+	public static String postProcForwardPaths(String xpath, RewriterConfig config) {
+		if (config.removeEmptyNamespaces()) {
+			xpath = replaceEmptyNamespace(xpath);
+		}
 		if (config.rewritesTraceLeaf()) {
 			return replaceTraceTextLeaf(xpath);
 		} else {
@@ -77,7 +87,7 @@ public abstract class XPathRewriterBase {
 	/**
 	 * This method run the first stage of the normalization
 	 * process. It gets the node where the pair of XPath and position
-	 * of an character-scheme-refined XPath selector points to. Either
+	 * of a character-scheme-refined XPath selector points to. Either
 	 * this node is a text node, or the selector is invalid in the
 	 * context of the current document. In general, the resulting
 	 * position is not the same as the input position.<P>
@@ -95,8 +105,8 @@ public abstract class XPathRewriterBase {
 	 * @param resource  the {@link DOMResource} on the base of which the normalization is done
 	 * @param xpath  the XPath part of the XPath selector
 	 * @param position  the position following the character scheme of RFC5147
-	 * @param mode  an normalization algorithm selected from {@link Mode}
-	 * @throws {@link SelectorException}
+	 * @param mode  a normalization algorithm selected from {@link Mode}
+	 * @throws SelectorException if the XPath does not select exactly one node
 	 * @return a pair of node and position
 	 */
 	protected Pair<XdmNode, Integer> getTextNodeAtPosition(
@@ -117,7 +127,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * The implementation of step 1 of the normalization algorithm in
+	 * The implementation of step 1 of the normalization algorithm
 	 * in mode {@link Mode#FIRST}.
 	 */
 	protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(
@@ -132,7 +142,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * The implementation of step 1 of the normalization algorithm in
+	 * The implementation of step 1 of the normalization algorithm
 	 * in mode {@link Mode#SECOND}.
 	 */
 	protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(
@@ -149,7 +159,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * The implementation of step 1 of the normalization algorithm in
+	 * The implementation of step 1 of the normalization algorithm
 	 * in mode {@link Mode#FIRST_OF_DEEPEST_NODES}.
 	 */
 	protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(
@@ -162,7 +172,8 @@ public abstract class XPathRewriterBase {
 			return nodesAtPosition.get(0);
 		} else {
 			// we still have to get the text node with the deepest path
-			LOG.debug("found {} nodes, getting deepest", nodesAtPosition.size());
+			LOG.debug(
+					"found {} nodes, getting deepest (get first of deepest nodes at position)", nodesAtPosition.size());
 			// note, that Stream.max() returns the first of the items with the maximum value
 			Optional<Pair<XdmNode, Integer>> deepest =
 					nodesAtPosition.stream().max(Comparator.comparing(XPathNormalizer::getDepth));
@@ -171,7 +182,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * The implementation of step 1 of the normalization algorithm in
+	 * The implementation of step 1 of the normalization algorithm
 	 * in mode {@link Mode#LAST_OF_DEEPEST_NODES}.
 	 */
 	protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(
@@ -200,7 +211,7 @@ public abstract class XPathRewriterBase {
 	 * @param resource  the {@link DOMResource} on the base of which the normalization is done
 	 * @param xpath  the XPath part of the XPath selector
 	 * @param position  the position following the character scheme of RFC5147
-	 * @throws {@link SelectorException}
+	 * @throws SelectorException if xpath does not evaluate to one node
 	 * @return a pair of node and position
 	 */
 	protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(
@@ -221,7 +232,7 @@ public abstract class XPathRewriterBase {
 	 * @param resource  the {@link DOMResource} on the base of which the normalization is done
 	 * @param xpath  the XPath part of the XPath selector
 	 * @param position  the position following the character scheme of RFC5147
-	 * @throws {@link SelectorException}
+	 * @throws SelectorException if xpath does not get one node
 	 * @return a pair of node and position
 	 */
 	protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(
@@ -238,7 +249,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * Get the node from the DOM resource given by the the XPath
+	 * Get the node from the DOM resource given by the XPath
 	 * passed as argument. If the XPath does not evaluate to a single
 	 * node, this method raises an {@link SelectorException}.
 	 *
@@ -257,10 +268,8 @@ public abstract class XPathRewriterBase {
 			// assert that the XPath selects exactly 1 node
 			if (nodes.size() != 1) {
 				LOG.error("XPath '{}' does not select exactly one node: selects {} nodes", xpath, nodes.size());
-				throw new SelectorException("XPath '" + xpath
-						+ "' does not select exactly one node: selects "
-						+ String.valueOf(nodes.size())
-						+ " nodes");
+				throw new SelectorException(
+						"XPath '" + xpath + "' does not select exactly one node: selects " + nodes.size() + " nodes");
 			} else if (!nodes.itemAt(0).isNode()) {
 				LOG.error("Node selected by XPath '{}' does not select a node", xpath);
 				throw new SelectorException("XPath '" + xpath + "' does not select a node");
@@ -274,7 +283,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * Get the node from the XDM value resource given by the the XPath
+	 * Get the node from the XDM value resource given by the XPath
 	 * passed as argument. If the XPath does not evaluate to a single
 	 * node, this method raises an {@link SelectorException}.
 	 *
@@ -287,7 +296,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * Get the node from the DOM resource given by the the XPath
+	 * Get the node from the DOM resource given by the XPath
 	 * passed as argument. If the XPath does not evaluate to a single
 	 * node, this method raises an {@link SelectorException}.
 	 */
@@ -303,13 +312,13 @@ public abstract class XPathRewriterBase {
 			}
 			if (result.size() != 1) {
 				LOG.error(
-						"XPath '{}' does not select exaclty one node in XdmValueResource: selects {} nodes",
+						"XPath '{}' does not select exactly one node in XdmValueResource: selects {} nodes",
 						xpath,
 						result.size());
 				throw new SelectorException(
 						"XPath '" + xpath + "' does not select exactly one node in XdmValueResource");
 			} else if (!result.itemAt(0).isNode()) {
-				LOG.error("XPath '{}' does not select a node", xpath, result.size());
+				LOG.error("XPath '{}' does not select a node", xpath);
 				throw new SelectorException("XPath '" + xpath + "' does not select a node");
 			} else {
 				return (XdmNode) result.itemAt(0);
@@ -326,7 +335,7 @@ public abstract class XPathRewriterBase {
 	 * a node and a position, that contain the character scheme
 	 * position inside a given fragment.<P>
 	 *
-	 * This method collects all canditates in case of referential
+	 * This method collects all candidates in case of referential
 	 * ambiguity. See {@link Mode}.
 	 *
 	 * @param fragment  as {@link XdmNode} inside a {@link DOMResource}
@@ -336,7 +345,7 @@ public abstract class XPathRewriterBase {
 		Iterator<XdmNode> descendants = fragment.axisIterator(Axis.DESCENDANT_OR_SELF);
 		int charsEaten = 0;
 		XdmNode node = fragment;
-		List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
+		List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<>();
 		while (descendants.hasNext()) {
 			node = descendants.next();
 			LOG.debug("investigating '{}' node", node.getUnderlyingNode().getLocalPart());
@@ -347,7 +356,7 @@ public abstract class XPathRewriterBase {
 					charsEaten += length;
 				} else {
 					// position is inside this text node or at its end
-					nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
+					nodesAtPosition.add(new ImmutablePair<>(node, position - charsEaten));
 					if (position < charsEaten + length) {
 						// we can stop, since positions in all further text nodes will have greater positions
 						break;
@@ -367,14 +376,14 @@ public abstract class XPathRewriterBase {
 	 * position inside a given fragment, or in the first text node
 	 * before or after it.<P>
 	 *
-	 * This method collects all canditates in case of referential
+	 * This method collects all candidates in case of referential
 	 * ambiguity. See {@link Mode}.
 	 *
 	 * @param fragment  as {@link XdmNode} inside a {@link DOMResource}
 	 * @param position  the RFC 5147 character scheme position inside the fragment
 	 */
 	protected final List<Pair<XdmNode, Integer>> getTextNodesWithPosition(final XdmNode fragment, final int position) {
-		List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<Pair<XdmNode, Integer>>();
+		List<Pair<XdmNode, Integer>> nodesAtPosition = new ArrayList<>();
 		XdmNode node;
 		// 1. before the fragment, if position is zero
 		if (position == 0) {
@@ -386,7 +395,7 @@ public abstract class XPathRewriterBase {
 					textNodeSeen = true;
 					int length =
 							node.getUnderlyingValue().getUnicodeStringValue().length32();
-					nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, length));
+					nodesAtPosition.add(new ImmutablePair<>(node, length));
 				}
 			}
 		}
@@ -404,7 +413,7 @@ public abstract class XPathRewriterBase {
 					charsEaten += length;
 				} else {
 					// position is inside this text node or at its end
-					nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, position - charsEaten));
+					nodesAtPosition.add(new ImmutablePair<>(node, position - charsEaten));
 					if (position < charsEaten + length) {
 						// we can stop, since positions in all further text nodes will have greater positions
 						break;
@@ -422,7 +431,7 @@ public abstract class XPathRewriterBase {
 				node = following.next();
 				if (node.getNodeKind().equals(XdmNodeKind.TEXT)) {
 					textNodeSeen = true;
-					nodesAtPosition.add(new ImmutablePair<XdmNode, Integer>(node, 0));
+					nodesAtPosition.add(new ImmutablePair<>(node, 0));
 				}
 			}
 		}
@@ -433,7 +442,6 @@ public abstract class XPathRewriterBase {
 	 * Get the new position value based on the old one and the
 	 * fragment selected by the normalized XPath.
 	 *
-	 * @param resource the {@link DOMResource} operating on
 	 * @param textNode the text node as {@link XdmNode} gotten from step 1
 	 * @param pos the position gotten form step 1
 	 * @param fragment the {@link XdmNode} selected by the XPath resulting from step 2
@@ -446,9 +454,9 @@ public abstract class XPathRewriterBase {
 		// iter over all descendant text nodes until we found textNode
 		boolean found = false;
 		int posAcc = pos;
-		Iterator<XdmNode> descenant = fragment.axisIterator(Axis.DESCENDANT);
-		while (descenant.hasNext() && !found) {
-			XdmNode node = descenant.next();
+		Iterator<XdmNode> descendant = fragment.axisIterator(Axis.DESCENDANT);
+		while (descendant.hasNext() && !found) {
+			XdmNode node = descendant.next();
 			if (!node.getNodeKind().equals(XdmNodeKind.TEXT)) continue;
 			if (node.equals(textNode)) {
 				found = true;
@@ -479,17 +487,17 @@ public abstract class XPathRewriterBase {
 	 * its ancestors.
 	 */
 	protected static int getDepth(XdmNode node) {
-		Iterator<XdmNode> ascendents = node.axisIterator(Axis.ANCESTOR_OR_SELF);
+		Iterator<XdmNode> ancestors = node.axisIterator(Axis.ANCESTOR_OR_SELF);
 		int depth = 0;
-		while (ascendents.hasNext()) {
+		while (ancestors.hasNext()) {
 			depth += 1;
-			ascendents.next();
+			ancestors.next();
 		}
 		return depth;
 	}
 
 	/**
-	 * A utiltity method that gets the depth of a node of a pair of
+	 * A utility method that gets the depth of a node of a pair of
 	 * node and position like used in this module.
 	 */
 	protected static int getDepth(Pair<XdmNode, Integer> pair) {
@@ -497,7 +505,7 @@ public abstract class XPathRewriterBase {
 	}
 
 	/**
-	 * A utility function for unescaping XPaths.
+	 * A utility function for un-escaping XPaths.
 	 */
 	protected String unespace(String in) {
 		return in.replace("&apos;", "'");
@@ -511,7 +519,7 @@ public abstract class XPathRewriterBase {
 	 *
 	 * @param xpath    the XPath for generating a path expression, e.g., fn:xpath()
 	 * @param node     the {@link XdmNode} for which to generate the path expression
-	 * @param escaped  whether or not the generated path expression is to be escaped
+	 * @param escaped  whether the generated path expression is to be escaped
 	 * @param processor  a Saxon {@link Processor}
 	 */
 	protected String pathExpressionWithXPath(String xpath, XdmNode node, boolean escaped, Processor processor)
@@ -524,17 +532,17 @@ public abstract class XPathRewriterBase {
 			selector.setContextItem(node);
 			nodes = selector.evaluate();
 		} catch (SaxonApiException e) {
-			LOG.error("failed to normalize XPath using '{}': ", xpath, e.getMessage());
+			LOG.error("failed to normalize XPath using '{}': ", xpath);
 			throw new SelectorException(e);
 		}
 		if (nodes.size() != 1) {
 			LOG.error("normalizing XPath '{}' did not return exactly one item: returned {} items", xpath, nodes.size());
 			throw new SelectorException("normalizing XPath '" + xpath
 					+ "' did not return exactly one item: returned "
-					+ String.valueOf(nodes.size())
+					+ nodes.size()
 					+ " item");
 		} else if (!nodes.itemAt(0).isAtomicValue()) {
-			LOG.error("normalizing XPath '{}' did not return an atomic value", xpath, nodes.size());
+			LOG.error("normalizing XPath '{}' did not return an atomic value", xpath);
 			throw new SelectorException("normalizing XPath '" + xpath + "' did not return an atomic value");
 		} else {
 			if (escaped) {

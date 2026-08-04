@@ -60,7 +60,7 @@ public class TestNormalizeAnnotation {
 	}
 
 	private static RewriterConfig makeConfig(String xpath) {
-		return new RewriterConfig(null, false, xpath, false);
+		return new RewriterConfig(null, false, xpath, false, false);
 	}
 
 	// normalizing XPathSelector refinedBy FragmentSelector conforming to RFC5147 character scheme

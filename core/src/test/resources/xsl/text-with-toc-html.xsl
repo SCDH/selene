@@ -2,11 +2,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:trace="http://wwu.de/scdh/selection-engine/node-tracing"
-    xmlns="http://www.w3.org/1999/xhtml"
     xpath-default-namespace="http://www.tei-c.org/ns/1.0" exclude-result-prefixes="#all"
     version="3.0">
 
-    <xsl:output method="xhtml" indent="false"/>
+    <xsl:output method="html" indent="false"/>
 
     <xsl:use-package name="http://wwu.de/scdh/selection-engine/node-tracing" package-version="1.0.0"/>
 
@@ -50,14 +49,21 @@
         </div>
     </xsl:template>
 
-    <xsl:template match="l | p">
+    <xsl:template mode="toc #unnamed" match="l | p">
         <p>
             <xsl:call-template name="trace:source-id"/>
-            <xsl:apply-templates/>
+            <xsl:apply-templates mode="#current"/>
         </p>
     </xsl:template>
 
-    <xsl:template match="caesura">
+    <xsl:template match="lem | sic | corr" mode="toc #unnamed">
+        <span>
+            <xsl:call-template name="trace:source-id"/>
+            <xsl:apply-templates mode="#current"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="caesura" mode="toc #unnamed">
         <span style="margin-left:2em">
             <xsl:call-template name="trace:source-id"/>
         </span>
@@ -71,15 +77,12 @@
         </xsl:element>
     </xsl:template>
 
-    <xsl:template match="app">
-        <xsl:apply-templates select="lem"/>
+    <xsl:template match="app" mode="toc #unnamed">
+        <xsl:apply-templates select="lem" mode="#current"/>
     </xsl:template>
 
-    <xsl:template match="lem">
-        <span>
-            <xsl:call-template name="trace:source-id"/>
-            <xsl:apply-templates/>
-        </span>
+    <xsl:template match="choice[sic and corr]" mode="toc #unnamed">
+        <xsl:apply-templates select="corr" mode="#current"/>
     </xsl:template>
 
 
