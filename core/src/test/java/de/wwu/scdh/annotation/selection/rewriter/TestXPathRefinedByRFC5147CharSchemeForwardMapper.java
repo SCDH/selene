@@ -32,8 +32,8 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	public static final File ID_XSL =
 			Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
 
-	public static final File TEXT_WITH_TOC_XSL =
-			Paths.get("src", "test", "resources", "xsl", "text-with-toc.xsl").toFile();
+	public static final File TEXT_WITH_TOC_XSL = Paths.get("src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
+			.toFile();
 
 	public static final File TEXT_XSL =
 			Paths.get("src", "test", "resources", "xsl", "text.xsl").toFile();

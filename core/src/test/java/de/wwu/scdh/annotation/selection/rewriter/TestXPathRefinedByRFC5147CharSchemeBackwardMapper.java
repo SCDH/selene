@@ -33,8 +33,8 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 	public static final File ID_XSL =
 			Paths.get("src", "test", "resources", "xsl", "id.xsl").toFile();
 
-	public static final File TEXT_WITH_TOC_XSL =
-			Paths.get("src", "test", "resources", "xsl", "text-with-toc.xsl").toFile();
+	public static final File TEXT_WITH_TOC_XSL = Paths.get("src", "test", "resources", "xsl", "text-with-toc-xhtml.xsl")
+			.toFile();
 
 	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false);
 
