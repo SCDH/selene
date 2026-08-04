@@ -179,7 +179,9 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		// the XdmValue output looks a bit weird: all text containers are directly in document node
-		assertTrue(mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"));
+		assertTrue(
+				mapped.get(0).getXPath().endsWith("/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[22]"),
+				"The output of transformation to plaintext is remarkably weird!");
 		assertEquals(5, mapped.get(0).getChar());
 	}
 
