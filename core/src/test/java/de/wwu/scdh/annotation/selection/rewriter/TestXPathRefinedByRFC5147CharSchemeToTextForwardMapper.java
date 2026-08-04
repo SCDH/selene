@@ -151,7 +151,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
 		assertEquals(1, mapped.size());
 		int charPos = mapped.get(0).getChar();
-		assertEquals(125 - 1, charPos);
+		assertEquals(54 - 1, charPos);
 		String serialized = serialize(image.getContents(), "text");
 		assertEquals("g", serialized.substring(charPos, charPos + 1));
 	}

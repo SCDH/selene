@@ -12,7 +12,26 @@
 
     <xsl:mode on-no-match="shallow-skip"/>
 
-    <xsl:template match="teiHeader | head | rdg"/>
+    <xsl:template match="teiHeader | head"/>
+
+    <xsl:template match="app">
+        <xsl:apply-templates select="lem"/>
+    </xsl:template>
+
+    <xsl:template match="choice[sic and corr]">
+        <xsl:apply-templates select="corr"/>
+    </xsl:template>
+
+    <xsl:template match="text()[not(ancestor::l or ancestor::p or ancestor::head)]"/>
+
+    <xsl:template match="p | l">
+        <xsl:apply-templates/>
+        <xsl:text>&#xa;</xsl:text>
+    </xsl:template>
+
+    <xsl:template match="caesura">
+        <xsl:text>||</xsl:text>
+    </xsl:template>
 
     <xsl:template match="/">
         <xsl:call-template name="trace:root"/>

@@ -155,7 +155,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
-		RFC5147CharScheme imagePoint = new RFC5147CharScheme(125);
+		RFC5147CharScheme imagePoint = new RFC5147CharScheme(54);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());
 		assertEquals(
