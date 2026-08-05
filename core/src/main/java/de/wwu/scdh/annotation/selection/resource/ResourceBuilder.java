@@ -268,11 +268,7 @@ public class ResourceBuilder {
 		switch (method) {
 			case "text":
 				return RFC5147CharScheme.class;
-			case "html":
-				return XPathRefinedByRFC5147CharScheme.class;
-			case "xhtml":
-				return XPathRefinedByRFC5147CharScheme.class;
-			case "xml":
+			case "html", "xhtml", "xml":
 				return XPathRefinedByRFC5147CharScheme.class;
 			default:
 				log.error("no point for output method {}", method);
