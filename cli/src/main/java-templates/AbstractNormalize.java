@@ -13,6 +13,9 @@ import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XPathCompiler;
+import net.sf.saxon.s9api.XsltCompiler;
+import net.sf.saxon.s9api.XsltPackage;
+import net.sf.saxon.s9api.SaxonApiException;
 
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
@@ -28,6 +31,19 @@ abstract class AbstractNormalize {
     protected static final Processor PROC = new Processor();
 
 	XPathCompiler compiler = PROC.newXPathCompiler();
+
+	protected void compileXPathLibrary() {
+		try {
+			File library = new File(DOMResource.class.getResource("/xslt/xpath.xsl").getPath());
+			XsltCompiler xsltCompiler = PROC.newXsltCompiler();
+			XsltPackage functionLibrary = xsltCompiler.compilePackage(library);
+			compiler.addXsltFunctionLibrary(functionLibrary);
+			compiler.declareNamespace("sel", "http://wwu.de/scdh/selection-engine/xpaths");
+		} catch (SaxonApiException e) {
+			System.err.println("failed to load xpath library: " + e.getMessage());
+			System.exit(2);
+		}
+	}
 
 	enum Normalizer {
 	FROM_ROOT_CLARK,
