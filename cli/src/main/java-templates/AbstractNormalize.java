@@ -12,6 +12,7 @@ import picocli.CommandLine.Parameters;
 import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XPathCompiler;
 
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
@@ -26,7 +27,9 @@ abstract class AbstractNormalize {
 
     protected static final Processor PROC = new Processor();
 
-    enum Normalizer {
+	XPathCompiler compiler = PROC.newXPathCompiler();
+
+	enum Normalizer {
 	FROM_ROOT_CLARK,
 	FROM_DEEPEST_ID_CLARK
     }
@@ -148,12 +151,10 @@ abstract class AbstractNormalize {
     }
 
     protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
-	return new XPathNormalizerWithXPath(getNormalizerXPath());
+	return new XPathNormalizerWithXPath(PROC.newXPathCompiler(), getNormalizerXPath());
     }
 
-    protected NormalizerFactory getNormalizerFactory() {
-	return new NormalizerFactory();
-    }
+    protected NormalizerFactory getNormalizerFactory(){ return new NormalizerFactory(PROC.newXPathCompiler()); }
 
     protected RewriterConfig getRewriterConfig() throws CliException {
 	return new RewriterConfig(mode, false, getNormalizerXPath(), true, true);

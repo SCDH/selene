@@ -63,7 +63,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
@@ -85,7 +85,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(2, mapped.size());
 
@@ -121,7 +121,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(0, mapped.size());
 	}
@@ -137,7 +137,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
@@ -157,7 +157,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG_NO_NS);
 		assertEquals(1, mapped.size());
 		assertEquals(
@@ -173,7 +173,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);
@@ -193,7 +193,7 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 		preimage.setImage(image);
 		// let $ctx:=., $rt:=$ctx/ancestor-or-self::node()[parent::node()[not(parent::node())]] return path($rt)
 		XPathRefinedByRFC5147CharSchemeForwardMapper mapper = new XPathRefinedByRFC5147CharSchemeForwardMapper(
-				"path(ancestor-or-self::node()[ parent::node()[not(parent::node())]  ]) ");
+				PROC.newXPathCompiler(), "path(ancestor-or-self::node()[ parent::node()[not(parent::node())]  ]) ");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, CONFIG);

@@ -60,7 +60,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		assertEquals(PROC, image.getProcessor());
 		assertEquals(PROC, preimage.getImage().getProcessor());
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]/text()[1]", 5);
 		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
@@ -82,7 +82,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		assertEquals(PROC, image.getProcessor());
 		assertEquals(PROC, preimage.getImage().getProcessor());
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]/text()[1]", 5);
 		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
@@ -106,7 +106,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		assertEquals(PROC, image.getProcessor());
 		assertEquals(PROC, preimage.getImage().getProcessor());
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]/text()[1]", 5);
 		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
@@ -134,7 +134,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());
 		assertEquals(
@@ -156,7 +156,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_XHTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());
 		assertEquals(
@@ -177,7 +177,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());
 		assertEquals(
@@ -198,7 +198,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				new XdmValueResource(GESANG_XML, transform(source, TEXT_WITH_TOC_HTML_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());
 		assertEquals(

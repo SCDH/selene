@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.sf.saxon.s9api.Axis;
-import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XPathExecutable;
@@ -77,12 +76,23 @@ public abstract class XPathRewriterBase {
 		}
 	}
 
-	// protected final DOMResource resource;
+	protected final XPathCompiler xPathCompiler;
+	protected final String xpath;
 
 	/**
 	 * Make a new {@link XPathNormalizer} for a {@link DOMResource}.
 	 */
-	public XPathRewriterBase() {}
+	public XPathRewriterBase(XPathCompiler xPathCompiler, String xpath) {
+		this.xPathCompiler = xPathCompiler;
+		this.xpath = xpath;
+	}
+
+	/**
+	 * Returns the XPath the mapper instance was configured with.
+	 */
+	public String getXPath() {
+		return xpath;
+	}
 
 	/**
 	 * This method run the first stage of the normalization
@@ -132,7 +142,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getFirstNodeAtPosition(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -147,7 +157,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getSecondNodeAtPosition(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -164,7 +174,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getFirstOfDeepestNodesAtPosition(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -187,7 +197,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getLastOfDeepestNodesAtPosition(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -216,7 +226,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStopAtEnd(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -237,7 +247,7 @@ public abstract class XPathRewriterBase {
 	 */
 	protected final Pair<XdmNode, Integer> getDeepTextNodeAtPositionStepOverEnd(
 			S9ApiResource<? extends XdmValue> resource, String xpath, int position) throws SelectorException {
-		XdmNode fragment = getNode(resource.getContents(), xpath, resource.getProcessor());
+		XdmNode fragment = getNode(resource.getContents(), xpath);
 		List<Pair<XdmNode, Integer>> nodesAtPosition = getDescendantTextNodesWithPosition(fragment, position);
 		if (nodesAtPosition.isEmpty()) {
 			return reportNotFound(xpath, position);
@@ -258,10 +268,8 @@ public abstract class XPathRewriterBase {
 	 * @return an {@link XdmNode} which the XPath points to
 	 */
 	protected final XdmNode getNode(DOMResource resource, String xpath) throws SelectorException {
-		Processor proc = resource.getProcessor();
-		XPathCompiler compiler = proc.newXPathCompiler();
 		try {
-			XPathExecutable executable = compiler.compile(xpath);
+			XPathExecutable executable = xPathCompiler.compile(xpath);
 			XPathSelector selector = executable.load();
 			selector.setContextItem(resource.getContents());
 			XdmValue nodes = selector.evaluate();
@@ -292,7 +300,7 @@ public abstract class XPathRewriterBase {
 	 * @return an {@link XdmNode} which the XPath points to
 	 */
 	protected final XdmNode getNode(XdmValueResource resource, String xpath) throws SelectorException {
-		return getNode(resource.getContents(), xpath, resource.getProcessor());
+		return getNode(resource.getContents(), xpath);
 	}
 
 	/**
@@ -300,10 +308,9 @@ public abstract class XPathRewriterBase {
 	 * passed as argument. If the XPath does not evaluate to a single
 	 * node, this method raises an {@link SelectorException}.
 	 */
-	protected final XdmNode getNode(XdmValue value, String xpath, Processor processor) throws SelectorException {
-		XPathCompiler compiler = processor.newXPathCompiler();
+	protected final XdmNode getNode(XdmValue value, String xpath) throws SelectorException {
 		try {
-			XPathExecutable executable = compiler.compile(xpath);
+			XPathExecutable executable = xPathCompiler.compile(xpath);
 			XdmValue result = XdmEmptySequence.getInstance();
 			for (XdmItem item : value.stream().asList()) {
 				XPathSelector selector = executable.load();
@@ -520,14 +527,11 @@ public abstract class XPathRewriterBase {
 	 * @param xpath    the XPath for generating a path expression, e.g., fn:xpath()
 	 * @param node     the {@link XdmNode} for which to generate the path expression
 	 * @param escaped  whether the generated path expression is to be escaped
-	 * @param processor  a Saxon {@link Processor}
 	 */
-	protected String pathExpressionWithXPath(String xpath, XdmNode node, boolean escaped, Processor processor)
-			throws SelectorException {
-		XPathCompiler compiler = processor.newXPathCompiler();
+	protected String pathExpressionWithXPath(String xpath, XdmNode node, boolean escaped) throws SelectorException {
 		XdmValue nodes;
 		try {
-			XPathExecutable executable = compiler.compile(xpath);
+			XPathExecutable executable = xPathCompiler.compile(xpath);
 			XPathSelector selector = executable.load();
 			selector.setContextItem(node);
 			nodes = selector.evaluate();

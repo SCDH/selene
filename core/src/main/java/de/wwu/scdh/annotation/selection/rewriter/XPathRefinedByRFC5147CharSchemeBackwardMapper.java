@@ -6,6 +6,7 @@ import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmNode;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -37,16 +38,11 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeBackwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	protected final String xpath;
-
 	/**
-	 * Create a {@link XPathRefinedByRFC5147CharSchemeBackwardMapper}
-	 * for a {@link MappedDOMResource}.
-	 *
-	 * @param xpath  an XPath expression which will be evaluated on a context node for normalization
+	 * {@inheritDoc}
 	 */
-	public XPathRefinedByRFC5147CharSchemeBackwardMapper(String xpath) {
-		this.xpath = xpath;
+	public XPathRefinedByRFC5147CharSchemeBackwardMapper(XPathCompiler xPathCompiler, String xpath) {
+		super(xPathCompiler, xpath);
 	}
 
 	/**
@@ -72,20 +68,11 @@ public class XPathRefinedByRFC5147CharSchemeBackwardMapper extends XPathRewriter
 		// step 3: rebase each image node
 		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<XPathRefinedByRFC5147CharScheme>();
 		if (preimageNode.isPresent()) {
-			String normalizedXPath = pathExpressionWithXPath(
-					getXPath(), preimageNode.get(), config.getEscaped(), preimage.getProcessor());
-			XdmNode normalizedNode =
-					getNode(preimage.getContents(), unespace(normalizedXPath), preimage.getProcessor());
+			String normalizedXPath = pathExpressionWithXPath(getXPath(), preimageNode.get(), config.getEscaped());
+			XdmNode normalizedNode = getNode(preimage.getContents(), unespace(normalizedXPath));
 			Integer normalizedPos = posInNormalizedNode(preimageNode.get(), imagePair.getRight(), normalizedNode);
 			transformed.add(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
 		}
 		return transformed;
-	}
-
-	/**
-	 * Returns the XPath the mapper instance was configured with.
-	 */
-	public String getXPath() {
-		return xpath;
 	}
 }

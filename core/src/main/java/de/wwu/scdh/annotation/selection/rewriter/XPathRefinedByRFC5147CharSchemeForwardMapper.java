@@ -5,6 +5,7 @@ import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmNode;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -35,16 +36,11 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	protected final String xpath;
-
 	/**
-	 * Create a {@link XPathRefinedByRFC5147CharSchemeForwardMapper}
-	 * for a {@link MappedDOMResource}.
-	 *
-	 * @param xpath  an XPath expression which will be evaluated on a context node for normalization
+	 * {@inheritDoc}
 	 */
-	public XPathRefinedByRFC5147CharSchemeForwardMapper(String xpath) {
-		this.xpath = xpath;
+	public XPathRefinedByRFC5147CharSchemeForwardMapper(XPathCompiler xPathCompiler, String xpath) {
+		super(xPathCompiler, xpath);
 	}
 
 	/**
@@ -54,7 +50,7 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
 	public List<XPathRefinedByRFC5147CharScheme> rewrite(
 			MappedDOMResource preimage, XPathRefinedByRFC5147CharScheme preimagePoint, RewriterConfig config)
 			throws SelectorException {
-		// step 1: normalize to pair of text node and position
+		// step 1: normalize to a pair of text node and position
 		Pair<XdmNode, Integer> preimagePair =
 				getTextNodeAtPosition(preimage, preimagePoint.getXPath(), preimagePoint.getChar(), config.getMode());
 		// step 2: map text node from preimage to list of text nodes from image
@@ -62,21 +58,12 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
 		// step 3: rebase in image using configured XPath
 		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<XPathRefinedByRFC5147CharScheme>();
 		for (XdmNode imageNode : imageNodes) {
-			String normalizedXPath =
-					pathExpressionWithXPath(getXPath(), imageNode, config.getEscaped(), preimage.getProcessor());
-			XdmNode normalizedNode =
-					getNode(preimage.getImage().getContents(), unespace(normalizedXPath), preimage.getProcessor());
+			String normalizedXPath = pathExpressionWithXPath(getXPath(), imageNode, config.getEscaped());
+			XdmNode normalizedNode = getNode(preimage.getImage().getContents(), unespace(normalizedXPath));
 			Integer normalizedPos = posInNormalizedNode(imageNode, preimagePair.getRight(), normalizedNode);
 			transformed.add(
 					new XPathRefinedByRFC5147CharScheme(postProcForwardPaths(normalizedXPath, config), normalizedPos));
 		}
 		return transformed;
-	}
-
-	/**
-	 * Returns the XPath the mapper instance was configured with.
-	 */
-	public String getXPath() {
-		return xpath;
 	}
 }

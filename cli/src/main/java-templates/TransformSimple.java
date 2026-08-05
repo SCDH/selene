@@ -128,13 +128,13 @@ public class TransformSimple extends AbstractNormalize implements Callable<Integ
 	RewriterFactory factory;
 	Rewriter rewriter;
 	if (backward) {
-	    factory = new BackwardMappingFactory();
+	    factory = new BackwardMappingFactory(compiler);
 	    rewriter = factory.getRewriter
 		(preimage.getImage().getPointClass(),
 		 XPathRefinedByRFC5147CharScheme.class,
 		 getRewriterConfig());
 	} else {
-	    factory = new ForwardMappingFactory();
+	    factory = new ForwardMappingFactory(compiler);
 	    rewriter = factory.getRewriter
 		(XPathRefinedByRFC5147CharScheme.class,
 		 preimage.getImage().getPointClass(),

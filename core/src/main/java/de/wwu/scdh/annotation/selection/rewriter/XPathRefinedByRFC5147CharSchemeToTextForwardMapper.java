@@ -41,16 +41,13 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, RFC5147CharScheme> {
 
-	protected final String xpath = "preceding::text()";
+	public static final String XPATH = "preceding::text()";
 
 	/**
-	 * Create a {@link XPathRefinedByRFC5147CharSchemeToTextForwardMapper}
-	 * for a {@link MappedDOMResource}.
-	 *
-	 * @param xpath  an XPath expression which will be evaluated on a context node for normalization
+	 * {@inheritDoc}
 	 */
-	public XPathRefinedByRFC5147CharSchemeToTextForwardMapper(String xpath) {
-		// this.xpath = xpath;
+	public XPathRefinedByRFC5147CharSchemeToTextForwardMapper(XPathCompiler xPathCompiler, String xpath) {
+		super(xPathCompiler, XPATH);
 	}
 
 	/**
@@ -80,7 +77,7 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 		List<RFC5147CharScheme> transformed = new ArrayList<RFC5147CharScheme>();
 		try {
 			XPathCompiler xPathCompiler = preimage.getProcessor().newXPathCompiler();
-			XPathExecutable xPathExecutable = xPathCompiler.compile(xpath);
+			XPathExecutable xPathExecutable = xPathCompiler.compile(XPATH);
 			// for every node in image
 			for (XdmNode imageNode : imageNodes) {
 				// preimage character pos component is the offset into the image node
@@ -102,6 +99,6 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 	 * Returns the XPath the mapper instance was configured with.
 	 */
 	public String getXPath() {
-		return xpath;
+		return XPATH;
 	}
 }

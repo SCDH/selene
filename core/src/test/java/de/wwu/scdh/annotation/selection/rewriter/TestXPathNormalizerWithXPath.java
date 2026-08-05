@@ -28,7 +28,7 @@ public class TestXPathNormalizerWithXPath {
 	@Test
 	public void testWithPathFunction() throws SelectorException, SaxonApiException, IOException {
 		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
-		XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath("path(.)");
+		XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(PROC.newXPathCompiler(), "path(.)");
 		assertEquals("path(.)", normalizer.getXPath());
 		String xpath;
 		List<XPathRefinedByRFC5147CharScheme> result;
@@ -55,8 +55,8 @@ public class TestXPathNormalizerWithXPath {
 	@Test
 	public void testWithDeepestIdClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
 		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
-		XPathNormalizerWithXPath normalizer =
-				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(
+				PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 		String xpath;
 		List<XPathRefinedByRFC5147CharScheme> result;
 		XPathRefinedByRFC5147CharScheme point;
@@ -73,8 +73,8 @@ public class TestXPathNormalizerWithXPath {
 	@Test
 	public void testWithDeepestIdClarkXPathVerse2AppChar6() throws SelectorException, SaxonApiException, IOException {
 		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
-		XPathNormalizerWithXPath normalizer =
-				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		XPathNormalizerWithXPath normalizer = new XPathNormalizerWithXPath(
+				PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
 		String xpath;
 		List<XPathRefinedByRFC5147CharScheme> result;
 		XPathRefinedByRFC5147CharScheme point;
@@ -93,7 +93,7 @@ public class TestXPathNormalizerWithXPath {
 	public void testPathExpressionClarkXPathOnRootElement() throws SelectorException, SaxonApiException, IOException {
 		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
-				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+				new XPathNormalizerWithXPath(PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 		String xpath;
 		List<XPathRefinedByRFC5147CharScheme> result;
 		XPathRefinedByRFC5147CharScheme point;
@@ -112,7 +112,7 @@ public class TestXPathNormalizerWithXPath {
 			throws SelectorException, SaxonApiException, IOException {
 		DOMResource resource = DOMResource.fromXML(GESANG_XML, PROC);
 		XPathNormalizerWithXPath normalizer =
-				new XPathNormalizerWithXPath(XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+				new XPathNormalizerWithXPath(PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
 		String xpath;
 		List<XPathRefinedByRFC5147CharScheme> result;
 		XPathRefinedByRFC5147CharScheme point;

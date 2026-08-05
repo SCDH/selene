@@ -3,11 +3,11 @@ package de.wwu.scdh.annotation.selection.rewriter;
 import de.wwu.scdh.annotation.selection.*;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.S9ApiResource;
 import java.util.List;
+import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmNode;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The same position (or range) in a {@link DOMResource} can be
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * Normalization of selectors is a 2-stage process: 1) In the first
  * stage, the text position (or range) which is referenced by the
- * selector, has to be found. A pair containing a text node and a RFC
+ * selector, has to be found. A pair containing a text node and an RFC
  * 5147 character scheme position is returned. 2) In the second stage,
  * this position is expressed as a selector again, i.e., the node is
  * referenced with an XPath, where the XPath may be written as a path
@@ -46,14 +46,12 @@ import org.slf4j.LoggerFactory;
 public abstract class XPathNormalizer extends XPathRewriterBase
 		implements Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(XPathNormalizer.class);
-
-	// protected final DOMResource resource;
-
 	/**
-	 * Make a new {@link XPathNormalizer} for a {@link DOMResource}.
+	 * {@inheritDoc}
 	 */
-	public XPathNormalizer() {}
+	public XPathNormalizer(XPathCompiler xPathCompiler, String xpath) {
+		super(xPathCompiler, xpath);
+	}
 
 	/**
 	 * Normalize an XPath Selector refined by an RFC5147 character
@@ -78,7 +76,7 @@ public abstract class XPathNormalizer extends XPathRewriterBase
 				getTextNodeAtPosition(resource, point.getXPath(), point.getChar(), config.getMode());
 		String normalizedXPath = getNormalizedXPath(resource, textNode.getLeft(), config.getEscaped());
 		XdmNode normalizedNode = getNode(resource, unespace(normalizedXPath));
-		Integer normalizedPos = posInNormalizedNode(textNode.getLeft(), textNode.getRight(), normalizedNode);
+		int normalizedPos = posInNormalizedNode(textNode.getLeft(), textNode.getRight(), normalizedNode);
 		return List.of(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
 	}
 
@@ -86,10 +84,11 @@ public abstract class XPathNormalizer extends XPathRewriterBase
 	 * This abstract method must be implemented by normalizers. It
 	 * returns the normalized path to the node given as argument.
 	 *
-	 * @param node  an {@link XdmNode} to which the normlized path must be generated to
-	 * @param escaped  whether or not the normalized XPath is to be escaped for X-processing, e.g., <code>'</code> escaped to <code>&amp;apos;</code>.
+	 * @param node  an {@link XdmNode} to which the normalized path must be generated to
+	 * @param escaped  whether or not the normalized XPath is to be escaped for X-processing, e.g.,
+	 *                    <code>'</code> escaped to <code>&amp;apos;</code>.
 	 * @return the normalized XPath expression as a String
-	 * @see XPathNormalizer#getTextNodeAtPosition(String, int, boolean)
+	 * @see XPathRewriterBase#getTextNodeAtPosition(S9ApiResource, String, int, Mode)
 	 */
 	protected abstract String getNormalizedXPath(DOMResource resource, XdmNode node, boolean escaped)
 			throws SelectorException;
