@@ -34,25 +34,25 @@ with the same transformation that is used for deriving a
 representation of the resource. Transforming selectors is important
 for making standoff annotations interoperable when they were
 aggregated for a particular representation of a resource; it is thus a
-corner stone of generating and processing FAIR research
+cornerstone of generating and processing FAIR research
 data.
 
 | preimage | image      | Transformation Techn. | forward selector transformation    | backward selector transformation   |
 |:---------|------------|-----------------------|------------------------------------|------------------------------------|
 | XML      | XML        | arbitrary XSLT        | ✅ (XML selector to XML selector)  | ✅ (XML selector to XML selector)  |
 | XML      | XHTML      | arbitrary XSLT        | ✅ (XML selector to HTML selector) | ✅ (HTML selector to XML selector) |
-| XML      | HTML       | arbitrary XSLT        | ❓ (XML selector to HTML selector) | ❓ (HTML selector to XML selector) |
+| XML      | HTML       | arbitrary XSLT        | ✅ (XML selector to HTML selector) | ✅ (HTML selector to XML selector) |
 | XML      | plain text | arbitrary XSLT        | ✅ (XML selector to text selector) | ✅ (text selector to XML selector) |
 
 Currently, selector transformations forward and backward are only
 supported alongside XSLT transformations of preimage to image. Why?
 Because XSLT is a formidable technology based on a truly declarative
 programming paradigm. And *Selene*'s selector transformation exploits
-the possibilities only a declarative language can provide. Lern more
+the possibilities only a declarative language can provide. Learn more
 about the preconditions to the XSLT in the [project's Wiki](wiki/XSLT).
 
 Yes, as you can see in the table, *Selene* is capable of rewriting
-pointers into plain text (inter-glyph character positions) to pointers
+pointers into plain text (inter-character positions) to pointers
 into XML (XPath selectors refined by inter-glyph character positions)
 if the plain text was derived from XML with XSLT.
 
@@ -94,7 +94,7 @@ as the Morning Star or the Evening Star.
 
 Java version required: OpenJDK 17+
 
-Tesing and building:
+Testing and building:
 
 ```{shell}
 ./mvnw clean test package
@@ -103,7 +103,7 @@ Tesing and building:
 After building with Maven, there is a command line interface in
 `cli/target/bin/oasel`.
 
-Generating Java Docs, which will be in `target/site/apidocs`:
+Generating Javadocs, which will be in `target/site/apidocs`:
 
 ```{shell}
 ./mvnw javadoc:aggregate
@@ -123,11 +123,11 @@ cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld  -x "path(root(
 
 Building native executable:
 
-1. set up graalvm
+1. set up GraalVM
 
 ```shell
 tar -zxf graalvm.tgz
-export GRAALVM_HOMT=graalvm-...
+export GRAALVM_HOME=graalvm-...
 ```
 
 2. build native executable
