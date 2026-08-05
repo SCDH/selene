@@ -16,7 +16,7 @@
             <directory>${project.basedir}/src/main/resources/xslt</directory>
             <outputDirectory>selene</outputDirectory>
             <includes>
-                <include>**/*.xsl</include>
+                <include>*.xsl</include>
                 <include>saxon*.xml</include>
             </includes>
         </fileSet>

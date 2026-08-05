@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:sel="http://wwu.de/scdh/selection-engine/xpaths" xmlns:t="http://www.tei-c.org/ns/1.0"
+    stylesheet="xpath.xsl" run-as="external">
+
+    <x:scenario label="from deepest id on second text node directly in verse 2">
+        <x:call function="sel:from-deepest-id">
+            <x:param name="ctx" select="id('v2')/text()[2]"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result" select="'id(''v2'')/text()[2]'"/>
+        <x:expect label="string length for escaping" test="string-length(.)" select="18"/>
+    </x:scenario>
+
+    <x:scenario label="from deepest id on title">
+        <x:call function="sel:from-deepest-id">
+            <x:param name="ctx" select="/t:TEI/t:teiHeader/t:fileDesc/t:titleStmt/t:title/text()"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result"
+            select="'/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}teiHeader[1]/Q{http://www.tei-c.org/ns/1.0}fileDesc[1]/Q{http://www.tei-c.org/ns/1.0}titleStmt[1]/Q{http://www.tei-c.org/ns/1.0}title[1]/text()[1]'"
+        />
+    </x:scenario>
+
+    <x:scenario label="from deepest id to element on second text node directly in verse 2">
+        <x:call function="sel:from-deepest-id-to-element">
+            <x:param name="ctx" select="id('v2')/text()[2]"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result" select="'id(''v2'')'"/>
+        <x:expect label="string length of path with single quotes" test="string-length(.)"
+            select="8"/>
+    </x:scenario>
+
+    <x:scenario label="from deepest to element id on title">
+        <x:call function="sel:from-deepest-id-to-element">
+            <x:param name="ctx" select="/t:TEI/t:teiHeader/t:fileDesc/t:titleStmt/t:title/text()"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result"
+            select="'/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}teiHeader[1]/Q{http://www.tei-c.org/ns/1.0}fileDesc[1]/Q{http://www.tei-c.org/ns/1.0}titleStmt[1]/Q{http://www.tei-c.org/ns/1.0}title[1]'"
+        />
+    </x:scenario>
+
+
+    <x:scenario label="to element on second text node directly in verse 2">
+        <x:call function="sel:to-element">
+            <x:param name="ctx" select="id('v2')/text()[2]"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result"
+            select="'/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]'"
+        />
+    </x:scenario>
+
+    <x:scenario label="to element id on title">
+        <x:call function="sel:to-element">
+            <x:param name="ctx" select="/t:TEI/t:teiHeader/t:fileDesc/t:titleStmt/t:title/text()"
+                href="../../../../../test/Gesang.tei.xml"/>
+        </x:call>
+        <x:expect label="result"
+            select="'/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}teiHeader[1]/Q{http://www.tei-c.org/ns/1.0}fileDesc[1]/Q{http://www.tei-c.org/ns/1.0}titleStmt[1]/Q{http://www.tei-c.org/ns/1.0}title[1]'"
+        />
+    </x:scenario>
+
+
+</x:description>
