@@ -1,0 +1,32 @@
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "g1.1",
+  "type": "Annotation",
+  "body": {
+    "source": "https://global.scdh.uni-muenster.de/comment/1"
+  },
+  "target": {
+    "source": "https://docs.org/Gesang.html",
+    "selector": {
+        "type": "RangeSelector",
+        "startSelector": {
+            "type": "XPathSelector",
+            "value": "/html[1]/body[1]/div[2]/div[1]/p[2]/span[1]/text()[1]",
+            "refinedBy": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+                "value": "char=1"
+            }
+        },
+        "endSelector": {
+            "type": "XPathSelector",
+            "value": "/html[1]/body[1]/div[2]/div[1]/p[2]/span[1]/text()[1]",
+            "refinedBy": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+                "value": "char=3"
+                }
+            }
+        }
+    }
+}
