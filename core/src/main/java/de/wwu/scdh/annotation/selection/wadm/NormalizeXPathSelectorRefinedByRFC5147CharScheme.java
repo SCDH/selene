@@ -159,19 +159,30 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
 		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
 		LOG.debug("{} points rewritten", points.size());
-		for (XPathRefinedByRFC5147CharScheme p : points) {
-			if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
-				XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
-				LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
+		if (points.isEmpty()) {
+			// remove values and indicate, that the selector does not point into the image/preimage
+			model.removeAll(selector, RDF.value, null);
+			Statement nullXPath = model.createLiteralStatement(selector, RDF.type, SEL.BlankedSelector);
+			model.add(nullXPath);
+			model.removeAll(refinement, RDF.value, null);
+			Statement nullRefinement = model.createLiteralStatement(refinement, RDF.type, SEL.BlankedSelector);
+			model.add(nullRefinement);
+		} else {
+			// TODO: see #23
+			for (XPathRefinedByRFC5147CharScheme p : points) {
+				if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
+					XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
+					LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
 
-				// 4. write the normalized values back to the model
-				model.remove(xpathStatement);
-				Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
-				model.add(xpathStmt);
-				model.remove(refinementValueStatement);
-				Statement charStatement = model.createLiteralStatement(
-						refinement, RDF.value, "char=" + String.valueOf(normalized.getChar()));
-				model.add(charStatement);
+					// 4. write the normalized values back to the model
+					model.remove(xpathStatement);
+					Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
+					model.add(xpathStmt);
+					model.remove(refinementValueStatement);
+					Statement charStatement = model.createLiteralStatement(
+							refinement, RDF.value, "char=" + String.valueOf(normalized.getChar()));
+					model.add(charStatement);
+				}
 			}
 		}
 	}
