@@ -7,8 +7,19 @@ import de.wwu.scdh.annotation.selection.Rewriter;
 import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import net.sf.saxon.s9api.XPathCompiler;
 
 public class NormalizerFactory implements RewriterFactory {
+
+	private final XPathCompiler compiler;
+
+	/**
+	 * Creates a new {@link BackwardMappingFactory} with a {@link XPathCompiler}.
+	 * @param compiler - A compiler used for evaluating XPath expressions.
+	 */
+	public NormalizerFactory(XPathCompiler compiler) {
+		this.compiler = compiler;
+	}
 
 	// @SuppressWarnings("unchecked")
 	@Override
@@ -19,7 +30,7 @@ public class NormalizerFactory implements RewriterFactory {
 		RW rc;
 		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)
 				&& XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
-			rc = (RW) new XPathNormalizerWithXPath(config.getXPath());
+			rc = (RW) new XPathNormalizerWithXPath(compiler, config.getXPath());
 		} else {
 			throw new ConfigurationException(
 					"no rewriter for " + point1.getClass().getCanonicalName() + " ; "

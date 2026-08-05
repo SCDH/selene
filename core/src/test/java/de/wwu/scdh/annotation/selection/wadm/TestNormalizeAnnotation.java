@@ -26,6 +26,8 @@ import org.junit.jupiter.api.*;
  */
 public class TestNormalizeAnnotation {
 
+	private static final Processor PROC = new Processor();
+
 	public static final String IRI = "https://docs.org/scdh.span.42.html";
 	public static final String REWRITE_IRI = "https://docs.org/scdh.span.42.xhtml";
 
@@ -37,7 +39,7 @@ public class TestNormalizeAnnotation {
 
 	public static final URI SPAN_HTML = new File(SAMPLE_DIR, "scdh.span.42.html").toURI();
 
-	private final RewriterFactory rewriterFactory = new NormalizerFactory();
+	private final RewriterFactory rewriterFactory = new NormalizerFactory(PROC.newXPathCompiler());
 	private RewriterConfig normalizerConfig;
 
 	private Model model;
@@ -50,7 +52,7 @@ public class TestNormalizeAnnotation {
 	public void setupResource() throws URISyntaxException, ResourceException, MalformedURLException {
 		iri = new URI(IRI);
 		rewriteIri = new URI(REWRITE_IRI);
-		ResourceBuilder resourceBuilder = new ResourceBuilder(new Processor());
+		ResourceBuilder resourceBuilder = new ResourceBuilder(PROC);
 		try (InputStream inputStream = SPAN_HTML.toURL().openStream()) {
 			resource =
 					resourceBuilder.parseResource(iri, inputStream, SPAN_HTML.toString(), ResourceBuilder.Parser.HTML);

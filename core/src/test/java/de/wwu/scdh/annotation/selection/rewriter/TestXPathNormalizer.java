@@ -37,7 +37,7 @@ public class TestXPathNormalizer {
 
 	private class DummyNormalizer extends XPathNormalizer {
 		public DummyNormalizer() {
-			super();
+			super(PROC.newXPathCompiler(), "ignored");
 		}
 
 		@Override

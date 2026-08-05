@@ -79,7 +79,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		assertEquals(PROC, image.getProcessor());
 		assertEquals(PROC, preimage.getImage().getProcessor());
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]/text()[1]", 5);
 		RFC5147CharScheme imagePoint = new RFC5147CharScheme(252);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
@@ -97,7 +97,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		RFC5147CharScheme imagePoint = new RFC5147CharScheme(247); // ambivalence!
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 0);
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]", 16);
@@ -117,7 +117,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		RFC5147CharScheme imagePoint = new RFC5147CharScheme(247); // ambivalence!
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 0);
 		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]", 16);
@@ -137,7 +137,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		RFC5147CharScheme imagePoint = new RFC5147CharScheme(0);
 		// ("/*", 0);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
@@ -154,7 +154,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextBackwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, NO_HEADER_XSL, LIBTRACE_XML), PROC);
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextBackwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(PROC.newXPathCompiler(), "path(.)");
 		RFC5147CharScheme imagePoint = new RFC5147CharScheme(54);
 		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
 		assertEquals(1, mapped.size());

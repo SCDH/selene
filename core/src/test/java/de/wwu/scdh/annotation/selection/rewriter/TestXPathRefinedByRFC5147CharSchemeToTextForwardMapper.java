@@ -77,7 +77,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
@@ -95,7 +95,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 0);
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
@@ -113,7 +113,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, TEXT_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint = new XPathRefinedByRFC5147CharScheme("/*", 0);
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
 		assertEquals(1, mapped.size());
@@ -130,7 +130,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, NO_HEADER_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]", 5);
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
@@ -145,7 +145,7 @@ public class TestXPathRefinedByRFC5147CharSchemeToTextForwardMapper {
 		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, NO_HEADER_XSL, LIBTRACE_XML));
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeToTextForwardMapper mapper =
-				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper("path(.)");
+				new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(PROC.newXPathCompiler(), "path(.)");
 		XPathRefinedByRFC5147CharScheme preimagePoint =
 				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:l[2]/text()[2]", 6);
 		List<RFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);

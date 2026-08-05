@@ -8,12 +8,23 @@ import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import net.sf.saxon.s9api.XPathCompiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ForwardMappingFactory implements RewriterFactory {
 
 	private static Logger Log = LoggerFactory.getLogger(ForwardMappingFactory.class);
+
+	private final XPathCompiler compiler;
+
+	/**
+	 * Creates a new {@link BackwardMappingFactory} with a {@link XPathCompiler}.
+	 * @param compiler - A compiler used for evaluating XPath expressions.
+	 */
+	public ForwardMappingFactory(XPathCompiler compiler) {
+		this.compiler = compiler;
+	}
 
 	// @SuppressWarnings("unchecked")
 	@Override
@@ -26,10 +37,10 @@ public class ForwardMappingFactory implements RewriterFactory {
 		RW rc;
 		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
 				&& XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
-			rc = (RW) new XPathRefinedByRFC5147CharSchemeForwardMapper(config.getXPath());
+			rc = (RW) new XPathRefinedByRFC5147CharSchemeForwardMapper(compiler, config.getXPath());
 		} else if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
 				&& RFC5147CharScheme.class.isAssignableFrom(point2)) {
-			rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(config.getXPath());
+			rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(compiler, config.getXPath());
 		} else {
 			Log.error("no forward mapping for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
 			throw new ConfigurationException(
