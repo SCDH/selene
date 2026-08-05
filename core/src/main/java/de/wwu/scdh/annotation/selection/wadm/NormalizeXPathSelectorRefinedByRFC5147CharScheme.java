@@ -160,13 +160,13 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
 		LOG.debug("{} points rewritten", points.size());
 		if (points.isEmpty()) {
-			// set values to null to indicate, that the selector does not point into the image/preimage
-			model.remove(xpathStatements);
-			Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, null);
-			model.add(xpathStmt);
-			model.remove(refinementValueStatement);
-			Statement charStatement = model.createLiteralStatement(refinement, RDF.value, "char=");
-			model.add(charStatement);
+			// remove values and indicate, that the selector does not point into the image/preimage
+			model.removeAll(selector, RDF.value, null);
+			Statement nullXPath = model.createLiteralStatement(selector, RDF.type, SEL.BlankedSelector);
+			model.add(nullXPath);
+			model.removeAll(refinement, RDF.value, null);
+			Statement nullRefinement = model.createLiteralStatement(refinement, RDF.type, SEL.BlankedSelector);
+			model.add(nullRefinement);
 		} else {
 			// TODO: see #23
 			for (XPathRefinedByRFC5147CharScheme p : points) {
