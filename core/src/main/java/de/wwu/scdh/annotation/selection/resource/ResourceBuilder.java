@@ -268,13 +268,15 @@ public class ResourceBuilder {
 		switch (method) {
 			case "text":
 				return RFC5147CharScheme.class;
+			case "html":
+				return XPathRefinedByRFC5147CharScheme.class;
 			case "xhtml":
 				return XPathRefinedByRFC5147CharScheme.class;
 			case "xml":
 				return XPathRefinedByRFC5147CharScheme.class;
 			default:
 				log.error("no point for output method {}", method);
-				throw new ResourceException("unsupported output method" + method);
+				throw new ResourceException("unsupported output method " + method);
 		}
 	}
 
