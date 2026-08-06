@@ -50,6 +50,8 @@ public class TestRewriteAnnotationHtml {
 			new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
 	public static final String SONG_BW_TO_ELEMENT_IN_PREIMAGE_JSON =
 			new File(SAMPLE_DIR, "gBwHtmlToElementInPreimage.json").toString();
+	public static final String SONG_BW_TO_HIGHER_IN_PREIMAGE_JSON =
+			new File(SAMPLE_DIR, "gBwHtmlToHigherInPreimage.json").toString();
 	public static final String SONG_FW_NOT_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwNotInImage.json").toString();
 	public static final String SONG_BW_TO_LEAVE_NOT_IN_PREIMAGE_JSON =
 			new File(SAMPLE_DIR, "gBwHtmlToLeafNotInPreimage.json").toString();
@@ -509,6 +511,151 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has rdf:value");
 		assertEquals(
 				"char=11",
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"end refinement has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has no extra class");
+	}
+
+	@Test
+	public void testBackwardToHigherInPreimage() {
+		normalizerConfig = makeConfig("path(.)");
+		model = NormalizeAnnotation.rewrite(
+				songMapped,
+				songIriHtml,
+				songIri,
+				backwardFactory,
+				normalizerConfig,
+				SONG_BW_TO_HIGHER_IN_PREIMAGE_JSON,
+				Optional.of("jsonld"));
+		assertEquals(
+				1,
+				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+						.toSet()
+						.size());
+		Resource specificResource = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+				.next()
+				.getResource();
+		assertEquals(
+				1,
+				model.listStatements(specificResource, OA.hasSource, (RDFNode) null)
+						.toSet()
+						.size());
+		assertEquals(
+				IRI_SONG,
+				specificResource
+						.getProperty(OA.hasSource)
+						.getObject()
+						.asResource()
+						.toString());
+		Resource rangeSelector = model.listStatements(specificResource, OA.hasSelector, (Resource) null)
+				.next()
+				.getObject()
+				.asResource();
+		// start selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasStartSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a start selector");
+		Resource startSelector = model.listStatements(rangeSelector, OA.hasStartSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has rdf:value");
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"start selector has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has no extra class");
+		Resource startRefinement = model.listStatements(startSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has rdf:value");
+		assertEquals(
+				"char=7",
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has extra class");
+		// end selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasEndSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a end selector");
+		Resource endSelector = model.listStatements(rangeSelector, OA.hasEndSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has rdf:value");
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has no extra class");
+		Resource endRefinement = model.listStatements(endSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has rdf:value");
+		assertEquals(
+				"char=13",
 				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
 						.next()
 						.getObject()
