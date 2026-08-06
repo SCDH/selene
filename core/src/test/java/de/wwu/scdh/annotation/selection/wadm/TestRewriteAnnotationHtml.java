@@ -378,7 +378,6 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
-	// works, but not guarantied, since selector goes down to the text leaf
 	@Test
 	public void testBackwardToElementInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
