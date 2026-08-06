@@ -31,7 +31,11 @@
             <body>
                 <div class="toc" style="font-size:0.8em; background-color:lightgray">
                     <h1>Table of contents:</h1>
-                    <xsl:apply-templates mode="toc" select="//text//head"/>
+                    <xsl:for-each select="//text//head">
+                        <xsl:value-of select="position()"/>
+                        <xsl:text>. </xsl:text>
+                        <xsl:apply-templates mode="toc" select="."/>
+                    </xsl:for-each>
                 </div>
                 <hr/>
                 <div class="content">
@@ -73,8 +77,10 @@
         <xsl:variable name="level" as="xs:integer" select="count(ancestor::div | ancestor::lg) + 1"/>
         <xsl:element name="{'h' || $level}">
             <xsl:call-template name="trace:source-id"/>
+            <xsl:attribute name="style">display:inline</xsl:attribute>
             <xsl:apply-templates mode="#current"/>
         </xsl:element>
+        <br/>
     </xsl:template>
 
     <xsl:template match="app" mode="toc #unnamed">

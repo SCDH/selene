@@ -4,7 +4,7 @@
   "type": "Annotation",
   "body": {
     "type": "TextualBody",
-    "value": "Points to an element somewhere in the middle of the hierarchy and to a position after some text not from the preimage. For testing backward mapping in content mixed from preimage and not preimage."
+    "value": "Points to an element somewhere in the middle of the hierarchy and to a position after some text not from the preimage. For testing backward mapping in content mixed from preimage and strings and extra text nodes from XSLT."
   },
   "target": {
     "source": "https://docs.org/Gesang.html",
@@ -16,7 +16,7 @@
             "refinedBy": {
                 "type": "FragmentSelector",
                 "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
-                "value": "char=25"
+                "value": "char=28"
             }
         },
         "endSelector": {
@@ -25,7 +25,7 @@
             "refinedBy": {
                 "type": "FragmentSelector",
                 "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
-                "value": "char=31"
+                "value": "char=34"
                 }
             }
         }
