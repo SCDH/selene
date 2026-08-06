@@ -46,10 +46,10 @@ public class TestRewriteAnnotationHtml {
 			Paths.get("src", "test", "resources", "xsl").toFile();
 
 	public static final String SONG_FW_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwInImage.json").toString();
-	public static final String SONG_BW_IN_PREIMAGE_JSON = new File(SAMPLE_DIR, "gBwHtmlInPreimage.json").toString();
+	public static final String SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON = new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
 	public static final String SONG_FW_NOT_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwNotInImage.json").toString();
-	public static final String SONG_BW_NOT_IN_PREIMAGE_JSON =
-			new File(SAMPLE_DIR, "gBwHtmlNotInPreimage.json").toString();
+	public static final String SONG_BW_TO_LEAVE_NOT_IN_PREIMAGE_JSON =
+			new File(SAMPLE_DIR, "gBwHtmlToLeafNotInPreimage.json").toString();
 
 	public static final URI SONG_XML = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
@@ -82,13 +82,13 @@ public class TestRewriteAnnotationHtml {
 		return new RewriterConfig(null, false, xpath, true, true);
 	}
 
-	// TODO: test with ../h1[1] without pointing to text() leaf
-
-	@Disabled // TODO: investigate: [main] ERROR de.wwu.scdh.annotation.selection.rewriter.XPathRewriterBase - XPath
+	@Disabled("could never be guarantied, since selector goes down to text leaf!")
 	// '/html[1]/body[1]/div[1]/h1[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]' does not
-	// select exactly one node in XdmValueResource: selects 0 nodes
+	// select exactly one node in XdmValueResource: selects 0 nodes --- This is totally logical, since this text node
+	// was never a trace:text node. And, we cannot securely use text() here, since the content could come from string
+	// items in the image. Facit: No guaranty about selectors that go down to the text leaf.
 	@Test
-	public void testBackwardNotInPreimage() {
+	public void testBackwardToLeafNotInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songMapped,
@@ -96,7 +96,7 @@ public class TestRewriteAnnotationHtml {
 				songIri,
 				backwardFactory,
 				normalizerConfig,
-				SONG_BW_NOT_IN_PREIMAGE_JSON,
+				SONG_BW_TO_LEAVE_NOT_IN_PREIMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
 				1,
@@ -510,8 +510,9 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	// works, but not guarantied, since selector goes down to the text leaf
 	@Test
-	public void testBackwardInImage() {
+	public void testBackwardToLeafInImage() {
 		normalizerConfig = makeConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songMapped,
@@ -519,7 +520,7 @@ public class TestRewriteAnnotationHtml {
 				songIri,
 				backwardFactory,
 				normalizerConfig,
-				SONG_BW_IN_PREIMAGE_JSON,
+				SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
 				1,
