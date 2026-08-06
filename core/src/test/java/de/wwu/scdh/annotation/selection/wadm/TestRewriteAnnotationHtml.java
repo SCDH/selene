@@ -46,7 +46,10 @@ public class TestRewriteAnnotationHtml {
 			Paths.get("src", "test", "resources", "xsl").toFile();
 
 	public static final String SONG_FW_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwInImage.json").toString();
-	public static final String SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON = new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
+	public static final String SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON =
+			new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
+	public static final String SONG_BW_TO_ELEMENT_IN_PREIMAGE_JSON =
+			new File(SAMPLE_DIR, "gBwHtmlToElementInPreimage.json").toString();
 	public static final String SONG_FW_NOT_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwNotInImage.json").toString();
 	public static final String SONG_BW_TO_LEAVE_NOT_IN_PREIMAGE_JSON =
 			new File(SAMPLE_DIR, "gBwHtmlToLeafNotInPreimage.json").toString();
@@ -227,10 +230,9 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
-
 	// works, but not guarantied, since selector goes down to the text leaf
 	@Test
-	public void testBackwardToLeafInImage() {
+	public void testBackwardToLeafInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songMapped,
@@ -374,6 +376,151 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	// works, but not guarantied, since selector goes down to the text leaf
+	@Test
+	public void testBackwardToElementInPreimage() {
+		normalizerConfig = makeConfig("path(.)");
+		model = NormalizeAnnotation.rewrite(
+				songMapped,
+				songIriHtml,
+				songIri,
+				backwardFactory,
+				normalizerConfig,
+				SONG_BW_TO_ELEMENT_IN_PREIMAGE_JSON,
+				Optional.of("jsonld"));
+		assertEquals(
+				1,
+				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+						.toSet()
+						.size());
+		Resource specificResource = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+				.next()
+				.getResource();
+		assertEquals(
+				1,
+				model.listStatements(specificResource, OA.hasSource, (RDFNode) null)
+						.toSet()
+						.size());
+		assertEquals(
+				IRI_SONG,
+				specificResource
+						.getProperty(OA.hasSource)
+						.getObject()
+						.asResource()
+						.toString());
+		Resource rangeSelector = model.listStatements(specificResource, OA.hasSelector, (Resource) null)
+				.next()
+				.getObject()
+				.asResource();
+		// start selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasStartSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a start selector");
+		Resource startSelector = model.listStatements(rangeSelector, OA.hasStartSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has rdf:value");
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]",
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"start selector has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has no extra class");
+		Resource startRefinement = model.listStatements(startSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has rdf:value");
+		assertEquals(
+				"char=7",
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has extra class");
+		// end selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasEndSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a end selector");
+		Resource endSelector = model.listStatements(rangeSelector, OA.hasEndSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has rdf:value");
+		assertEquals(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[2]/text()[2]",
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has no extra class");
+		Resource endRefinement = model.listStatements(endSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has rdf:value");
+		assertEquals(
+				"char=11",
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"end refinement has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has no extra class");
+	}
 
 	@Test
 	public void testForwardNotInImage() {
@@ -513,7 +660,6 @@ public class TestRewriteAnnotationHtml {
 						.size(),
 				"end refinement is a sel:Null selector");
 	}
-
 
 	@Disabled("could never be guarantied, since selector goes down to text leaf!")
 	// '/html[1]/body[1]/div[1]/h1[1]/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]' does not
@@ -658,7 +804,6 @@ public class TestRewriteAnnotationHtml {
 						.size(),
 				"end refinement is a sel:Null selector");
 	}
-
 
 	@Test
 	public void testForwardNotInImageTxt() {
