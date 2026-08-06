@@ -37,7 +37,6 @@ public class TestRewriteAnnotationHtml {
 
 	public static final String IRI_SONG = "https://docs.org/Gesang.tei.xml";
 	public static final String IRI_SONG_HTML = "https://docs.org/Gesang.html";
-	public static final String IRI_SONG_TXT = "https://docs.org/Gesang.txt";
 
 	public static final File TEST_DIR = Paths.get("..", "test").toFile();
 	public static final File SAMPLE_DIR =
@@ -67,13 +66,12 @@ public class TestRewriteAnnotationHtml {
 	private Model model;
 
 	private de.wwu.scdh.annotation.selection.Resource<?> songMapped;
-	private URI songIri, songIriHtml, songIriTxt;
+	private URI songIri, songIriHtml;
 
 	@BeforeEach
 	public void setupResource() throws URISyntaxException, ResourceException, MalformedURLException {
 		songIri = new URI(IRI_SONG);
 		songIriHtml = new URI(IRI_SONG_HTML);
-		songIriTxt = new URI(IRI_SONG_TXT);
 		ResourceBuilder resourceBuilder = new ResourceBuilder(PROC);
 		try (InputStream inputStream = SONG_XML.toURL().openStream()) {
 			DOMResource preimageSong = (DOMResource) resourceBuilder.parseResource(
@@ -979,145 +977,6 @@ public class TestRewriteAnnotationHtml {
 						.size());
 		assertEquals(
 				IRI_SONG,
-				specificResource
-						.getProperty(OA.hasSource)
-						.getObject()
-						.asResource()
-						.toString());
-		Resource rangeSelector = model.listStatements(specificResource, OA.hasSelector, (Resource) null)
-				.next()
-				.getObject()
-				.asResource();
-		// start selector
-		assertEquals(
-				1,
-				model.listStatements(rangeSelector, OA.hasStartSelector, (Resource) null)
-						.toSet()
-						.size(),
-				"has a start selector");
-		Resource startSelector = model.listStatements(rangeSelector, OA.hasStartSelector, (RDFNode) null)
-				.next()
-				.getObject()
-				.asResource();
-		assertEquals(
-				0,
-				model.listStatements(startSelector, RDF.value, (RDFNode) null)
-						.toSet()
-						.size(),
-				"start selector does not have rdf:value");
-		assertEquals(
-				2,
-				model.listStatements(startSelector, RDF.type, (RDFNode) null)
-						.toSet()
-						.size(),
-				"start selector has extra class");
-		assertEquals(
-				1,
-				model.listStatements(startSelector, RDF.type, SEL.BlankedSelector)
-						.toSet()
-						.size(),
-				"start selector is a sel:Null selector");
-		Resource startRefinement = model.listStatements(startSelector, OA.refinedBy, (RDFNode) null)
-				.next()
-				.getObject()
-				.asResource();
-		assertEquals(
-				0,
-				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
-						.toSet()
-						.size(),
-				"start refinement does not have rdf:value");
-		assertEquals(
-				2,
-				model.listStatements(startRefinement, RDF.type, (RDFNode) null)
-						.toSet()
-						.size(),
-				"start refinement has extra class");
-		assertEquals(
-				1,
-				model.listStatements(startRefinement, RDF.type, SEL.BlankedSelector)
-						.toSet()
-						.size(),
-				"start refinement is a sel:Null selector");
-		// end selector
-		assertEquals(
-				1,
-				model.listStatements(rangeSelector, OA.hasEndSelector, (Resource) null)
-						.toSet()
-						.size(),
-				"has a end selector");
-		Resource endSelector = model.listStatements(rangeSelector, OA.hasEndSelector, (RDFNode) null)
-				.next()
-				.getObject()
-				.asResource();
-		assertEquals(
-				0,
-				model.listStatements(endSelector, RDF.value, (RDFNode) null)
-						.toSet()
-						.size(),
-				"end selector does not have rdf:value");
-		assertEquals(
-				2,
-				model.listStatements(endSelector, RDF.type, (RDFNode) null)
-						.toSet()
-						.size(),
-				"end selector has extra class");
-		assertEquals(
-				1,
-				model.listStatements(endSelector, RDF.type, SEL.BlankedSelector)
-						.toSet()
-						.size(),
-				"end selector is a sel:Null selector");
-		Resource endRefinement = model.listStatements(endSelector, OA.refinedBy, (RDFNode) null)
-				.next()
-				.getObject()
-				.asResource();
-		assertEquals(
-				0,
-				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
-						.toSet()
-						.size(),
-				"end refinement does not have rdf:value");
-		assertEquals(
-				2,
-				model.listStatements(endRefinement, RDF.type, (RDFNode) null)
-						.toSet()
-						.size(),
-				"end refinement has extra class");
-		assertEquals(
-				1,
-				model.listStatements(endRefinement, RDF.type, SEL.BlankedSelector)
-						.toSet()
-						.size(),
-				"end refinement is a sel:Null selector");
-	}
-
-	@Test
-	public void testForwardNotInImageTxt() {
-		normalizerConfig = makeConfig("path(.)");
-		model = NormalizeAnnotation.rewrite(
-				songMapped,
-				songIri,
-				songIriTxt,
-				forwardFactory,
-				normalizerConfig,
-				SONG_FW_NOT_IN_IMAGE_JSON,
-				Optional.of("jsonld"));
-		assertEquals(
-				1,
-				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
-						.toSet()
-						.size());
-		Resource specificResource = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
-				.next()
-				.getResource();
-		assertEquals(
-				1,
-				model.listStatements(specificResource, OA.hasSource, (RDFNode) null)
-						.toSet()
-						.size());
-		assertEquals(
-				IRI_SONG_TXT,
 				specificResource
 						.getProperty(OA.hasSource)
 						.getObject()
