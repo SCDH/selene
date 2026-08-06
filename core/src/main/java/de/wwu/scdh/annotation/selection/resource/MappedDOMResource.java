@@ -193,7 +193,12 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	 */
 	@Override
 	public Optional<XdmNode> getCorrespondingInPreimage(XdmNode imageNode) {
-		return Optional.of(reverseMap.get(imageNode));
+		// reverseMap contains null value when node not in preimage
+		if (reverseMap.get(imageNode) == null) {
+			return Optional.empty();
+		} else {
+			return Optional.of(reverseMap.get(imageNode));
+		}
 	}
 
 	/**
