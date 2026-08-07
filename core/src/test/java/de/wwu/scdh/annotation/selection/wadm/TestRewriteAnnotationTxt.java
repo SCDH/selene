@@ -84,7 +84,7 @@ public class TestRewriteAnnotationTxt {
 	}
 
 	private static RewriterConfig makeConfig(String xpath) {
-		return new RewriterConfig(null, false, xpath, true, true);
+		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.forwardDOMToTextPointClassMap());
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class TestRewriteAnnotationTxt {
 						.size(),
 				"start selector has rdf:value");
 		assertEquals(
-				"char=44",
+				"char=43",
 				model.listStatements(startSelector, RDF.value, (RDFNode) null)
 						.next()
 						.getObject()
@@ -180,7 +180,7 @@ public class TestRewriteAnnotationTxt {
 						.size(),
 				"end selector has rdf:value");
 		assertEquals(
-				"char=46",
+				"char=45",
 				model.listStatements(endSelector, RDF.value, (RDFNode) null)
 						.next()
 						.getObject()
@@ -643,7 +643,6 @@ public class TestRewriteAnnotationTxt {
 				"end refinement has no extra class");
 	}
 
-	@Disabled("not yet")
 	@Test
 	public void testForwardNotInImage() {
 		normalizerConfig = makeConfig("path(.)");

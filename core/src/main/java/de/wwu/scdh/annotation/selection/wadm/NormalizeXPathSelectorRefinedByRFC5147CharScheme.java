@@ -7,12 +7,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.OA;
@@ -59,6 +55,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		this.rewriterFactory = rewriterFactory;
 		this.normalizerConfig = normalizerConfig;
 		try {
+			// note: The second point class, i.e., the output point, may be rewritten by the factory!
 			this.rewriter = rewriterFactory.getRewriter(
 					XPathRefinedByRFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class, normalizerConfig);
 			LOG.debug(
@@ -158,6 +155,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
 		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
+		// 4. write back to the model
 		LOG.debug("{} points rewritten", points.size());
 		if (points.isEmpty()) {
 			// remove values and indicate, that the selector does not point into the image/preimage
@@ -169,21 +167,10 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 			model.add(nullRefinement);
 		} else {
 			// TODO: see #23
-			for (XPathRefinedByRFC5147CharScheme p : points) {
-				if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
-					XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
-					LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
-
-					// 4. write the normalized values back to the model
-					model.remove(xpathStatement);
-					Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
-					model.add(xpathStmt);
-					model.remove(refinementValueStatement);
-					Statement charStatement = model.createLiteralStatement(
-							refinement, RDF.value, "char=" + String.valueOf(normalized.getChar()));
-					model.add(charStatement);
-				}
-			}
+			model.removeAll(refinement, null, null);
+			model.removeAll(selector, null, null);
+			SelectorBuilder build = new SelectorBuilder(model, selector);
+			points.forEach(build);
 		}
 	}
 }
