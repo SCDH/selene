@@ -19,7 +19,7 @@ public class ForwardMappingFactory implements RewriterFactory {
 	private final XPathCompiler compiler;
 
 	/**
-	 * Creates a new {@link BackwardMappingFactory} with a {@link XPathCompiler}.
+	 * Creates a new {@link ForwardMappingFactory} with a {@link XPathCompiler}.
 	 * @param compiler - A compiler used for evaluating XPath expressions.
 	 */
 	public ForwardMappingFactory(XPathCompiler compiler) {
@@ -28,24 +28,30 @@ public class ForwardMappingFactory implements RewriterFactory {
 
 	// @SuppressWarnings("unchecked")
 	@Override
-	public <R extends Resource<?>, P1 extends Point, P2 extends Point, RW extends Rewriter<R, P1, P2>> RW getRewriter(
-			Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException {
+	public <R extends Resource<?>, P1 extends Point, P2 extends Point, P3 extends Point, RW extends Rewriter<R, P1, P3>>
+			RW getRewriter(Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException {
 
 		Log.debug("looking up mapper for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
 
-		// return null;
+		Class<P3> mappedPointClass;
+		if (config.getPointClassMap().containsKey(point2)) {
+			mappedPointClass = (Class<P3>) config.getPointClassMap().get(point2);
+		} else {
+			mappedPointClass = (Class<P3>) point2;
+		}
+
 		RW rc;
 		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
-				&& XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
+				&& XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(mappedPointClass)) {
 			rc = (RW) new XPathRefinedByRFC5147CharSchemeForwardMapper(compiler, config.getXPath());
 		} else if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
-				&& RFC5147CharScheme.class.isAssignableFrom(point2)) {
+				&& RFC5147CharScheme.class.isAssignableFrom(mappedPointClass)) {
 			rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(compiler, config.getXPath());
 		} else {
-			Log.error("no forward mapping for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
+			Log.error("no forward mapping for {}, {}", point1.getCanonicalName(), mappedPointClass.getCanonicalName());
 			throw new ConfigurationException(
 					"no forward mapping for " + point1.getClass().getCanonicalName() + " ; "
-							+ point2.getClass().getCanonicalName());
+							+ mappedPointClass.getClass().getCanonicalName());
 		}
 		return rc;
 	}
