@@ -33,6 +33,11 @@
         <xsl:text>||</xsl:text>
     </xsl:template>
 
+    <xsl:template match="text">
+        <xsl:apply-templates/>
+        <xsl:text>&#xa;&#xa;Bye!</xsl:text>
+    </xsl:template>
+
     <xsl:template match="/">
         <xsl:call-template name="trace:root"/>
     </xsl:template>
