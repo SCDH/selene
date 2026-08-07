@@ -20,8 +20,8 @@ public class SelectorBuilder implements Consumer<Point> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SelectorBuilder.class);
 
-	private Model model;
-	private Resource selector;
+	private final Model model;
+	private final Resource selector;
 
 	/**
 	 * Makes a new {@link SelectorBuilder} for a {@link Model}. It will use the {@link Resource} <code>selector</code>
