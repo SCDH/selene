@@ -15,6 +15,8 @@ import net.sf.saxon.s9api.XPathSelector;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Map an {@link XPathRefinedByRFC5147CharScheme} point inside a
@@ -41,6 +43,8 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, RFC5147CharScheme> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(XPathRefinedByRFC5147CharSchemeToTextForwardMapper.class);
+
 	public static final String XPATH = "preceding::text()";
 
 	/**
@@ -65,6 +69,7 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 	public List<RFC5147CharScheme> rewrite(
 			MappedDOMResource preimage, XPathRefinedByRFC5147CharScheme preimagePoint, RewriterConfig config)
 			throws SelectorException {
+		LOG.info("forwarding XPath refined by char scheme to RFC 5147 char scheme");
 		// step 1: normalize to pair of text node and position
 		Pair<XdmNode, Integer> preimagePair =
 				getTextNodeAtPosition(preimage, preimagePoint.getXPath(), preimagePoint.getChar(), config.getMode());

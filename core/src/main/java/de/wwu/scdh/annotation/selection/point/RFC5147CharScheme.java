@@ -10,6 +10,8 @@ import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
  */
 public class RFC5147CharScheme extends PointImpl {
 
+	public static final String RFC5147 = "http://tools.ietf.org/rfc/rfc5147";
+
 	private final int chr;
 
 	/**

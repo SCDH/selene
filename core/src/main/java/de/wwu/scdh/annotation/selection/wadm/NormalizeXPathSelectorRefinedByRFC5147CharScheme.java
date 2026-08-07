@@ -1,18 +1,15 @@
 package de.wwu.scdh.annotation.selection.wadm;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.OA;
@@ -42,7 +39,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	protected final URI iri;
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
-	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> rewriter = null;
+	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, ? extends Point> rewriter = null;
 	protected final RewriterConfig normalizerConfig;
 
 	protected Optional<Exception> error = null;
@@ -59,6 +56,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		this.rewriterFactory = rewriterFactory;
 		this.normalizerConfig = normalizerConfig;
 		try {
+			// note: The second point class, i.e., the output point, may be rewritten by the factory!
 			this.rewriter = rewriterFactory.getRewriter(
 					XPathRefinedByRFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class, normalizerConfig);
 			LOG.debug(
@@ -157,7 +155,8 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		// 3. normalize the components
 		LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
-		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
+		List<? extends Point> points = rewriter.rewrite(domResource, point, normalizerConfig);
+		// 4. write back to the model
 		LOG.debug("{} points rewritten", points.size());
 		if (points.isEmpty()) {
 			// remove values and indicate, that the selector does not point into the image/preimage
@@ -169,21 +168,46 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 			model.add(nullRefinement);
 		} else {
 			// TODO: see #23
-			for (XPathRefinedByRFC5147CharScheme p : points) {
-				if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(p.getClass())) {
-					XPathRefinedByRFC5147CharScheme normalized = (XPathRefinedByRFC5147CharScheme) p;
-					LOG.debug("normalized to {};{}", normalized.getXPath(), normalized.getChar());
-
-					// 4. write the normalized values back to the model
-					model.remove(xpathStatement);
-					Statement xpathStmt = model.createLiteralStatement(selector, RDF.value, normalized.getXPath());
-					model.add(xpathStmt);
-					model.remove(refinementValueStatement);
-					Statement charStatement = model.createLiteralStatement(
-							refinement, RDF.value, "char=" + String.valueOf(normalized.getChar()));
-					model.add(charStatement);
-				}
-			}
+			model.removeAll(refinement, null, null);
+			model.removeAll(selector, null, null);
+			SelectorBuilder build = new SelectorBuilder(model, selector);
+			points.forEach(build);
 		}
+	}
+
+	/**
+	 * Use this to filter out XPath selectors that are refined by Fragment selectors conforming to RFC5147.
+	 * @param model - The RDF {@link Model}
+	 * @param selector - A selector {@link Resource}
+	 * @return a filtered subset of <code>selectors</code>
+	 */
+	protected static boolean filter(Model model, Resource selector) {
+		LOG.info("filter");
+		StmtIterator types = model.listStatements(selector, RDF.type, OA.XPathSelector);
+		boolean isXPathSel = types.hasNext();
+		types.close();
+		StmtIterator refinedBys = model.listStatements(selector, OA.refinedBy, (RDFNode) null);
+		boolean isRefined = refinedBys.hasNext();
+		if (!isXPathSel || !isRefined) {
+			refinedBys.close();
+			return false;
+		}
+		Resource refinement = model.listStatements(selector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getResource();
+		refinedBys.close();
+		StmtIterator rfc5147s =
+				model.listStatements(refinement, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
+		boolean conforms = rfc5147s.hasNext();
+		rfc5147s.close();
+		StmtIterator values = model.listStatements(refinement, RDF.value, (RDFNode) null);
+		boolean hasValue = values.hasNext();
+		if (!conforms || !hasValue) {
+			values.close();
+			return false;
+		}
+		String value = values.next().getObject().asLiteral().getString();
+		values.close();
+		return value.startsWith("char=");
 	}
 }
