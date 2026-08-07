@@ -208,10 +208,8 @@ public class TestRewriteAnnotationTxt {
 				"end selector has no refinement");
 	}
 
-	// works, but not guarantied, since selector goes down to the text leaf
-	@Disabled("not yet")
 	@Test
-	public void testBackwardToLeafInPreimage() {
+	public void testBackwardInPreimage() {
 		normalizerConfig = backwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
