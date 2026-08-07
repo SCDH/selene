@@ -1,6 +1,7 @@
 package de.wwu.scdh.annotation.selection.wadm;
 
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import java.net.URI;
@@ -38,7 +39,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	protected final URI iri;
 	protected Model model;
 	protected final RewriterFactory rewriterFactory;
-	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> rewriter = null;
+	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, ? extends Point> rewriter = null;
 	protected final RewriterConfig normalizerConfig;
 
 	protected Optional<Exception> error = null;
@@ -154,7 +155,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		// 3. normalize the components
 		LOG.debug("normalizing refined XPath {};{}", xpath, startPos);
 		XPathRefinedByRFC5147CharScheme point = new XPathRefinedByRFC5147CharScheme(xpath, startPos);
-		List<XPathRefinedByRFC5147CharScheme> points = rewriter.rewrite(domResource, point, normalizerConfig);
+		List<? extends Point> points = rewriter.rewrite(domResource, point, normalizerConfig);
 		// 4. write back to the model
 		LOG.debug("{} points rewritten", points.size());
 		if (points.isEmpty()) {
@@ -172,5 +173,33 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 			SelectorBuilder build = new SelectorBuilder(model, selector);
 			points.forEach(build);
 		}
+	}
+
+	/**
+	 * Use this to filter out XPath selectors that are refined by Fragment selectors conforming to RFC5147.
+	 * @param model - The RDF {@link Model}
+	 * @param selectors - An {@link ExtendedIterator} over selector {@link Resource}s.
+	 * @return a filtered subset of <code>selectors</code>
+	 */
+	protected static ExtendedIterator<Resource> filter(Model model, ExtendedIterator<Resource> selectors) {
+		return selectors
+				.filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector)
+						.toSet()
+						.isEmpty())
+				.filterKeep(
+						sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
+						!model.listStatements(sel, OA.refinedBy, (RDFNode) null)
+								.mapWith(stmt -> stmt.getSubject())
+								.filterKeep(
+										refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector)
+												.toSet()
+												.isEmpty())
+								.filterKeep(refinement -> model.listStatements(
+												refinement, DCTerms.conformsTo, RFC5147CharScheme.RFC5147)
+										.toSet()
+										.isEmpty())
+								// TODO: filter char scheme
+								.toSet()
+								.isEmpty());
 	}
 }

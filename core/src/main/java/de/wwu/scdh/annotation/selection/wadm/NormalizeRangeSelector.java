@@ -5,11 +5,10 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OA;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,57 +48,19 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 	public void accept(Resource selector) {
 		LOG.debug("normalizing range selector '{}'", selector.toString());
 
-		selector.listProperties(OA.hasStartSelector)
-				.mapWith(stmt -> stmt.getResource())
-				.filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector)
-						.toSet()
-						.isEmpty())
-				.filterKeep(
-						sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
-						!model.listStatements(sel, OA.refinedBy, (RDFNode) null)
-								.mapWith(stmt -> stmt.getSubject())
-								.filterKeep(
-										refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector)
-												.toSet()
-												.isEmpty())
-								.filterKeep(refinement -> model.listStatements(
-												refinement,
-												DCTerms.conformsTo,
-												NormalizeXPathSelectorRefinedByRFC5147CharScheme.RFC5147)
-										.toSet()
-										.isEmpty())
-								// TODO: filter char scheme
-								.toSet()
-								.isEmpty())
+		ExtendedIterator<Resource> startSelectors =
+				selector.listProperties(OA.hasStartSelector).mapWith(Statement::getResource);
+		ExtendedIterator<Resource> endSelectors =
+				selector.listProperties(OA.hasEndSelector).mapWith(Statement::getResource);
+
+		NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, startSelectors)
 				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
 						resource,
 						iri,
 						rewriterFactory,
 						model,
-						RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
-
-		selector.listProperties(OA.hasEndSelector)
-				.mapWith(stmt -> stmt.getResource())
-				.filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector)
-						.toSet()
-						.isEmpty())
-				.filterKeep(
-						sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
-						!model.listStatements(sel, OA.refinedBy, (RDFNode) null)
-								.mapWith(stmt -> stmt.getSubject())
-								.filterKeep(
-										refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector)
-												.toSet()
-												.isEmpty())
-								.filterKeep(refinement -> model.listStatements(
-												refinement,
-												DCTerms.conformsTo,
-												NormalizeXPathSelectorRefinedByRFC5147CharScheme.RFC5147)
-										.toSet()
-										.isEmpty())
-								// TODO: filter char scheme
-								.toSet()
-								.isEmpty())
+						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+		NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, endSelectors)
 				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
 						resource,
 						iri,
