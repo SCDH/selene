@@ -51,29 +51,25 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 
 		boolean done = false;
 
-		ExtendedIterator<Resource> startSelectors =
-				selector.listProperties(OA.hasStartSelector)
-						.mapWith(Statement::getResource)
-						.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
-		ExtendedIterator<Resource> endSelectors =
-				selector.listProperties(OA.hasEndSelector)
-						.mapWith(Statement::getResource)
-						.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
+		ExtendedIterator<Resource> startSelectors = selector.listProperties(OA.hasStartSelector)
+				.mapWith(Statement::getResource)
+				.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
+		ExtendedIterator<Resource> endSelectors = selector.listProperties(OA.hasEndSelector)
+				.mapWith(Statement::getResource)
+				.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
 		done = startSelectors.hasNext() || endSelectors.hasNext();
-		startSelectors
-				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
-								resource,
-								iri,
-								rewriterFactory,
-								model,
-								RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
-		endSelectors
-				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
-						resource,
-						iri,
-						rewriterFactory,
-						model,
-						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+		startSelectors.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
+				resource,
+				iri,
+				rewriterFactory,
+				model,
+				RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
+		endSelectors.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
+				resource,
+				iri,
+				rewriterFactory,
+				model,
+				RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
 
 		// important to stop: otherwise rewrite over and over again
 		if (done) return;
@@ -85,14 +81,14 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 				.mapWith(Statement::getResource)
 				.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s));
 		done = startSelectors.hasNext() || endSelectors.hasNext();
-		startSelectors
-				.forEach(new NormalizeRFC5147CharScheme(
-						resource,
-						iri,
-						rewriterFactory,
-						model,
-						RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
-		endSelectors.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s))
+		startSelectors.forEach(new NormalizeRFC5147CharScheme(
+				resource,
+				iri,
+				rewriterFactory,
+				model,
+				RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
+		endSelectors
+				.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s))
 				.forEach(new NormalizeRFC5147CharScheme(
 						resource,
 						iri,

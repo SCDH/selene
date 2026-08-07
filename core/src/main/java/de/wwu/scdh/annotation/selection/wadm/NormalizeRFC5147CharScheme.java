@@ -137,7 +137,8 @@ public class NormalizeRFC5147CharScheme implements Consumer<Resource> {
 		StmtIterator types = model.listStatements(selector, RDF.type, OA.FragmentSelector);
 		boolean isFragSel = types.hasNext();
 		types.close();
-		StmtIterator rfc5147s = model.listStatements(selector, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
+		StmtIterator rfc5147s =
+				model.listStatements(selector, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
 		boolean conforms = rfc5147s.hasNext();
 		rfc5147s.close();
 		StmtIterator values = model.listStatements(selector, RDF.value, (RDFNode) null);

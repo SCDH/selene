@@ -192,9 +192,12 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 			refinedBys.close();
 			return false;
 		}
-		Resource refinement = model.listStatements(selector, OA.refinedBy, (RDFNode) null).next().getResource();
+		Resource refinement = model.listStatements(selector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getResource();
 		refinedBys.close();
-		StmtIterator rfc5147s = model.listStatements(refinement, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
+		StmtIterator rfc5147s =
+				model.listStatements(refinement, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
 		boolean conforms = rfc5147s.hasNext();
 		rfc5147s.close();
 		StmtIterator values = model.listStatements(refinement, RDF.value, (RDFNode) null);
