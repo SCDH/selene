@@ -113,4 +113,12 @@ public class RewriterConfig {
 	public static Map<Class<? extends Point>, Class<? extends Point>> forwardDOMToTextPointClassMap() {
 		return Map.of(XPathRefinedByRFC5147CharScheme.class, RFC5147CharScheme.class);
 	}
+
+	/**
+	 * Returns mapping of point classes suitable for forwarding XML to plain text selectors.
+	 * @return a mapping of point classes.
+	 */
+	public static Map<Class<? extends Point>, Class<? extends Point>> backwardDOMToTextPointClassMap() {
+		return Map.of(RFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class);
+	}
 }

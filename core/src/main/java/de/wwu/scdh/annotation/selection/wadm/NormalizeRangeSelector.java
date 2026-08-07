@@ -67,5 +67,23 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 						rewriterFactory,
 						model,
 						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+
+		startSelectors = selector.listProperties(OA.hasStartSelector).mapWith(Statement::getResource);
+		endSelectors = selector.listProperties(OA.hasEndSelector).mapWith(Statement::getResource);
+
+		NormalizeRFC5147CharScheme.filter(model, startSelectors)
+				.forEach(new NormalizeRFC5147CharScheme(
+						resource,
+						iri,
+						rewriterFactory,
+						model,
+						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+		NormalizeRFC5147CharScheme.filter(model, endSelectors)
+				.forEach(new NormalizeRFC5147CharScheme(
+						resource,
+						iri,
+						rewriterFactory,
+						model,
+						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
 	}
 }

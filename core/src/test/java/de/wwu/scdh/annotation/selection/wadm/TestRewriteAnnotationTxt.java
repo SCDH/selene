@@ -45,8 +45,8 @@ public class TestRewriteAnnotationTxt {
 			Paths.get("src", "test", "resources", "xsl").toFile();
 
 	public static final String SONG_FW_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwInImage.json").toString();
-	public static final String SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON =
-			new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
+	public static final String SONG_BW_IN_PREIMAGE_JSON = new File(SAMPLE_DIR, "gBwTxtInPreimage.json").toString();
+
 	public static final String SONG_BW_TO_ELEMENT_IN_PREIMAGE_JSON =
 			new File(SAMPLE_DIR, "gBwHtmlToElementInPreimage.json").toString();
 	public static final String SONG_BW_TO_HIGHER_IN_PREIMAGE_JSON =
@@ -83,13 +83,17 @@ public class TestRewriteAnnotationTxt {
 		}
 	}
 
-	private static RewriterConfig makeConfig(String xpath) {
+	private static RewriterConfig forwardConfig(String xpath) {
 		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+	}
+
+	private static RewriterConfig backwardConfig(String xpath) {
+		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.backwardDOMToTextPointClassMap());
 	}
 
 	@Test
 	public void testForwardInImage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIri,
@@ -208,14 +212,14 @@ public class TestRewriteAnnotationTxt {
 	@Disabled("not yet")
 	@Test
 	public void testBackwardToLeafInPreimage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = backwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
 				songIri,
 				backwardFactory,
 				normalizerConfig,
-				SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON,
+				SONG_BW_IN_PREIMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
 				1,
@@ -231,7 +235,7 @@ public class TestRewriteAnnotationTxt {
 						.toSet()
 						.size());
 		assertEquals(
-				IRI_SONG_IMAGE,
+				IRI_SONG,
 				specificResource
 						.getProperty(OA.hasSource)
 						.getObject()
@@ -354,7 +358,7 @@ public class TestRewriteAnnotationTxt {
 	@Disabled("not yet")
 	@Test
 	public void testBackwardToElementInPreimage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
@@ -500,7 +504,7 @@ public class TestRewriteAnnotationTxt {
 	@Disabled("not yet")
 	@Test
 	public void testBackwardToHigherInPreimage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
@@ -645,7 +649,7 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testForwardNotInImage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIri,
@@ -789,7 +793,7 @@ public class TestRewriteAnnotationTxt {
 	// items in the image. Facit: No guaranty about selectors that go down to the text leaf.
 	@Test
 	public void testBackwardToLeafNotInPreimage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
@@ -929,7 +933,7 @@ public class TestRewriteAnnotationTxt {
 	@Disabled("not yet")
 	@Test
 	public void testBackwardToElementNotInPreimage() {
-		normalizerConfig = makeConfig("path(.)");
+		normalizerConfig = forwardConfig("path(.)");
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
