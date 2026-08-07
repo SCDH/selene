@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class NormalizeRFC5147CharScheme implements Consumer<Resource> {
 	}
 
 	public void acceptThrows(Resource selector) throws ModelException, NumberFormatException, SelectorException {
-		LOG.debug("normalizing/rewriting Fragment selector conforming to RFC 5147");
+		LOG.info("normalizing/rewriting Fragment selector conforming to RFC 5147");
 
 		DOMResource domResource;
 		if (resource instanceof DOMResource) {
@@ -129,16 +129,36 @@ public class NormalizeRFC5147CharScheme implements Consumer<Resource> {
 	/**
 	 * Use this to filter out Fragment selectors conforming to RFC5147.
 	 * @param model - The RDF {@link Model}
-	 * @param selectors - An {@link ExtendedIterator} over selector {@link Resource}s.
+	 * @param selector - A selector {@link Resource}
 	 * @return a filtered subset of <code>selectors</code>
 	 */
-	protected static ExtendedIterator<Resource> filter(Model model, ExtendedIterator<Resource> selectors) {
-		return selectors.filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.FragmentSelector)
-				.toSet()
-				.isEmpty());
-		//				.filterKeep(sel -> !model.listStatements(sel, DCTerms.conformsTo, RFC5147CharScheme.RFC5147)
-		//						.toSet()
-		//						.isEmpty());
+	protected static boolean filter(Model model, Resource selector) {
+		LOG.info("filter");
+		StmtIterator types = model.listStatements(selector, RDF.type, OA.FragmentSelector);
+		boolean isFragSel = types.hasNext();
+		types.close();
+		StmtIterator rfc5147s = model.listStatements(selector, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
+		boolean conforms = rfc5147s.hasNext();
+		rfc5147s.close();
+		StmtIterator values = model.listStatements(selector, RDF.value, (RDFNode) null);
+		boolean hasValue = values.hasNext();
+		boolean hasCharValue = false;
+		if (hasValue) {
+			String value = values.next().getObject().asLiteral().getString();
+			hasCharValue = value.startsWith("char=");
+		}
+		values.close();
+		StmtIterator refined = model.listStatements(null, OA.refinedBy, selector);
+		boolean isRefinement = refined.hasNext();
+		refined.close();
+		StmtIterator refinedBys = model.listStatements(selector, OA.refinedBy, (RDFNode) null);
+		boolean isRefined = refinedBys.hasNext();
+		refinedBys.close();
+		StmtIterator xpaths = model.listStatements(selector, RDF.type, OA.XPathSelector);
+		boolean isXPathSel = xpaths.hasNext();
+		xpaths.close();
+		LOG.info("filter: {}, {}, {}, {}, {}", isFragSel, conforms, hasCharValue, isRefinement, isRefined);
+		return isFragSel && conforms && hasCharValue && !isRefinement && !isRefined;
 		// TODO: filter char scheme
 	}
 }

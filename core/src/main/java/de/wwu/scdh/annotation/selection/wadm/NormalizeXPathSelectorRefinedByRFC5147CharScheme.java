@@ -178,28 +178,33 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	/**
 	 * Use this to filter out XPath selectors that are refined by Fragment selectors conforming to RFC5147.
 	 * @param model - The RDF {@link Model}
-	 * @param selectors - An {@link ExtendedIterator} over selector {@link Resource}s.
+	 * @param selector - A selector {@link Resource}
 	 * @return a filtered subset of <code>selectors</code>
 	 */
-	protected static ExtendedIterator<Resource> filter(Model model, ExtendedIterator<Resource> selectors) {
-		return selectors
-				.filterKeep(sel -> !model.listStatements(sel, RDF.type, OA.XPathSelector)
-						.toSet()
-						.isEmpty())
-				.filterKeep(
-						sel -> // keep selectors refinedBy a oa:FragmentSelector conforming to RFC5147
-						!model.listStatements(sel, OA.refinedBy, (RDFNode) null)
-								.mapWith(stmt -> stmt.getSubject())
-								.filterKeep(
-										refinement -> model.listStatements(refinement, RDF.type, OA.FragmentSelector)
-												.toSet()
-												.isEmpty())
-								.filterKeep(refinement -> model.listStatements(
-												refinement, DCTerms.conformsTo, RFC5147CharScheme.RFC5147)
-										.toSet()
-										.isEmpty())
-								// TODO: filter char scheme
-								.toSet()
-								.isEmpty());
+	protected static boolean filter(Model model, Resource selector) {
+		LOG.info("filter");
+		StmtIterator types = model.listStatements(selector, RDF.type, OA.XPathSelector);
+		boolean isXPathSel = types.hasNext();
+		types.close();
+		StmtIterator refinedBys = model.listStatements(selector, OA.refinedBy, (RDFNode) null);
+		boolean isRefined = refinedBys.hasNext();
+		if (!isXPathSel || !isRefined) {
+			refinedBys.close();
+			return false;
+		}
+		Resource refinement = model.listStatements(selector, OA.refinedBy, (RDFNode) null).next().getResource();
+		refinedBys.close();
+		StmtIterator rfc5147s = model.listStatements(refinement, DCTerms.conformsTo, model.createResource(RFC5147CharScheme.RFC5147));
+		boolean conforms = rfc5147s.hasNext();
+		rfc5147s.close();
+		StmtIterator values = model.listStatements(refinement, RDF.value, (RDFNode) null);
+		boolean hasValue = values.hasNext();
+		if (!conforms || !hasValue) {
+			values.close();
+			return false;
+		}
+		String value = values.next().getObject().asLiteral().getString();
+		values.close();
+		return value.startsWith("char=");
 	}
 }

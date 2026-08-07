@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -48,42 +49,59 @@ public class NormalizeRangeSelector implements Consumer<Resource> {
 	public void accept(Resource selector) {
 		LOG.debug("normalizing range selector '{}'", selector.toString());
 
+		boolean done = false;
+
 		ExtendedIterator<Resource> startSelectors =
-				selector.listProperties(OA.hasStartSelector).mapWith(Statement::getResource);
+				selector.listProperties(OA.hasStartSelector)
+						.mapWith(Statement::getResource)
+						.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
 		ExtendedIterator<Resource> endSelectors =
-				selector.listProperties(OA.hasEndSelector).mapWith(Statement::getResource);
-
-		NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, startSelectors)
+				selector.listProperties(OA.hasEndSelector)
+						.mapWith(Statement::getResource)
+						.filterKeep(s -> NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, s));
+		done = startSelectors.hasNext() || endSelectors.hasNext();
+		startSelectors
+				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
+								resource,
+								iri,
+								rewriterFactory,
+								model,
+								RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
+		endSelectors
 				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
 						resource,
 						iri,
 						rewriterFactory,
 						model,
 						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
-		NormalizeXPathSelectorRefinedByRFC5147CharScheme.filter(model, endSelectors)
-				.forEach(new NormalizeXPathSelectorRefinedByRFC5147CharScheme(
+
+		// important to stop: otherwise rewrite over and over again
+		if (done) return;
+
+		startSelectors = model.listStatements(selector, OA.hasStartSelector, (RDFNode) null)
+				.mapWith(Statement::getResource)
+				.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s));
+		endSelectors = model.listStatements(selector, OA.hasEndSelector, (RDFNode) null)
+				.mapWith(Statement::getResource)
+				.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s));
+		done = startSelectors.hasNext() || endSelectors.hasNext();
+		startSelectors
+				.forEach(new NormalizeRFC5147CharScheme(
 						resource,
 						iri,
 						rewriterFactory,
 						model,
-						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
-
-		startSelectors = selector.listProperties(OA.hasStartSelector).mapWith(Statement::getResource);
-		endSelectors = selector.listProperties(OA.hasEndSelector).mapWith(Statement::getResource);
-
-		NormalizeRFC5147CharScheme.filter(model, startSelectors)
+						RewriterConfig.withMode(normalizerConfig, START_XPATH_SELECTOR_MODE)));
+		endSelectors.filterKeep(s -> NormalizeRFC5147CharScheme.filter(model, s))
 				.forEach(new NormalizeRFC5147CharScheme(
 						resource,
 						iri,
 						rewriterFactory,
 						model,
 						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
-		NormalizeRFC5147CharScheme.filter(model, endSelectors)
-				.forEach(new NormalizeRFC5147CharScheme(
-						resource,
-						iri,
-						rewriterFactory,
-						model,
-						RewriterConfig.withMode(normalizerConfig, END_XPATH_SELECTOR_MODE)));
+
+		if (!done) {
+			LOG.info("cannot map this oa:RangeSelector");
+		}
 	}
 }

@@ -86,15 +86,11 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testForwardInImage() {
-		normalizerConfig = forwardConfig("path(.)");
+		RewriterConfig config =
+				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+		;
 		model = NormalizeAnnotation.rewrite(
-				songImage,
-				songIri,
-				songIriImage,
-				forwardFactory,
-				normalizerConfig,
-				SONG_FW_IN_IMAGE_JSON,
-				Optional.of("jsonld"));
+				songImage, songIri, songIriImage, forwardFactory, config, SONG_FW_IN_IMAGE_JSON, Optional.of("jsonld"));
 		assertEquals(
 				1,
 				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
@@ -203,13 +199,14 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testBackwardInPreimage() {
-		normalizerConfig = backwardConfig("path(.)");
+		RewriterConfig config =
+				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap());
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
 				songIri,
 				backwardFactory,
-				normalizerConfig,
+				config,
 				SONG_BW_IN_PREIMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
@@ -348,13 +345,15 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testForwardNotInImage() {
-		normalizerConfig = forwardConfig("path(.)");
+		RewriterConfig config =
+				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+		;
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIri,
 				songIriImage,
 				forwardFactory,
-				normalizerConfig,
+				config,
 				SONG_FW_NOT_IN_IMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
@@ -487,13 +486,14 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testBackwardNotInPreimage() {
-		normalizerConfig = backwardConfig("path(.)");
+		RewriterConfig config =
+				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap());
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
 				songIri,
 				backwardFactory,
-				normalizerConfig,
+				config,
 				SONG_BW_NOT_IN_PREIMAGE_JSON,
 				Optional.of("jsonld"));
 		assertEquals(
