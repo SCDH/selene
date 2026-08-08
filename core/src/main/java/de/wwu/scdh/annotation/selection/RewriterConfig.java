@@ -121,4 +121,28 @@ public class RewriterConfig {
 	public static Map<Class<? extends Point>, Class<? extends Point>> backwardDOMToTextPointClassMap() {
 		return Map.of(RFC5147CharScheme.class, XPathRefinedByRFC5147CharScheme.class);
 	}
+
+	/**
+	 * Returns a mapping of point classes for an XSLT output method and a pointer rewriting direction.
+	 *
+	 * @param method - a valid method string as defined in {@link javax.xml.transform.OutputKeys#METHOD}.
+	 * @param direction - either "forward" or "backward"
+	 * @return a mapping of point classes
+	 * @see - The output method strings defined by  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.xml/javax/xml/transform/OutputKeys.html#METHOD">Saxon API</a>}
+	 */
+	public static Map<Class<? extends Point>, Class<? extends Point>> getPointClassMapForXslt(
+			String method, String direction) {
+		if (method == null || direction == null) {
+			return Map.of();
+		}
+		if (method.equals("text")) {
+			if (direction.equals("forward")) {
+				return forwardDOMToTextPointClassMap();
+			} else {
+				return backwardDOMToTextPointClassMap();
+			}
+		} else {
+			return Map.of();
+		}
+	}
 }
