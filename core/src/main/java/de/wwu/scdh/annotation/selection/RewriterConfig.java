@@ -2,13 +2,18 @@ package de.wwu.scdh.annotation.selection;
 
 import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A record for configuration parameters of a {@link Rewriter}.
  * The parameters are documented in the constructor.
  */
 public class RewriterConfig {
+
+	private static final Logger LOG = LoggerFactory.getLogger(RewriterConfig.class);
 
 	private final Mode mode;
 	private final boolean escaped;
@@ -131,11 +136,12 @@ public class RewriterConfig {
 	 * @see - The output method strings defined by  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.xml/javax/xml/transform/OutputKeys.html#METHOD">Saxon API</a>}
 	 */
 	public static Map<Class<? extends Point>, Class<? extends Point>> getPointClassMapForXslt(
-			String method, Rewriter.Direction direction) {
+			ResourceBuilder.OutputMethod method, Rewriter.Direction direction) {
+		LOG.debug("setting up point class mapping for {}, {}", method, direction);
 		if (method == null || direction == null) {
 			return Map.of();
 		}
-		if (method.equals("text")) {
+		if (method.equals(ResourceBuilder.OutputMethod.TEXT)) {
 			if (direction.equals(Rewriter.Direction.FORWARD)) {
 				return forwardDOMToTextPointClassMap();
 			} else {
