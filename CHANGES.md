@@ -1,5 +1,12 @@
 ## Changes
 
+## 0.3.0
+
+- adds support for Web Annotation RFC 5147 plain text Fragment
+  selectors (forward and backward)
+- in detail: closes a number of issues #9, #10, #19, #22, #28, #30, #32
+- adds to #27 by adding tests systematically
+
 ## 0.2.0
 
 - filter annotations by `oa:hasSource` when normalizing or mapping
