@@ -378,6 +378,8 @@ public class ResourceBuilder {
 		StreamSource source;
 		if (method.equals(OutputMethod.XML)) {
 			source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML));
+		} else if (method.equals(OutputMethod.TEXT)) {
+			source = new StreamSource(ResourceBuilder.class.getResourceAsStream(LIBTRACE_XML));
 		} else {
 			throw new ResourceException("output method not yet supported: " + method);
 		}
