@@ -13,6 +13,16 @@ import java.util.List;
 public interface Rewriter<R extends Resource<?>, P1 extends Point, P2 extends Point> {
 
 	/**
+	 * Rewriting a {@link Point} in <code>FORWARD</code> direction means to transform it in the same direction as using
+	 * the same transformation for transforming a preimage to an image of a resource. Transforming a point
+	 * <code>BACKWARD</code> is transforming it in the counter direction.
+	 */
+	public static enum Direction {
+		FORWARD,
+		BACKWARD
+	}
+
+	/**
 	 * Rewrite a {@link Point} in a {@link Resource} to the same
 	 * point, but with a different (or potentially different)
 	 * representation.<P>
