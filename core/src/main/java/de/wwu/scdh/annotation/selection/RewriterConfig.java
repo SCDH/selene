@@ -131,12 +131,12 @@ public class RewriterConfig {
 	 * @see - The output method strings defined by  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.xml/javax/xml/transform/OutputKeys.html#METHOD">Saxon API</a>}
 	 */
 	public static Map<Class<? extends Point>, Class<? extends Point>> getPointClassMapForXslt(
-			String method, String direction) {
+			String method, Rewriter.Direction direction) {
 		if (method == null || direction == null) {
 			return Map.of();
 		}
 		if (method.equals("text")) {
-			if (direction.equals("forward")) {
+			if (direction.equals(Rewriter.Direction.FORWARD)) {
 				return forwardDOMToTextPointClassMap();
 			} else {
 				return backwardDOMToTextPointClassMap();
