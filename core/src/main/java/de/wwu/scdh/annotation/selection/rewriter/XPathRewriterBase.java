@@ -331,7 +331,7 @@ public abstract class XPathRewriterBase {
 				return (XdmNode) result.itemAt(0);
 			}
 		} catch (SaxonApiException e) {
-			LOG.error(e.getMessage());
+			LOG.error("error evaluating XPath expression {}: {}", xpath, e.getMessage());
 			throw new SelectorException(e);
 		}
 	}

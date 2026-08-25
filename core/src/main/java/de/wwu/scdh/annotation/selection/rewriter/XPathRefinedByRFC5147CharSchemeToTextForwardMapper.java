@@ -99,11 +99,4 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 		}
 		return transformed;
 	}
-
-	/**
-	 * Returns the XPath the mapper instance was configured with.
-	 */
-	public String getXPath() {
-		return XPATH;
-	}
 }

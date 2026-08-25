@@ -44,7 +44,7 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
 	 * notation.
 	 */
 	public static final String FROM_ROOT_CLARK_XPATH =
-			"let $ctx:=., $elSteps:=$ctx/ancestor-or-self::element(), $txtStep:=$ctx[self::text()] return ($elSteps ! (let $step:=., $ns:=namespace-uri($step), $name:=name($step), $pos:=count($step/preceding-sibling::node()[name() eq $name])+1 return concat('/Q{', $ns, '}', $name, '[', $pos, ']')), $txtStep ! (concat('/text()[', count($txtStep/preceding-sibling::text())+1, ']'))) => string-join('')";
+			"let $ctx:=., $elSteps:=$ctx/ancestor-or-self::element(), $txtStep:=$ctx[self::text()] return ($elSteps ! (let $step:=., $ns:=namespace-uri($step), $name:=local-name($step), $pos:=count($step/preceding-sibling::node()[name() eq $name])+1 return concat('/Q{', $ns, '}', $name, '[', $pos, ']')), $txtStep ! (concat('/text()[', count($txtStep/preceding-sibling::text())+1, ']'))) => string-join('')";
 
 	/**
 	 * An XPath expression suitable for normalizing path expressions
@@ -55,7 +55,7 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
 	 * node. Element names are QNames in Clark notation.
 	 */
 	public static final String FROM_DEEPEST_ID_CLARK_XPATH =
-			"let $ctx:=., $elSteps:=$ctx/ancestor-or-self::element(), $ids:=for $step in 1 to count($elSteps) return if ($elSteps[$step]/@xml:id) then $step else -1, $idAt:=$ids[. ne -1][last()], $idStep:=if ($idAt) then concat('id(&apos;', $elSteps[$idAt]/@xml:id, '&apos;)') else '', $txtStep:=$ctx[self::text()] return concat($idStep, ($elSteps[position() gt $idAt or empty($idAt)] ! (let $step:=., $ns:=namespace-uri($step), $name:=name($step), $pos:=count($step/preceding-sibling::node()[name() eq $name])+1 return concat('/Q{', $ns, '}', $name, '[', $pos, ']')), $txtStep ! (concat('/text()[', count($txtStep/preceding-sibling::text())+1, ']'))) => string-join(''))";
+			"let $ctx:=., $elSteps:=$ctx/ancestor-or-self::element(), $ids:=for $step in 1 to count($elSteps) return if ($elSteps[$step]/@xml:id) then $step else -1, $idAt:=$ids[. ne -1][last()], $idStep:=if ($idAt) then concat('id(&apos;', $elSteps[$idAt]/@xml:id, '&apos;)') else '', $txtStep:=$ctx[self::text()] return concat($idStep, ($elSteps[position() gt $idAt or empty($idAt)] ! (let $step:=., $ns:=namespace-uri($step), $name:=local-name($step), $pos:=count($step/preceding-sibling::node()[name() eq $name])+1 return concat('/Q{', $ns, '}', $name, '[', $pos, ']')), $txtStep ! (concat('/text()[', count($txtStep/preceding-sibling::text())+1, ']'))) => string-join(''))";
 
 	/**
 	 * Get the path to the {@link XdmNode} given as parameter by using

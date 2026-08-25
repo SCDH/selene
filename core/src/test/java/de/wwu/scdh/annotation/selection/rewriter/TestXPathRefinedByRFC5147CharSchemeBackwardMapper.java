@@ -40,7 +40,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 					"src", "test", "resources", "xsl", "text-with-toc-html.xsl")
 			.toFile();
 
-	RewriterConfig config = new RewriterConfig(Mode.FIRST, false, null, false, false);
+	private static final RewriterConfig CONFIG = new RewriterConfig(Mode.FIRST, false, null, false, false);
 
 	public static XdmValue transform(DOMResource resource, File stylesheet, File pkg) throws SaxonApiException {
 		XsltCompiler compiler = PROC.newXsltCompiler();
@@ -65,11 +65,32 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
 				5);
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
 				mapped.get(0).getXPath());
+		assertEquals(5, mapped.get(0).getChar());
+	}
+
+	@Test
+	public void testXPathFromConstructor() throws ResourceException, SaxonApiException, SelectorException {
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML), PROC);
+		preimage.setImage(image);
+		assertEquals(PROC, image.getProcessor());
+		assertEquals(PROC, preimage.getImage().getProcessor());
+		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper = new XPathRefinedByRFC5147CharSchemeBackwardMapper(
+				PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		// ("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:head[1]/text()[1]", 5);
+		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
+				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}l[1]",
+				5);
+		RewriterConfig config = new RewriterConfig(Mode.FIRST, false, "path(.)", false, false);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		assertEquals(1, mapped.size());
+		assertEquals("id(&apos;v1&apos;)/text()[1]", mapped.get(0).getXPath(), "uses XPath from constructor");
 		assertEquals(5, mapped.get(0).getChar());
 	}
 
@@ -87,7 +108,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		XPathRefinedByRFC5147CharScheme imagePoint = new XPathRefinedByRFC5147CharScheme(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
 				0);
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		// position at end of lg/text()[1]
 		assertEquals(
@@ -112,7 +133,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]",
 				0);
 		List<XPathRefinedByRFC5147CharScheme> mapped =
-				mapper.rewrite(preimage, imagePoint, RewriterConfig.withMode(config, Mode.DEEP_NODE_STEP_OVER_END));
+				mapper.rewrite(preimage, imagePoint, RewriterConfig.withMode(CONFIG, Mode.DEEP_NODE_STEP_OVER_END));
 		assertEquals(1, mapped.size());
 		// position at end of lg/text()[1]
 		assertEquals(
@@ -135,7 +156,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
@@ -157,7 +178,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
@@ -178,7 +199,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",
@@ -199,7 +220,7 @@ public class TestXPathRefinedByRFC5147CharSchemeBackwardMapper {
 		preimage.setImage(image);
 		XPathRefinedByRFC5147CharSchemeBackwardMapper mapper =
 				new XPathRefinedByRFC5147CharSchemeBackwardMapper(PROC.newXPathCompiler(), "path(.)");
-		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, config);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, imagePoint, CONFIG);
 		assertEquals(1, mapped.size());
 		assertEquals(
 				"/Q{http://www.tei-c.org/ns/1.0}TEI[1]/Q{http://www.tei-c.org/ns/1.0}text[1]/Q{http://www.tei-c.org/ns/1.0}body[1]/Q{http://www.tei-c.org/ns/1.0}lg[1]/Q{http://www.tei-c.org/ns/1.0}head[1]/text()[1]",

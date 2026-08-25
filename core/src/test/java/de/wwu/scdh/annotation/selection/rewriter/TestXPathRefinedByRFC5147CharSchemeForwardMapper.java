@@ -75,6 +75,26 @@ public class TestXPathRefinedByRFC5147CharSchemeForwardMapper {
 	}
 
 	@Test
+	public void testUsesXPathFromConstructor() throws ResourceException, SaxonApiException, SelectorException {
+		DOMResource source = DOMResource.fromXMLwithXerces(GESANG_XML, PROC);
+		MappedDOMResource preimage = new MappedDOMResource(source);
+		XdmValueResource image = new XdmValueResource(GESANG_XML, transform(source, ID_XSL, LIBTRACE_XML));
+		preimage.setImage(image);
+		XPathRefinedByRFC5147CharSchemeForwardMapper mapper = new XPathRefinedByRFC5147CharSchemeForwardMapper(
+				PROC.newXPathCompiler(), XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+		XPathRefinedByRFC5147CharScheme preimagePoint =
+				new XPathRefinedByRFC5147CharScheme("/*:TEI[1]/*:text[1]/*:body[1]/*:lg[1]/*:l[1]", 5);
+		RewriterConfig config = new RewriterConfig(Mode.FIRST, false, "path(.)", false, false);
+		List<XPathRefinedByRFC5147CharScheme> mapped = mapper.rewrite(preimage, preimagePoint, config);
+		assertEquals(1, mapped.size());
+		assertEquals(
+				"id(&apos;v1&apos;)/Q{http://wwu.de/scdh/selection-engine/node-tracing}text[1]",
+				mapped.get(0).getXPath(),
+				"uses XPath from constructor");
+		assertEquals(5, mapped.get(0).getChar());
+	}
+
+	@Test
 	public void testForwardToMultipleNodes() throws ResourceException, SaxonApiException, SelectorException {
 		// we transform a point that occurs twice in the output
 		XPathRefinedByRFC5147CharScheme preimagePoint =
