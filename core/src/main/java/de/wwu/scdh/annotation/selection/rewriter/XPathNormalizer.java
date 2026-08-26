@@ -46,9 +46,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public abstract class XPathNormalizer extends XPathRewriterBase
 		implements Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public XPathNormalizer(XPathCompiler xPathCompiler, String xpath) {
 		super(xPathCompiler, xpath);
 	}

@@ -3,7 +3,7 @@ package de.wwu.scdh.annotation.selection.component;
 import de.wwu.scdh.annotation.selection.Component;
 
 /**
- * An {@link XPathComponent} is a {@link Component} of a {@link Point}
+ * An {@link XPathComponent} is a {@link Component} of a {@link de.wwu.scdh.annotation.selection.Point}
  * with a String value that represents an XPath into the resource.
  */
 public class XPathComponent implements Component<String> {

@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This class can be used to normalize the model of all WADM
  * XPathSelectors, that are refined by RFC5147 conforming
- * FragmentSelectors. An {@link XPathNormalizer} does the task of
- * normalization.<P>
+ * FragmentSelectors. An {@link Rewriter} does the task of
+ * normalization.<P/>
  *
  * This class implements the {@link Consumer} interface and can thus
  * be used in a functional style like <code>forEach(new
@@ -42,7 +42,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	protected Rewriter<DOMResource, XPathRefinedByRFC5147CharScheme, ? extends Point> rewriter = null;
 	protected final RewriterConfig normalizerConfig;
 
-	protected Optional<Exception> error = null;
+	protected Optional<Exception> error;
 
 	public NormalizeXPathSelectorRefinedByRFC5147CharScheme(
 			de.wwu.scdh.annotation.selection.Resource<?> resource,
@@ -55,6 +55,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		this.model = model;
 		this.rewriterFactory = rewriterFactory;
 		this.normalizerConfig = normalizerConfig;
+		error = Optional.empty();
 		try {
 			// note: The second point class, i.e., the output point, may be rewritten by the factory!
 			this.rewriter = rewriterFactory.getRewriter(
@@ -75,11 +76,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 	public void accept(Resource selector) {
 		try {
 			acceptThrows(selector);
-		} catch (ModelException e) {
-			error = Optional.of(e);
-		} catch (NumberFormatException e) {
-			error = Optional.of(e);
-		} catch (SelectorException e) {
+		} catch (ModelException | NumberFormatException | SelectorException e) {
 			error = Optional.of(e);
 		}
 	}
@@ -116,7 +113,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		Statement refinementValueStatement;
 		String refinementValue;
 		ExtendedIterator<Resource> refinementIter = model.listStatements(selector, OA.refinedBy, (RDFNode) null)
-				.mapWith(stmt -> stmt.getResource())
+				.mapWith(Statement::getResource)
 				.filterKeep(ref -> !(model.listStatements(ref, RDF.type, OA.FragmentSelector)
 								.toSet()
 								.isEmpty()
@@ -142,7 +139,7 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 
 		// only the character scheme is supported
 		int startPos;
-		if (refinementValue.startsWith("char=", 0)) {
+		if (refinementValue.startsWith("char=")) {
 			startPos = Integer.parseInt(refinementValue.substring(5));
 		} else {
 			LOG.error(

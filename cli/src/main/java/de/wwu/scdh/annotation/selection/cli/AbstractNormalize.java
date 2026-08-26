@@ -1,32 +1,30 @@
 package de.wwu.scdh.annotation.selection.cli;
 
+import de.wwu.scdh.annotation.selection.Mode;
+import de.wwu.scdh.annotation.selection.RewriterConfig;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
+import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import java.io.File;
 import java.net.URI;
-
-import picocli.CommandLine.Option;
-
 import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltPackage;
-import net.sf.saxon.s9api.SaxonApiException;
-
-import de.wwu.scdh.annotation.selection.resource.DOMResource;
-import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
-import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
-import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
-import de.wwu.scdh.annotation.selection.Mode;
-import de.wwu.scdh.annotation.selection.RewriterConfig;
+import picocli.CommandLine.Option;
 
 abstract class AbstractNormalize {
 
-    protected static final Processor PROC = new Processor();
+	protected static final Processor PROC = new Processor();
 
 	XPathCompiler compiler = PROC.newXPathCompiler();
 
 	protected void compileXPathLibrary() {
 		try {
-			File library = new File(DOMResource.class.getResource("/xslt/xpath.xsl").getPath());
+			File library =
+					new File(DOMResource.class.getResource("/xslt/xpath.xsl").getPath());
 			XsltCompiler xsltCompiler = PROC.newXsltCompiler();
 			XsltPackage functionLibrary = xsltCompiler.compilePackage(library);
 			compiler.addXsltFunctionLibrary(functionLibrary);
@@ -38,134 +36,143 @@ abstract class AbstractNormalize {
 	}
 
 	enum Normalizer {
-	FROM_ROOT_CLARK,
-	FROM_DEEPEST_ID_CLARK
-    }
-
-    enum Direction {
-	FORWARD,
-	BACKWARD
-    }
-
-    public class CliException extends Exception {
-	public CliException(String msg) {
-	    super(msg);
+		FROM_ROOT_CLARK,
+		FROM_DEEPEST_ID_CLARK
 	}
-	public CliException(Throwable cause) {
-	    super(cause);
+
+	enum Direction {
+		FORWARD,
+		BACKWARD
 	}
-	public CliException(String msg, Throwable cause) {
-	    super(msg, cause);
+
+	public class CliException extends Exception {
+		public CliException(String msg) {
+			super(msg);
+		}
+
+		public CliException(Throwable cause) {
+			super(cause);
+		}
+
+		public CliException(String msg, Throwable cause) {
+			super(msg, cause);
+		}
 	}
-    }
 
+	@Option(
+			names = {"--parser"},
+			paramLabel = "PARSER",
+			description =
+					"The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
+	Parser parser = Parser.XML;
 
-    @Option(names = { "--parser" },
-	    paramLabel = "PARSER",
-	    description = "The parser used for reading the RESOURCE. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    Parser parser = Parser.XML;
+	@Option(
+			names = {"--mode"},
+			paramLabel = "MODE",
+			description =
+					"The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
+	Mode mode = Mode.DEEP_NODE_STOP_AT_END;
 
-    @Option(names = { "--mode" },
-	    paramLabel = "MODE",
-	    description = "The algorithm for descending into the DOM tree in the first normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    Mode mode = Mode.DEEP_NODE_STOP_AT_END;
+	@Option(
+			names = {"-n", "--normalizer"},
+			paramLabel = "NORMALIZER",
+			description =
+					"The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
+	Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
 
-    @Option(names = { "-n", "--normalizer" },
-	    paramLabel = "NORMALIZER",
-	    description = "The normalizer for the XPath part of the selector in the second normalization step. Valid values: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}")
-    Normalizer normalizer = Normalizer.FROM_DEEPEST_ID_CLARK;
+	@Option(
+			names = {"-x", "--normalizer-xpath"},
+			paramLabel = "NORMALIZER_XPATH",
+			description =
+					"The normalizer for the XPath part of the selector in the second normalization step. This will override NORMALIZER.")
+	String normalizerXPath = null;
 
-    @Option(names = { "-x", "--normalizer-xpath" },
-	    paramLabel = "NORMALIZER_XPATH",
-	    description = "The normalizer for the XPath part of the selector in the second normalization step. This will override NORMALIZER.")
-    String normalizerXPath = null;
-
-
-    protected URI resolveInCurrDir(URI resource) throws CliException {
-	if (resource.isAbsolute()) {
-	    return resource;
-	} else {
-	    try {
-		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
-		return currentDir.resolve(resource);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e.getMessage());
-	    }
+	protected URI resolveInCurrDir(URI resource) throws CliException {
+		if (resource.isAbsolute()) {
+			return resource;
+		} else {
+			try {
+				URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+				return currentDir.resolve(resource);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e.getMessage());
+			}
+		}
 	}
-    }
 
-    protected DOMResource parseResource(URI resource) throws CliException {
-	// make relative paths absolute by resolving against the URI of the current working director
-	URI resourceResolved;
-	if (resource.isAbsolute()) {
-	    resourceResolved = resource;
-	} else {
-	    try {
-		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
-		resourceResolved = currentDir.resolve(resource);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
+	protected DOMResource parseResource(URI resource) throws CliException {
+		// make relative paths absolute by resolving against the URI of the current working director
+		URI resourceResolved;
+		if (resource.isAbsolute()) {
+			resourceResolved = resource;
+		} else {
+			try {
+				URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+				resourceResolved = currentDir.resolve(resource);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		}
+		// parse the resource
+		if (parser.equals(Parser.XML)) {
+			try {
+				return DOMResource.fromXML(resourceResolved, PROC);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		} else if (parser.equals(Parser.HTML)) {
+			try {
+				return DOMResource.fromHTML(resourceResolved, PROC);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		} else {
+			System.err.printf("unknown parser %s\n", parser.toString());
+			throw new CliException("unknown parser " + parser.toString());
+		}
 	}
-	// parse the resource
-	if (parser.equals(Parser.XML)) {
-	    try {
-		return DOMResource.fromXML(resourceResolved, PROC);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
-	} else if (parser.equals(Parser.HTML)) {
-	    try {
-		return DOMResource.fromHTML(resourceResolved, PROC);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
-	} else {
-	    System.err.printf("unknown parser %s\n", parser.toString());
-	    throw new CliException("unknown parser " + parser.toString());
+
+	protected String getNormalizerXPath() throws CliException {
+		if (normalizerXPath != null) {
+			try {
+				return normalizerXPath;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		} else if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
+			try {
+				return XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
+			try {
+				return XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH;
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				throw new CliException(e);
+			}
+		} else {
+			System.err.printf("unknown normalizer %s\n", normalizer.name());
+			throw new CliException("unknown normalizer " + normalizer.name());
+		}
 	}
-    }
 
-    protected String getNormalizerXPath() throws CliException {
-	if (normalizerXPath != null) {
-	    try {
-		return normalizerXPath;
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
-	} else if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
-	    try {
-		return XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH;
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
-	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
-	    try {
-		return XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH;
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		throw new CliException(e);
-	    }
-	} else {
-	    System.err.printf("unknown normalizer %s\n", normalizer.name());
-	    throw new CliException("unknown normalizer " + normalizer.name());
+	protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
+		return new XPathNormalizerWithXPath(PROC.newXPathCompiler(), getNormalizerXPath());
 	}
-    }
 
-    protected XPathNormalizerWithXPath getXPathNormalizer() throws CliException {
-	return new XPathNormalizerWithXPath(PROC.newXPathCompiler(), getNormalizerXPath());
-    }
+	protected NormalizerFactory getNormalizerFactory() {
+		return new NormalizerFactory(PROC.newXPathCompiler());
+	}
 
-    protected NormalizerFactory getNormalizerFactory(){ return new NormalizerFactory(PROC.newXPathCompiler()); }
-
-    protected RewriterConfig getRewriterConfig() throws CliException {
-	return new RewriterConfig(mode, false, getNormalizerXPath(), true, true);
-    }
-
+	protected RewriterConfig getRewriterConfig() throws CliException {
+		return new RewriterConfig(mode, false, getNormalizerXPath(), true, true);
+	}
 }

@@ -105,7 +105,6 @@ public class RewriterConfig {
 
 	/**
 	 * Gets the mapping of given point types to requested point types in the output.
-	 * @return Map<Class<? extends Point>, Class<? extends Point>>
 	 */
 	public Map<Class<? extends Point>, Class<? extends Point>> getPointClassMap() {
 		return pointClassMap;

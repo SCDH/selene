@@ -47,10 +47,7 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 
 	public static final String XPATH = "preceding::text()";
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public XPathRefinedByRFC5147CharSchemeToTextForwardMapper(XPathCompiler xPathCompiler, String xpath) {
+	public XPathRefinedByRFC5147CharSchemeToTextForwardMapper(XPathCompiler xPathCompiler, String ignoredXpath) {
 		super(xPathCompiler, XPATH);
 	}
 
@@ -70,16 +67,16 @@ public class XPathRefinedByRFC5147CharSchemeToTextForwardMapper extends XPathRew
 			MappedDOMResource preimage, XPathRefinedByRFC5147CharScheme preimagePoint, RewriterConfig config)
 			throws SelectorException {
 		LOG.info("forwarding XPath refined by char scheme to RFC 5147 char scheme");
-		// step 1: normalize to pair of text node and position
+		// step 1: normalize to a pair of text node and position
 		Pair<XdmNode, Integer> preimagePair =
 				getTextNodeAtPosition(preimage, preimagePoint.getXPath(), preimagePoint.getChar(), config.getMode());
 		// step 2: map text node from preimage to list of text nodes from image
 		List<XdmNode> imageNodes = preimage.getCorrespondingInImage(preimagePair.getLeft());
 		// step 3: rebase each image node as char scheme only: The
 		// charScheme component of the preimagePair is the offset to
-		// the text node in the result. Add the lenght of all text
+		// the text node in the result. Add the length of all text
 		// nodes before the imageNode to get the actual position.
-		List<RFC5147CharScheme> transformed = new ArrayList<RFC5147CharScheme>();
+		List<RFC5147CharScheme> transformed = new ArrayList<>();
 		try {
 			XPathCompiler xPathCompiler = preimage.getProcessor().newXPathCompiler();
 			XPathExecutable xPathExecutable = xPathCompiler.compile(XPATH);

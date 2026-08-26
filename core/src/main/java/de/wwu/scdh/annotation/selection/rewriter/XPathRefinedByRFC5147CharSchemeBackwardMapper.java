@@ -11,7 +11,7 @@ import net.sf.saxon.s9api.XdmNode;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * Map an {@link XPathRefinedByRFC5147CharScheme} point into a image
+ * Map an {@link XPathRefinedByRFC5147CharScheme} point into an image
  * to a {@link XPathRefinedByRFC5147CharScheme} point into the XML
  * preimage.<P>
  *
@@ -38,9 +38,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeBackwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, XPathRefinedByRFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public XPathRefinedByRFC5147CharSchemeBackwardMapper(XPathCompiler xPathCompiler, String xpath) {
 		super(xPathCompiler, xpath);
 	}
@@ -66,11 +63,11 @@ public class XPathRefinedByRFC5147CharSchemeBackwardMapper extends XPathRewriter
 		// step 2: map text node from image to maybe (one or none) of text node from preimage
 		Optional<XdmNode> preimageNode = preimage.getCorrespondingInPreimage(textTraceElement);
 		// step 3: rebase each image node
-		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<XPathRefinedByRFC5147CharScheme>();
+		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<>();
 		if (preimageNode.isPresent()) {
 			String normalizedXPath = pathExpressionWithXPath(getXPath(), preimageNode.get(), config.getEscaped());
 			XdmNode normalizedNode = getNode(preimage.getContents(), unespace(normalizedXPath));
-			Integer normalizedPos = posInNormalizedNode(preimageNode.get(), imagePair.getRight(), normalizedNode);
+			int normalizedPos = posInNormalizedNode(preimageNode.get(), imagePair.getRight(), normalizedNode);
 			transformed.add(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
 		}
 		return transformed;

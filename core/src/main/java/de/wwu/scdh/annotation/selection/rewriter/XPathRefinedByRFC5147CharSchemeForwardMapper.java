@@ -40,9 +40,6 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
 
 	private static final Logger LOG = LoggerFactory.getLogger(XPathRefinedByRFC5147CharSchemeForwardMapper.class);
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public XPathRefinedByRFC5147CharSchemeForwardMapper(XPathCompiler xPathCompiler, String xpath) {
 		super(xPathCompiler, xpath);
 	}
@@ -61,11 +58,11 @@ public class XPathRefinedByRFC5147CharSchemeForwardMapper extends XPathRewriterB
 		// step 2: map text node from preimage to list of text nodes from image
 		List<XdmNode> imageNodes = preimage.getCorrespondingInImage(preimagePair.getLeft());
 		// step 3: rebase in image using configured XPath
-		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<XPathRefinedByRFC5147CharScheme>();
+		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<>();
 		for (XdmNode imageNode : imageNodes) {
 			String normalizedXPath = pathExpressionWithXPath(getXPath(), imageNode, config.getEscaped());
 			XdmNode normalizedNode = getNode(preimage.getImage().getContents(), unespace(normalizedXPath));
-			Integer normalizedPos = posInNormalizedNode(imageNode, preimagePair.getRight(), normalizedNode);
+			int normalizedPos = posInNormalizedNode(imageNode, preimagePair.getRight(), normalizedNode);
 			transformed.add(
 					new XPathRefinedByRFC5147CharScheme(postProcForwardPaths(normalizedXPath, config), normalizedPos));
 		}

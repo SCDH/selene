@@ -39,9 +39,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public class XPathRefinedByRFC5147CharSchemeToTextBackwardMapper extends XPathRewriterBase
 		implements Rewriter<MappedDOMResource, RFC5147CharScheme, XPathRefinedByRFC5147CharScheme> {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(XPathCompiler xPathCompiler, String xpath) {
 		super(xPathCompiler, xpath);
 	}
@@ -67,11 +64,11 @@ public class XPathRefinedByRFC5147CharSchemeToTextBackwardMapper extends XPathRe
 		// charScheme component of the preimagePair is the offset to
 		// the text node in the result. Add the length of all text
 		// nodes before the imageNode to get the actual position.
-		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<XPathRefinedByRFC5147CharScheme>();
+		List<XPathRefinedByRFC5147CharScheme> transformed = new ArrayList<>();
 		if (preimageNode.isPresent()) {
 			String normalizedXPath = pathExpressionWithXPath(getXPath(), preimageNode.get(), config.getEscaped());
 			XdmNode normalizedNode = getNode(preimage.getContents(), unespace(normalizedXPath));
-			Integer normalizedPos = posInNormalizedNode(preimageNode.get(), imagePair.getRight(), normalizedNode);
+			int normalizedPos = posInNormalizedNode(preimageNode.get(), imagePair.getRight(), normalizedNode);
 			transformed.add(new XPathRefinedByRFC5147CharScheme(normalizedXPath, normalizedPos));
 		}
 		return transformed;

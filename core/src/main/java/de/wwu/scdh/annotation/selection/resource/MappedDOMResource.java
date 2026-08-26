@@ -42,9 +42,9 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
 	public static final String ID_XPATH = "generate-id(.)";
 
-	protected Map<String, XdmNode> idToPreimageNode = new HashMap<String, XdmNode>();
-	protected Map<XdmNode, List<XdmNode>> forwardMap = new HashMap<XdmNode, List<XdmNode>>();
-	protected Map<XdmNode, XdmNode> reverseMap = new HashMap<XdmNode, XdmNode>();
+	protected Map<String, XdmNode> idToPreimageNode = new HashMap<>();
+	protected Map<XdmNode, List<XdmNode>> forwardMap = new HashMap<>();
+	protected Map<XdmNode, XdmNode> reverseMap = new HashMap<>();
 
 	private XdmValueResource image = null;
 
@@ -62,7 +62,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	 *
 	 * @param uri a {@link URI} identifying the resource
 	 * @param document  the document node (root node)
-	 * @param processor a saxon {@link Processor} that was used by the document builder
+	 * @param processor a Saxon {@link Processor} that was used by the document builder
 	 */
 	public MappedDOMResource(URI uri, XdmNode document, Processor processor) throws ResourceException {
 		super(uri, document, processor);
@@ -87,7 +87,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 
 	/**
 	 * Prepare mapping writing node identifiers into DOM level 3 user
-	 * data and setting up {@link MappedDOMResource.idToPreimageNode}.
+	 * data and setting up {@link MappedDOMResource#idToPreimageNode}.
 	 */
 	protected void leaveTraces() throws ResourceException {
 		XdmSequenceIterator<XdmNode> nodes = getContents().axisIterator(Axis.DESCENDANT_OR_SELF);
@@ -125,8 +125,8 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 	}
 
 	/**
-	 * Make the mappings {@link MappedDOMResource.forwardMap} and
-	 * {@link MappedDOMResource.reverseMap} by iterating over the
+	 * Make the mappings {@link MappedDOMResource#forwardMap} and
+	 * {@link MappedDOMResource#reverseMap} by iterating over the
 	 * items in the image, i.e., its contents, and read the DOM level
 	 * 3 user data in there.
 	 */
@@ -160,7 +160,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 					selector = xpathExecutable.load();
 					selector.setContextItem(node);
 					nodeId = selector.evaluateSingle();
-					// Id known in preimage?
+					// ID known in preimage?
 					if (nodeId == null || !idToPreimageNode.containsKey(nodeId.getStringValue())) {
 						// if no user data present, we can only set the reverse map
 						reverseMap.put(node, null);
@@ -175,7 +175,7 @@ public class MappedDOMResource extends DOMResource implements MappedResource<Xdm
 					if (forwardMap.containsKey(preimageNode)) {
 						forwardMap.get(preimageNode).add(node);
 					} else {
-						List<XdmNode> imageNodes = new ArrayList<XdmNode>();
+						List<XdmNode> imageNodes = new ArrayList<>();
 						imageNodes.add(node);
 						forwardMap.put(preimageNode, imageNodes);
 					}

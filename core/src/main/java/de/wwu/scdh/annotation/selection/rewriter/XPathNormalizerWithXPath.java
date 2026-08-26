@@ -28,9 +28,6 @@ public class XPathNormalizerWithXPath extends XPathNormalizer {
 	 */
 	public static final String PATH_FUNCTION_XPATH = "path(.)";
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public XPathNormalizerWithXPath(XPathCompiler xPathCompiler, String xpath) {
 		super(xPathCompiler, xpath);
 	}

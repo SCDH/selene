@@ -1,114 +1,113 @@
 package de.wwu.scdh.annotation.selection.cli;
 
+import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
+import de.wwu.scdh.annotation.selection.resource.DOMResource;
+import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
+import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import java.net.URI;
-
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-import java.util.concurrent.Callable;
 
-import de.wwu.scdh.annotation.selection.resource.DOMResource;
-import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
-import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
-import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
-
-
-@Command(name = "normalizes",
-	 mixinStandardHelpOptions = true,
-	 description = "normalize a *s*imple pair of XPath selector and RFC5147 character scheme selector")
+@Command(
+		name = "normalizes",
+		mixinStandardHelpOptions = true,
+		description = "normalize a *s*imple pair of XPath selector and RFC5147 character scheme selector")
 public class Normalize extends AbstractNormalize implements Callable<Integer> {
 
+	@Parameters(paramLabel = "RESOURCE", description = "The file the selector selects from")
+	URI resource;
 
-    @Parameters(paramLabel = "RESOURCE",
-		description = "The file the selector selects from")
-    URI resource;
+	@Option(
+			names = {"-p", "--xpath"},
+			required = true,
+			paramLabel = "XPATH",
+			description = "the XPath value of an XPath selector")
+	String xpath;
 
-    @Option(names = { "-p", "--xpath" },
-	    required = true,
-	    paramLabel = "XPATH",
-	    description = "the XPath value of an XPath selector")
-    String xpath;
+	@Option(
+			names = {"-c", "--character"},
+			required = true,
+			paramLabel = "POSITION",
+			description = "the position the XPath selector is refined with using the character scheme of RFC5147")
+	int character;
 
-    @Option(names = { "-c", "--character" },
-	    required = true,
-	    paramLabel = "POSITION",
-	    description = "the position the XPath selector is refined with using the character scheme of RFC5147")
-    int character;
+	@Override
+	public Integer call() throws Exception {
+		// make relative paths absolute by resolving against the URI of the current working director
+		URI resourceResolved;
+		if (resource.isAbsolute()) {
+			resourceResolved = resource;
+		} else {
+			try {
+				URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
+				resourceResolved = currentDir.resolve(resource);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return 1;
+			}
+		}
+		// parse the resource
+		DOMResource dom;
+		if (parser.equals(Parser.XML)) {
+			try {
+				dom = DOMResource.fromXML(resourceResolved, PROC);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return 1;
+			}
+		} else if (parser.equals(Parser.HTML)) {
+			try {
+				dom = DOMResource.fromHTML(resourceResolved, PROC);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return 1;
+			}
+		} else {
+			System.err.printf("unknown parser %s\n", parser.toString());
+			return 1;
+		}
+		System.err.printf("parsed %s\n", resource.toString());
 
+		System.err.printf("normalizing %s refined by char=%s\n", xpath, character);
 
-    @Override
-    public Integer call() throws Exception {
-	// make relative paths absolute by resolving against the URI of the current working director
-	URI resourceResolved;
-	if (resource.isAbsolute()) {
-	    resourceResolved = resource;
-	} else {
-	    try {
-		URI currentDir = new URI("file:" + System.getProperty("user.dir") + "/");
-		resourceResolved = currentDir.resolve(resource);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 1;
-	    }
+		XPathNormalizerWithXPath xpathNormalizer;
+		if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
+			try {
+				xpathNormalizer =
+						new XPathNormalizerWithXPath(compiler, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return 2;
+			}
+		} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
+			try {
+				xpathNormalizer =
+						new XPathNormalizerWithXPath(compiler, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				return 2;
+			}
+		} else {
+			System.err.printf("unknown normalizer %s\n", normalizer.name());
+			return 2;
+		}
+		try {
+			XPathRefinedByRFC5147CharScheme input, normalized;
+			input = new XPathRefinedByRFC5147CharScheme(xpath, character);
+			normalized =
+					xpathNormalizer.rewrite(dom, input, getRewriterConfig()).get(0);
+			System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			return 3;
+		}
+		return 0;
 	}
-	// parse the resource
-	DOMResource dom;
-	if (parser.equals(Parser.XML)) {
-	    try {
-		dom = DOMResource.fromXML(resourceResolved, PROC);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 1;
-	    }
-	} else if (parser.equals(Parser.HTML)) {
-	    try {
-		dom = DOMResource.fromHTML(resourceResolved, PROC);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 1;
-	    }
-	} else {
-	    System.err.printf("unknown parser %s\n", parser.toString());
-	    return 1;
+
+	public static void main(String... args) {
+		System.exit(new CommandLine(new Normalize()).execute(args));
 	}
-	System.err.printf("parsed %s\n", resource.toString());
-
-	System.err.printf("normalizing %s refined by char=%s\n", xpath, character);
-
-	XPathNormalizerWithXPath xpathNormalizer;
-	if (normalizer.equals(Normalizer.FROM_DEEPEST_ID_CLARK)) {
-	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(compiler, XPathNormalizerWithXPath.FROM_DEEPEST_ID_CLARK_XPATH);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 2;
-	    }
-	} else if (normalizer.equals(Normalizer.FROM_ROOT_CLARK)) {
-	    try {
-		xpathNormalizer = new XPathNormalizerWithXPath(compiler, XPathNormalizerWithXPath.FROM_ROOT_CLARK_XPATH);
-	    } catch (Exception e) {
-		System.err.println(e.getMessage());
-		return 2;
-	    }
-	} else {
-	    System.err.printf("unknown normalizer %s\n", normalizer.name());
-	    return 2;
-	}
-	try {
-	    XPathRefinedByRFC5147CharScheme input, normalized;
-	    input = new XPathRefinedByRFC5147CharScheme(xpath, character);
-	    normalized = xpathNormalizer.rewrite(dom, input, getRewriterConfig()).get(0);
-	    System.out.printf("%s,%s\n", normalized.getXPath(), normalized.getChar());
-	} catch (Exception e) {
-	    System.err.println(e.getMessage());
-	    return 3;
-	}
-	return 0;
-    }
-
-    public static void main(String... args) {
-	System.exit(new CommandLine(new Normalize()).execute(args));
-    }
-
 }
