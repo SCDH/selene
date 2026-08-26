@@ -2,6 +2,7 @@
 <xsl:package name="http://wwu.de/scdh/selection-engine/node-tracing" package-version="1.0.0"
   version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:trace="http://wwu.de/scdh/selection-engine/node-tracing"
   xmlns:sel="http://wwu.de/scdh/selection-engine/xpaths">
 
   <!-- the path starting from the deepest node with an ID -->
@@ -51,7 +52,13 @@
   <xsl:function name="sel:from-deepest-id-to-element" as="xs:string" visibility="final">
     <xsl:param name="ctx" as="node()"/>
     <xsl:choose>
+      <xsl:when test="$ctx[self::text()][parent::trace:text]">
+        <xsl:value-of select="sel:from-deepest-id($ctx/parent::*/parent::*)"/>
+      </xsl:when>
       <xsl:when test="$ctx[self::text()]">
+        <xsl:value-of select="sel:from-deepest-id($ctx/parent::*)"/>
+      </xsl:when>
+      <xsl:when test="$ctx[self::trace:text]">
         <xsl:value-of select="sel:from-deepest-id($ctx/parent::*)"/>
       </xsl:when>
       <xsl:otherwise>
@@ -64,7 +71,13 @@
   <xsl:function name="sel:to-element" as="xs:string" visibility="final">
     <xsl:param name="ctx" as="node()"/>
     <xsl:choose>
+      <xsl:when test="$ctx[self::text()][parent::trace:text]">
+        <xsl:value-of select="path($ctx/parent::*/parent::*)"/>
+      </xsl:when>
       <xsl:when test="$ctx[self::text()]">
+        <xsl:value-of select="path($ctx/parent::*)"/>
+      </xsl:when>
+      <xsl:when test="$ctx[self::trace:text]">
         <xsl:value-of select="path($ctx/parent::*)"/>
       </xsl:when>
       <xsl:otherwise>
