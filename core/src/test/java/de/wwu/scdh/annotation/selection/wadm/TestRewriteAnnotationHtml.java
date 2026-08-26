@@ -18,12 +18,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Optional;
-import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,11 @@ public class TestRewriteAnnotationHtml {
 	public static final File XSL_DIR =
 			Paths.get("src", "test", "resources", "xsl").toFile();
 
+	public static final File XPATH_XSL =
+			Paths.get("src", "main", "resources", "xslt", "xpath.xsl").toFile();
+
 	public static final String SONG_FW_IN_IMAGE_JSON = new File(SAMPLE_DIR, "gFwInImage.json").toString();
+	public static final String SONG_FW_IN_IMAGE2_JSON = new File(SAMPLE_DIR, "gFwInImage2.json").toString();
 	public static final String SONG_BW_TO_LEAVE_IN_PREIMAGE_JSON =
 			new File(SAMPLE_DIR, "gBwHtmlToLeafInPreimage.json").toString();
 	public static final String SONG_BW_TO_ELEMENT_IN_PREIMAGE_JSON =
@@ -59,7 +64,18 @@ public class TestRewriteAnnotationHtml {
 
 	public static final URI SONG_XML = new File(TEST_DIR, "Gesang.tei.xml").toURI();
 
-	private final RewriterFactory forwardFactory = new ForwardMappingFactory(PROC.newXPathCompiler());
+	private static XPathCompiler XPATH_COMPILER;
+
+	@BeforeAll
+	public static void setupXPathCompiler() throws SaxonApiException {
+		XPATH_COMPILER = PROC.newXPathCompiler();
+		XsltCompiler xsltCompiler = PROC.newXsltCompiler();
+		XsltPackage pkg = xsltCompiler.compilePackage(XPATH_XSL);
+		XPATH_COMPILER.addXsltFunctionLibrary(pkg);
+		XPATH_COMPILER.declareNamespace("sel", "http://wwu.de/scdh/selection-engine/xpaths");
+	}
+
+	private final RewriterFactory forwardFactory = new ForwardMappingFactory(XPATH_COMPILER);
 	private final RewriterFactory backwardFactory = new BackwardMappingFactory(PROC.newXPathCompiler());
 	private RewriterConfig normalizerConfig;
 
@@ -218,6 +234,296 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has rdf:value");
 		assertEquals(
 				"char=3",
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"end refinement has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has no extra class");
+	}
+
+	@Test
+	public void testForwardInImageToParent() {
+		normalizerConfig = makeConfig("sel:to-element(.)");
+		model = NormalizeAnnotation.rewrite(
+				songMapped,
+				songIri,
+				songIriHtml,
+				forwardFactory,
+				normalizerConfig,
+				SONG_FW_IN_IMAGE_JSON,
+				Optional.of("jsonld"));
+		assertEquals(
+				1,
+				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+						.toSet()
+						.size());
+		Resource specificResource = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+				.next()
+				.getResource();
+		assertEquals(
+				1,
+				model.listStatements(specificResource, OA.hasSource, (RDFNode) null)
+						.toSet()
+						.size());
+		assertEquals(
+				IRI_SONG_HTML,
+				specificResource
+						.getProperty(OA.hasSource)
+						.getObject()
+						.asResource()
+						.toString());
+		Resource rangeSelector = model.listStatements(specificResource, OA.hasSelector, (Resource) null)
+				.next()
+				.getObject()
+				.asResource();
+		// start selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasStartSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a start selector");
+		Resource startSelector = model.listStatements(rangeSelector, OA.hasStartSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has no extra class");
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has rdf:value");
+		assertEquals(
+				"/html[1]/body[1]/div[2]/div[1]/p[2]/span[1]",
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"start selector has rdf:value");
+		Resource startRefinement = model.listStatements(startSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has rdf:value");
+		assertEquals(
+				"char=1",
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has extra class");
+		// end selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasEndSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a end selector");
+		Resource endSelector = model.listStatements(rangeSelector, OA.hasEndSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has rdf:value");
+		assertEquals(
+				"/html[1]/body[1]/div[2]/div[1]/p[2]/span[1]",
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has no extra class");
+		Resource endRefinement = model.listStatements(endSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has rdf:value");
+		assertEquals(
+				"char=3",
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"end refinement has rdf:value");
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has no extra class");
+	}
+
+	@Test
+	public void testForwardInImage2ToElement() {
+		normalizerConfig = makeConfig("sel:to-element(.)");
+		model = NormalizeAnnotation.rewrite(
+				songMapped,
+				songIri,
+				songIriHtml,
+				forwardFactory,
+				normalizerConfig,
+				SONG_FW_IN_IMAGE2_JSON,
+				Optional.of("jsonld"));
+		assertEquals(
+				1,
+				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+						.toSet()
+						.size());
+		Resource specificResource = model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
+				.next()
+				.getResource();
+		assertEquals(
+				1,
+				model.listStatements(specificResource, OA.hasSource, (RDFNode) null)
+						.toSet()
+						.size());
+		assertEquals(
+				IRI_SONG_HTML,
+				specificResource
+						.getProperty(OA.hasSource)
+						.getObject()
+						.asResource()
+						.toString());
+		Resource rangeSelector = model.listStatements(specificResource, OA.hasSelector, (Resource) null)
+				.next()
+				.getObject()
+				.asResource();
+		// start selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasStartSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a start selector");
+		Resource startSelector = model.listStatements(rangeSelector, OA.hasStartSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has no extra class");
+		assertEquals(
+				1,
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start selector has rdf:value");
+		assertEquals(
+				"/html[1]/body[1]/div[2]/div[1]/p[1]",
+				model.listStatements(startSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString(),
+				"start selector has rdf:value");
+		Resource startRefinement = model.listStatements(startSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has rdf:value");
+		assertEquals(
+				"char=12",
+				model.listStatements(startRefinement, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(startRefinement, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"start refinement has extra class");
+		// end selector
+		assertEquals(
+				1,
+				model.listStatements(rangeSelector, OA.hasEndSelector, (Resource) null)
+						.toSet()
+						.size(),
+				"has a end selector");
+		Resource endSelector = model.listStatements(rangeSelector, OA.hasEndSelector, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has rdf:value");
+		assertEquals(
+				"/html[1]/body[1]/div[2]/div[1]/p[1]",
+				model.listStatements(endSelector, RDF.value, (RDFNode) null)
+						.next()
+						.getObject()
+						.asLiteral()
+						.getString());
+		assertEquals(
+				1,
+				model.listStatements(endSelector, RDF.type, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end selector has no extra class");
+		Resource endRefinement = model.listStatements(endSelector, OA.refinedBy, (RDFNode) null)
+				.next()
+				.getObject()
+				.asResource();
+		assertEquals(
+				1,
+				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
+						.toSet()
+						.size(),
+				"end refinement has rdf:value");
+		assertEquals(
+				"char=22",
 				model.listStatements(endRefinement, RDF.value, (RDFNode) null)
 						.next()
 						.getObject()
