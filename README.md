@@ -101,7 +101,7 @@ Testing and building:
 ```
 
 After building with Maven, there is a command line interface in
-`cli/target/bin/oasel`.
+`cli/target/bin/selene`.
 
 Generating Javadocs, which will be in `target/site/apidocs`:
 
@@ -138,7 +138,7 @@ export GRAALVM_HOME=graalvm-...
 
 
 ```shell
-cli/target/bin/selwr transforms --xpath='//*:head[1]/text()[1]' --character=5 --xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml --normalizer-xpath="path(.)" --config=saxon-config.xml
+cli/target/bin/selene transforms --xpath='//*:head[1]/text()[1]' --character=5 --xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml --normalizer-xpath="path(.)" --config=saxon-config.xml
 ```
 
 

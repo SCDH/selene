@@ -12,7 +12,7 @@
   <name>Selection Engine Command Line Interface</name>
 
   <properties>
-    <app.name>selwr</app.name>
+    <app.name>selene</app.name>
   </properties>
 
   <dependencies>
