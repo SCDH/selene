@@ -464,11 +464,11 @@ public abstract class XPathRewriterBase {
 		Iterator<XdmNode> descendant = fragment.axisIterator(Axis.DESCENDANT);
 		while (descendant.hasNext() && !found) {
 			XdmNode node = descendant.next();
-			if (!node.getNodeKind().equals(XdmNodeKind.TEXT)) continue;
 			if (node.equals(textNode)) {
 				found = true;
 				break;
 			}
+			if (!node.getNodeKind().equals(XdmNodeKind.TEXT)) continue;
 			posAcc += node.getUnderlyingValue().getUnicodeStringValue().length32();
 		}
 		if (!found) {
