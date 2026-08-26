@@ -28,13 +28,12 @@ public class NormalizerFactory implements RewriterFactory {
 
 		// return null;
 		RW rc;
-		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)
+		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
 				&& XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point2)) {
 			rc = (RW) new XPathNormalizerWithXPath(compiler, config.getXPath());
 		} else {
 			throw new ConfigurationException(
-					"no rewriter for " + point1.getClass().getCanonicalName() + " ; "
-							+ point2.getClass().getCanonicalName());
+					"no rewriter for " + point1.getCanonicalName() + " ; " + point2.getCanonicalName());
 		}
 		return rc;
 	}

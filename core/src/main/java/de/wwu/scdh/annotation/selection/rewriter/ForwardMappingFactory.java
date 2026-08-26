@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class ForwardMappingFactory implements RewriterFactory {
 
-	private static Logger Log = LoggerFactory.getLogger(ForwardMappingFactory.class);
+	private static final Logger Log = LoggerFactory.getLogger(ForwardMappingFactory.class);
 
 	private final XPathCompiler compiler;
 
@@ -34,11 +34,7 @@ public class ForwardMappingFactory implements RewriterFactory {
 		Log.debug("looking up mapper for {}, {}", point1.getCanonicalName(), point2.getCanonicalName());
 
 		Class<P3> mappedPointClass;
-		if (config.getPointClassMap().containsKey(point2)) {
-			mappedPointClass = (Class<P3>) config.getPointClassMap().get(point2);
-		} else {
-			mappedPointClass = (Class<P3>) point2;
-		}
+		mappedPointClass = (Class<P3>) config.getPointClassMap().getOrDefault(point2, point2);
 
 		RW rc;
 		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
@@ -49,9 +45,8 @@ public class ForwardMappingFactory implements RewriterFactory {
 			rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextForwardMapper(compiler, config.getXPath());
 		} else {
 			Log.error("no forward mapping for {}, {}", point1.getCanonicalName(), mappedPointClass.getCanonicalName());
-			throw new ConfigurationException(
-					"no forward mapping for " + point1.getClass().getCanonicalName() + " ; "
-							+ mappedPointClass.getClass().getCanonicalName());
+			throw new ConfigurationException("no forward mapping for " + point1.getCanonicalName() + " ; "
+					+ mappedPointClass.getCanonicalName());
 		}
 		return rc;
 	}

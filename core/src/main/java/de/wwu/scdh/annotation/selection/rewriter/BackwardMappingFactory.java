@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class BackwardMappingFactory implements RewriterFactory {
 
-	private static Logger Log = LoggerFactory.getLogger(ForwardMappingFactory.class);
+	private static final Logger Log = LoggerFactory.getLogger(ForwardMappingFactory.class);
 
 	private final XPathCompiler compiler;
 
@@ -32,11 +32,7 @@ public class BackwardMappingFactory implements RewriterFactory {
 			RW getRewriter(Class<P1> point1, Class<P2> point2, RewriterConfig config) throws ConfigurationException {
 
 		Class<P3> mappedPointClass;
-		if (config.getPointClassMap().containsKey(point2)) {
-			mappedPointClass = (Class<P3>) config.getPointClassMap().get(point2);
-		} else {
-			mappedPointClass = (Class<P3>) point2;
-		}
+		mappedPointClass = (Class<P3>) config.getPointClassMap().getOrDefault(point2, point2);
 
 		RW rc;
 		if (XPathRefinedByRFC5147CharScheme.class.isAssignableFrom(point1)
@@ -47,9 +43,8 @@ public class BackwardMappingFactory implements RewriterFactory {
 			rc = (RW) new XPathRefinedByRFC5147CharSchemeToTextBackwardMapper(compiler, config.getXPath());
 		} else {
 			Log.error("no backward mapping for {}, {}", point1.getCanonicalName(), mappedPointClass.getCanonicalName());
-			throw new ConfigurationException(
-					"no backward mapping for " + point1.getClass().getCanonicalName() + " ; "
-							+ mappedPointClass.getClass().getCanonicalName());
+			throw new ConfigurationException("no backward mapping for " + point1.getCanonicalName() + " ; "
+					+ mappedPointClass.getCanonicalName());
 		}
 		return rc;
 	}
