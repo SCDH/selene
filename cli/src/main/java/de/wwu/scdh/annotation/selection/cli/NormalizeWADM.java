@@ -1,31 +1,23 @@
 package de.wwu.scdh.annotation.selection.cli;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import org.apache.commons.lang3.tuple.Pair;
 import java.util.Optional;
 import java.io.StringWriter;
 import java.util.Collections;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import java.util.concurrent.Callable;
-
-import net.sf.saxon.s9api.Processor;
 
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFFormatVariant;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.system.JenaTitanium;
 import org.apache.jena.riot.WriterDatasetRIOT;
 import org.apache.jena.riot.RDFWriterRegistry;
@@ -46,15 +38,12 @@ import com.apicatalog.jsonld.document.JsonDocument;
 import jakarta.json.JsonObject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonStructure;
 import jakarta.json.JsonWriter;
 import jakarta.json.JsonWriterFactory;
 import jakarta.json.stream.JsonGenerator;
 
 import de.wwu.scdh.annotation.selection.Resource;
-import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
-import de.wwu.scdh.annotation.selection.RewriterConfig;
 
 
 @Command(name = "normalize",

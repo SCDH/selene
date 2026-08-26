@@ -1,16 +1,12 @@
 package de.wwu.scdh.annotation.selection.cli;
 
-import java.io.File;
 import java.net.URI;
-import org.apache.commons.lang3.tuple.Pair;
 import javax.xml.transform.stream.StreamSource;
 import java.util.List;
-import java.util.Iterator;
 import java.io.InputStream;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import java.util.concurrent.Callable;
@@ -21,17 +17,13 @@ import de.wwu.scdh.annotation.selection.Resource;
 import de.wwu.scdh.annotation.selection.resource.MappedDOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
-import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
-import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.point.XPathRefinedByRFC5147CharScheme;
 import de.wwu.scdh.annotation.selection.point.RFC5147CharScheme;
-import de.wwu.scdh.annotation.selection.RewriterConfig;
 import de.wwu.scdh.annotation.selection.RewriterFactory;
 import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
 import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
 import de.wwu.scdh.annotation.selection.Rewriter;
 import de.wwu.scdh.annotation.selection.Point;
-import de.wwu.scdh.annotation.selection.Component;
 import de.wwu.scdh.annotation.selection.component.XPathComponent;
 import de.wwu.scdh.annotation.selection.component.RFC5147CharComponent;
 import de.wwu.scdh.annotation.selection.NoSuchComponentException;

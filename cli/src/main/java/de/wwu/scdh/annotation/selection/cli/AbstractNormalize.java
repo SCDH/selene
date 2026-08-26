@@ -2,14 +2,8 @@ package de.wwu.scdh.annotation.selection.cli;
 
 import java.io.File;
 import java.net.URI;
-import org.apache.commons.lang3.tuple.Pair;
 
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import java.util.concurrent.Callable;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XPathCompiler;
@@ -18,9 +12,7 @@ import net.sf.saxon.s9api.XsltPackage;
 import net.sf.saxon.s9api.SaxonApiException;
 
 import de.wwu.scdh.annotation.selection.resource.DOMResource;
-import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder.Parser;
-import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizer;
 import de.wwu.scdh.annotation.selection.rewriter.XPathNormalizerWithXPath;
 import de.wwu.scdh.annotation.selection.rewriter.NormalizerFactory;
 import de.wwu.scdh.annotation.selection.Mode;
