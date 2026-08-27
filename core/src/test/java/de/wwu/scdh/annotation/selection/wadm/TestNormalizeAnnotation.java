@@ -20,8 +20,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * This class is used to test all the wadm normalizers.
@@ -71,7 +69,6 @@ public class TestNormalizeAnnotation {
 
 	// normalizing XPathSelector refinedBy FragmentSelector conforming to RFC5147 character scheme
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testAcceptP11WithPath() {
 		normalizerConfig = makeConfig("path(.)");
@@ -103,7 +100,6 @@ public class TestNormalizeAnnotation {
 						.size());
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testAcceptP11WithPathParent() {
 		normalizerConfig = makeConfig("path(parent::*)");
@@ -135,7 +131,6 @@ public class TestNormalizeAnnotation {
 						.size());
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testAcceptP11WithPathParentParent() {
 		normalizerConfig = makeConfig("path(parent::*/parent::*)");
@@ -167,7 +162,6 @@ public class TestNormalizeAnnotation {
 						.size());
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testRewriteP11WithPath() {
 		normalizerConfig = makeConfig("path(.)");

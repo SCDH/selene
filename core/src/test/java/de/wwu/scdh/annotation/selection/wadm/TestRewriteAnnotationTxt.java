@@ -26,8 +26,6 @@ import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * This class tests rewriting WADM annotations with HTML images.
@@ -86,7 +84,6 @@ public class TestRewriteAnnotationTxt {
 		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.backwardDOMToTextPointClassMap());
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardInImage() {
 		RewriterConfig config =
@@ -200,7 +197,6 @@ public class TestRewriteAnnotationTxt {
 				"end selector has no refinement");
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardInPreimage() {
 		RewriterConfig config =
@@ -347,7 +343,6 @@ public class TestRewriteAnnotationTxt {
 				"end refinement has no extra class");
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardNotInImage() {
 		RewriterConfig config =
@@ -489,7 +484,6 @@ public class TestRewriteAnnotationTxt {
 				"end refinement is a sel:Null selector");
 	}
 
-	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardNotInPreimage() {
 		RewriterConfig config =
