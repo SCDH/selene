@@ -36,3 +36,44 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag}" \
               --generate-notes
+
+      - name: Create Java Docs
+        run: mvn -Drevision=${{ github.ref_name }} -Dchangelist="" --batch-mode javadoc:aggregate
+
+      - name: Zip Java Docs
+        run: |
+          cd target/site/apidocs
+          zip -r apidocs.zip *
+
+      - name: Store Java Docs as gh artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apidocs
+          path: target/site/apidocs/apidocs.zip
+          retention-days: 1
+
+  pages:
+    name: Github pages
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+
+      - name: Create directory for gh pages
+        run: mkdir -p public
+
+      - name: Download apidocs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apidocs
+
+      - name: Unzip apidocs artifact
+        run: unzip apidocs.zip -d public
+
+      - name: Deploy on Github pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
