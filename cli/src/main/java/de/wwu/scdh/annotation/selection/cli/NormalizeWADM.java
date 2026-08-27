@@ -1,13 +1,12 @@
 package de.wwu.scdh.annotation.selection.cli;
 
 import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.JsonLdEmbed;
+import com.apicatalog.jsonld.JsonLdOptions;
 import com.apicatalog.jsonld.api.FramingApi;
-import com.apicatalog.jsonld.document.Document;
 import com.apicatalog.jsonld.document.JsonDocument;
-import com.apicatalog.jsonld.document.RdfDocument;
-import com.apicatalog.jsonld.lang.Keywords;
-import com.apicatalog.rdf.RdfDataset;
 import de.wwu.scdh.annotation.selection.Resource;
+import de.wwu.scdh.annotation.selection.utils.StaticDocumentLoader;
 import de.wwu.scdh.annotation.selection.wadm.NormalizeAnnotation;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -30,9 +29,11 @@ import org.apache.jena.riot.RDFFormatVariant;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.riot.WriterDatasetRIOT;
-import org.apache.jena.riot.system.JenaTitanium;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapZero;
+import org.apache.jena.riot.system.jsonld.JenaToTitanium;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.DatasetImpl;
 import org.apache.jena.sparql.util.Context;
 import picocli.CommandLine;
@@ -123,17 +124,19 @@ public class NormalizeWADM extends AbstractNormalize implements Callable<Integer
 			// do the framing and serialization with Titanium
 
 			try {
-				RdfDataset rdfds = JenaTitanium.convert(ds.asDatasetGraph());
-				Document rdfdoc = RdfDocument.of(rdfds);
-				// The Titanium API for framing does not allow
-				// RdfDocuments.  Thus, we make a JsonDocument
-				// representing the graph like for plain output
-				JsonArray array = JsonLd.fromRdf(rdfdoc).get();
-				JsonObject jsonStructure =
-						Json.createObjectBuilder().add(Keywords.GRAPH, array).build();
-				JsonDocument jsonDocument = JsonDocument.of(jsonStructure);
+				// use titanium for framing
+				JsonLdOptions options = new JsonLdOptions();
+				// options.setBase(null);
+				options.setDocumentLoader(new StaticDocumentLoader());
+				options.setOmitGraph(true);
+				options.setEmbed(JsonLdEmbed.ALWAYS);
+				// add more options here!
+				DatasetGraph dsg = DatasetGraphFactory.create(model.getGraph());
+				JsonArray ja = JenaToTitanium.convert(dsg, options);
+				JsonDocument jDoc = JsonDocument.of(ja);
 				// do the framing
-				FramingApi api = JsonLd.frame(jsonDocument, JsonDocument.of(framingUri.openStream()));
+				FramingApi api = JsonLd.frame(jDoc, JsonDocument.of(framingUri.openStream()));
+				api.loader(options.getDocumentLoader()); // important to set loader!
 				final JsonObject output = api.get();
 
 				// JsonOutput.print(System.out, true);

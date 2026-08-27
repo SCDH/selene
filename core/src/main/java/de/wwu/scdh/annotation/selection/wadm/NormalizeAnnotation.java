@@ -1,18 +1,17 @@
 package de.wwu.scdh.annotation.selection.wadm;
 
+import com.apicatalog.jsonld.JsonLdOptions;
 import de.wwu.scdh.annotation.selection.*;
+import de.wwu.scdh.annotation.selection.utils.StaticDocumentLoader;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.impl.OntModelImpl;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.*;
+import org.apache.jena.riot.system.jsonld.TitaniumJsonLdOptions;
 import org.apache.jena.vocabulary.OA;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -134,7 +133,12 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	/**
 	 * Normalize all annotations in a {@link Model} given by a URI
 	 * as {@link String} which may reference a local file (file URI)
-	 * or an online resource.
+	 * or an online resource.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -151,12 +155,10 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			RewriterConfig normalizerConfig,
 			String graph,
 			Optional<String> lang) {
-		Model model;
-		if (lang.isEmpty()) {
-			model = RDFDataMgr.loadModel(graph);
-		} else {
-			model = RDFDataMgr.loadModel(graph, RDFLanguages.nameToLang(lang.get()));
-		}
+		RDFParserBuilder parserBuilder = RDFParser.source(graph);
+		setParserOptions(parserBuilder);
+		lang.ifPresent(l -> parserBuilder.lang(RDFLanguages.nameToLang(l)));
+		Model model = parserBuilder.toModel();
 		return normalize(resource, iri, rewriterFactory, normalizerConfig, model);
 	}
 
@@ -164,7 +166,12 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	 * Rewrite all annotations in the provided {@link Model}. In contrast to
 	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, String, Optional)}
 	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
-	 * between representations.
+	 * between representations.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#rewrite(de.wwu.scdh.annotation.selection.Resource, URI, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -183,18 +190,21 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			RewriterConfig normalizerConfig,
 			String graph,
 			Optional<String> lang) {
-		Model model;
-		if (lang.isEmpty()) {
-			model = RDFDataMgr.loadModel(graph);
-		} else {
-			model = RDFDataMgr.loadModel(graph, RDFLanguages.nameToLang(lang.get()));
-		}
+		RDFParserBuilder parserBuilder = RDFParser.source(graph);
+		setParserOptions(parserBuilder);
+		lang.ifPresent(l -> parserBuilder.lang(RDFLanguages.nameToLang(l)));
+		Model model = parserBuilder.toModel();
 		return rewrite(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model);
 	}
 
 	/**
 	 * Normalize all annotations in a {@link Model} which is read from
-	 * an {@link InputStream}.
+	 * an {@link InputStream}.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -213,18 +223,20 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			InputStream input,
 			Optional<String> lang,
 			Optional<String> modelBase) {
-		Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
-		Lang langHint;
-		if (lang.isEmpty()) {
-
-			langHint = RDFLanguages.nameToLang(lang.get());
+		RDFParserBuilder parserBuilder = RDFParser.source(input);
+		modelBase.ifPresent(parserBuilder::base);
+		setParserOptions(parserBuilder);
+		if (lang.isPresent()) {
+			parserBuilder.lang(RDFLanguages.nameToLang(lang.get()));
 		} else {
-			langHint = RDFLanguages.NTRIPLES;
+			parserBuilder.lang(Lang.NTRIPLES);
 		}
-		if (modelBase.isEmpty()) {
-			RDFDataMgr.read(model, input, langHint);
-		} else {
-			RDFDataMgr.read(model, input, modelBase.get(), langHint);
+		Model model = parserBuilder.toModel();
+		try {
+			input.close();
+			LOG.warn("closed input stream");
+		} catch (Exception ignored) {
+			LOG.warn("failed to close input stream");
 		}
 		return normalize(resource, iri, rewriterFactory, normalizerConfig, model);
 	}
@@ -233,8 +245,13 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	 * Rewrite all annotations in the provided {@link Model}. In contrast to
 	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, InputStream, Optional, Optional)}
 	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
-	 * between representations.
+	 * between representations.<p/>
 	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#rewrite(de.wwu.scdh.annotation.selection.Resource, URI, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
+	 * *
 	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
 	 * @param rewriterFactory - a factory that returns a rewriter for a point
@@ -253,19 +270,25 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 			InputStream input,
 			Optional<String> lang,
 			Optional<String> modelBase) {
-		Model model = new OntModelImpl(OntModelSpec.OWL_DL_MEM);
-		Lang langHint;
-		if (lang.isEmpty()) {
-
-			langHint = RDFLanguages.nameToLang(lang.get());
+		RDFParserBuilder parserBuilder = RDFParser.source(input);
+		modelBase.ifPresent(parserBuilder::base);
+		setParserOptions(parserBuilder);
+		if (lang.isPresent()) {
+			parserBuilder.lang(RDFLanguages.nameToLang(lang.get()));
 		} else {
-			langHint = RDFLanguages.NTRIPLES;
+			parserBuilder.lang(Lang.NTRIPLES);
 		}
-		if (modelBase.isEmpty()) {
-			RDFDataMgr.read(model, input, langHint);
-		} else {
-			RDFDataMgr.read(model, input, modelBase.get(), langHint);
-		}
+		Model model = parserBuilder.toModel();
 		return rewrite(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model);
+	}
+
+	/**
+	 * Sets RDF parser options.
+	 * @param parserBuilder - the Apache Jena {@link RDFParserBuilder}
+	 */
+	private static void setParserOptions(RDFParserBuilder parserBuilder) {
+		JsonLdOptions options = new JsonLdOptions();
+		options.setDocumentLoader(new StaticDocumentLoader());
+		parserBuilder.set(TitaniumJsonLdOptions.JSONLD_OPTIONS, options);
 	}
 }
