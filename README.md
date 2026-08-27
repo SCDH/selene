@@ -91,6 +91,13 @@ as the Morning Star or the Evening Star.
 
 ## Getting Started
 
+### REST API
+
+Selene is integrated in SEED DTS. This is the most straight forward way to get it running.
+
+### CLI
+
+Note: Currently, the CLI may be behind core development and integration in SEED DTS. 
 
 Java version required: OpenJDK 17+
 
@@ -103,25 +110,33 @@ Testing and building:
 After building with Maven, there is a command line interface in
 `cli/target/bin/selene`.
 
-Generating Javadocs, which will be in `target/site/apidocs`:
+Usage Examples (Linux):
+
+```shell
+cli/target/bin/selene normalize test/gesang.annot1.json -l jsonld -f ttl
+```
+
+```shell
+cli/target/bin/selene normalize test/gesang.annot1.json -l jsonld  -x "path(root(.))" -f ntriples
+```
+
+```shell
+cli/target/bin/selene transforms --xpath='//*:head[1]/text()[1]' --character=5 --xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml --normalizer-xpath="path(.)" --config=saxon-config.xml
+```
+
+### Java API
+
+[**Javadocs** are online](https://scdh.github.io/selene/) for the latest release.
+
+Generate Javadocs, which will be in `target/site/apidocs`:
 
 ```{shell}
 ./mvnw javadoc:aggregate
 ```
 
-[Javadocs are online](https://scdh.zivgitlabpages.uni-muenster.de/selectors/selection-engine/apidocs/) for the latest release.
+### Native Executable
 
-Usage Examples (Linux):
-
-```shell
-cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld -f ttl
-```
-
-```shell
-cli/target/bin/oasel normalize test/gesang.annot1.json -l jsonld  -x "path(root(.))" -f ntriples
-```
-
-Building native executable:
+Building native executable (experimental):
 
 1. set up GraalVM
 
@@ -135,14 +150,3 @@ export GRAALVM_HOME=graalvm-...
 ```shell
 ./mvnw package -Pnative
 ```
-
-
-```shell
-cli/target/bin/selene transforms --xpath='//*:head[1]/text()[1]' --character=5 --xsl=test/text-with-toc-pkg.xsl test/Gesang.tei.xml --normalizer-xpath="path(.)" --config=saxon-config.xml
-```
-
-
-
-## Further Reading
-
-- [JSON-LD compact in RIOT](https://github.com/apache/jena/issues/2031)
