@@ -1,6 +1,6 @@
 ## Changes
 
-## 0.3.1
+## 0.3.1, 0.3.2
 
 - fixes issues #33 and #34
 
