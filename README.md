@@ -1,4 +1,7 @@
 [![Tests](https://github.com/SCDH/selene/actions/workflows/test.yaml/badge.svg)](https://github.com/SCDH/selene/actions/workflows/test.yaml)
+[![Create release](https://github.com/SCDH/selene/actions/workflows/deploy.yaml/badge.svg)](https://github.com/SCDH/selene/actions/workflows/deploy.yaml)
+![GitHub Tag](https://img.shields.io/github/v/tag/scdh/selene)
+
 
 # Selene Selection Engine
 
