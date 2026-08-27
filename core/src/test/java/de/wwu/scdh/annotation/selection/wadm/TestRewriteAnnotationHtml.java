@@ -28,6 +28,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * This class tests rewriting WADM annotations with HTML images.
@@ -103,6 +105,7 @@ public class TestRewriteAnnotationHtml {
 		return new RewriterConfig(null, false, xpath, true, true);
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardInImage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -248,6 +251,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardInImageToParent() {
 		normalizerConfig = makeConfig("sel:to-element(.)");
@@ -393,6 +397,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardInImage2ToElement() {
 		normalizerConfig = makeConfig("sel:to-element(.)");
@@ -539,6 +544,7 @@ public class TestRewriteAnnotationHtml {
 	}
 
 	// works, but not guarantied, since selector goes down to the text leaf
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardToLeafInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -684,6 +690,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardToElementInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -829,6 +836,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardToHigherInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -974,6 +982,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement has no extra class");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testForwardNotInImage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -1118,6 +1127,7 @@ public class TestRewriteAnnotationHtml {
 	// select exactly one node in XdmValueResource: selects 0 nodes --- This is totally logical, since this text node
 	// was never a trace:text node. And, we cannot securely use text() here, since the content could come from string
 	// items in the image. Facit: No guaranty about selectors that go down to the text leaf.
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardToLeafNotInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
@@ -1257,6 +1267,7 @@ public class TestRewriteAnnotationHtml {
 				"end refinement is a sel:Null selector");
 	}
 
+	@Execution(ExecutionMode.SAME_THREAD)
 	@Test
 	public void testBackwardToElementNotInPreimage() {
 		normalizerConfig = makeConfig("path(.)");
