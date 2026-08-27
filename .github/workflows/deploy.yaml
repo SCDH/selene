@@ -46,7 +46,7 @@ jobs:
           zip -r apidocs.zip *
 
       - name: Store Java Docs as gh artifact
-        uses: actions/download-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: apidocs
           path: target/site/apidocs/apidocs.zip
