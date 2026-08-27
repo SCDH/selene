@@ -133,7 +133,12 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	/**
 	 * Normalize all annotations in a {@link Model} given by a URI
 	 * as {@link String} which may reference a local file (file URI)
-	 * or an online resource.
+	 * or an online resource.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -161,7 +166,12 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	 * Rewrite all annotations in the provided {@link Model}. In contrast to
 	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, String, Optional)}
 	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
-	 * between representations.
+	 * between representations.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#rewrite(de.wwu.scdh.annotation.selection.Resource, URI, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -189,7 +199,12 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 
 	/**
 	 * Normalize all annotations in a {@link Model} which is read from
-	 * an {@link InputStream}.
+	 * an {@link InputStream}.<p/>
+	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
 	 *
 	 * @param resource - the resource the rewriting has to done with
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
@@ -230,8 +245,13 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 	 * Rewrite all annotations in the provided {@link Model}. In contrast to
 	 * {@link NormalizeAnnotation#normalize(de.wwu.scdh.annotation.selection.Resource, URI, RewriterFactory, RewriterConfig, InputStream, Optional, Optional)}
 	 * this method also rewrites the <code>oa:hasSource</code> property and is thus suitable for transforming selectors
-	 * between representations.
+	 * between representations.<p/>
 	 *
+	 * Note, that this method sets options to the RDF parser, e.g., the {@link StaticDocumentLoader} as JSON-LD
+	 * document loader. If you want full control over RDF parsing, the use
+	 * {@link NormalizeAnnotation#rewrite(de.wwu.scdh.annotation.selection.Resource, URI, URI, RewriterFactory, RewriterConfig, Model)}
+	 * instead.
+	 * *
 	 * @param resource - the resource the rewriting has to done with. Should be a {@link MappedResource}.
 	 * @param iri - the IRI of sources (<code>oa:hasSource</code>) the rewriting has to done on
 	 * @param rewriterFactory - a factory that returns a rewriter for a point
@@ -262,6 +282,10 @@ public class NormalizeAnnotation implements Consumer<Resource> {
 		return rewrite(resource, iri, rewriteIri, rewriterFactory, normalizerConfig, model);
 	}
 
+	/**
+	 * Sets RDF parser options.
+	 * @param parserBuilder - the Apache Jena {@link RDFParserBuilder}
+	 */
 	private static void setParserOptions(RDFParserBuilder parserBuilder) {
 		JsonLdOptions options = new JsonLdOptions();
 		options.setDocumentLoader(new StaticDocumentLoader());
