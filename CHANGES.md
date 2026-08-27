@@ -2,7 +2,7 @@
 
 ## 0.3.1
 
-- fixes issue #33
+- fixes issues #33 and #34
 
 ## 0.3.0
 
