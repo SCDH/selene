@@ -96,7 +96,10 @@ as the Morning Star or the Evening Star.
 
 ### REST API
 
-Selene is integrated in SEED DTS. This is the most straight forward way to get it running.
+Selene is integrated in [SEED
+DTS](https://github.com/scdh/seed-xc/dts). This is the most straight
+forward way to get Selene running and recommended for scholars using
+TEI.
 
 ### CLI
 
