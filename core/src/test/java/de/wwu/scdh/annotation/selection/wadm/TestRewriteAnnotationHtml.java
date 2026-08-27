@@ -10,7 +10,9 @@ import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
 import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -104,24 +106,14 @@ public class TestRewriteAnnotationHtml {
 	@Test
 	public void testForwardInImage() {
 		normalizerConfig = makeConfig("path(.)");
-		try {
-			model = NormalizeAnnotation.rewrite(
-					songMapped,
-					songIri,
-					songIriHtml,
-					forwardFactory,
-					normalizerConfig,
-					SONG_FW_IN_IMAGE_JSON,
-					Optional.of("jsonld"));
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			String sStackTrace = sw.toString(); // stack trace as a string
-			System.err.println(sStackTrace);
-			throw new RuntimeException(e);
-		}
+		model = NormalizeAnnotation.rewrite(
+				songMapped,
+				songIri,
+				songIriHtml,
+				forwardFactory,
+				normalizerConfig,
+				SONG_FW_IN_IMAGE_JSON,
+				Optional.of("jsonld"));
 		assertEquals(
 				1,
 				model.listStatements((Resource) null, OA.hasTarget, (RDFNode) null)
