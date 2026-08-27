@@ -10,7 +10,6 @@ import de.wwu.scdh.annotation.selection.resource.DOMResource;
 import de.wwu.scdh.annotation.selection.resource.ResourceBuilder;
 import de.wwu.scdh.annotation.selection.rewriter.BackwardMappingFactory;
 import de.wwu.scdh.annotation.selection.rewriter.ForwardMappingFactory;
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
