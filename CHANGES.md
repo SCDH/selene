@@ -1,5 +1,9 @@
 ## Changes
 
+## 0.3.1
+
+- fixes issue #33
+
 ## 0.3.0
 
 - adds support for Web Annotation RFC 5147 plain text Fragment
