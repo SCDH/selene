@@ -1,0 +1,8 @@
+de.wwu.scdh.annotation.selection
+de.wwu.scdh.annotation.selection.cli
+de.wwu.scdh.annotation.selection.component
+de.wwu.scdh.annotation.selection.point
+de.wwu.scdh.annotation.selection.resource
+de.wwu.scdh.annotation.selection.rewriter
+de.wwu.scdh.annotation.selection.utils
+de.wwu.scdh.annotation.selection.wadm
