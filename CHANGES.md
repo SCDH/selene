@@ -1,5 +1,11 @@
 ## Changes
 
+## 0.3.3
+
+- adds an option for writing error messages back to the model (see issue #37)
+- replaces `nu.validator` with Cowan's `tagsoup` for parsing HTML (see
+  issue #36)
+
 ## 0.3.1, 0.3.2
 
 - fixes issues #33 and #34
