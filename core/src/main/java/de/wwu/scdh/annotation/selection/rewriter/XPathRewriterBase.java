@@ -544,7 +544,7 @@ public abstract class XPathRewriterBase {
 			throw new SelectorException("normalizing XPath '" + xpath
 					+ "' did not return exactly one item: returned "
 					+ nodes.size()
-					+ " item");
+					+ " items");
 		} else if (!nodes.itemAt(0).isAtomicValue()) {
 			LOG.error("normalizing XPath '{}' did not return an atomic value", xpath);
 			throw new SelectorException("normalizing XPath '" + xpath + "' did not return an atomic value");

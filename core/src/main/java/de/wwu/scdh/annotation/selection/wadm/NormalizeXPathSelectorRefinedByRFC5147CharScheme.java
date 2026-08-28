@@ -77,6 +77,10 @@ public class NormalizeXPathSelectorRefinedByRFC5147CharScheme implements Consume
 		try {
 			acceptThrows(selector);
 		} catch (ModelException | NumberFormatException | SelectorException e) {
+			if (normalizerConfig.writesBackErrorMessages()) {
+				Statement errorStmt = model.createLiteralStatement(selector, SEL.error, e.getMessage());
+				model.add(errorStmt);
+			}
 			error = Optional.of(e);
 		}
 	}

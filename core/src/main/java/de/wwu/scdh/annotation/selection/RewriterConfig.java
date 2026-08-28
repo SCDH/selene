@@ -21,6 +21,7 @@ public class RewriterConfig {
 	private final boolean rewritesTraceLeaf;
 	private final boolean removeEmptyNamespaces;
 	private final Map<Class<? extends Point>, Class<? extends Point>> pointClassMap;
+	private final boolean writeBackErrorMessages;
 
 	/**
 	 * Make a new {@link RewriterConfig}.
@@ -40,6 +41,7 @@ public class RewriterConfig {
 		this.rewritesTraceLeaf = rewritesTraceLeaf;
 		this.removeEmptyNamespaces = removeEmptyNamespaces;
 		this.pointClassMap = Map.of();
+		this.writeBackErrorMessages = false;
 	}
 
 	/**
@@ -61,13 +63,15 @@ public class RewriterConfig {
 			String xpath,
 			boolean rewritesTraceLeaf,
 			boolean removeEmptyNamespaces,
-			Map<Class<? extends Point>, Class<? extends Point>> pointClassMap) {
+			Map<Class<? extends Point>, Class<? extends Point>> pointClassMap,
+			boolean writeBackErrorMessages) {
 		this.mode = mode;
 		this.escaped = escaped;
 		this.xpath = xpath;
 		this.rewritesTraceLeaf = rewritesTraceLeaf;
 		this.removeEmptyNamespaces = removeEmptyNamespaces;
 		this.pointClassMap = pointClassMap;
+		this.writeBackErrorMessages = writeBackErrorMessages;
 	}
 
 	/**
@@ -80,7 +84,8 @@ public class RewriterConfig {
 				config.xpath,
 				config.rewritesTraceLeaf,
 				config.removeEmptyNamespaces,
-				config.pointClassMap);
+				config.pointClassMap,
+				config.writeBackErrorMessages);
 	}
 
 	public Mode getMode() {
@@ -149,5 +154,12 @@ public class RewriterConfig {
 		} else {
 			return Map.of();
 		}
+	}
+
+	/**
+	 * Whether error messages should be written back to the model when a rewriting error occurs.
+	 */
+	public boolean writesBackErrorMessages() {
+		return writeBackErrorMessages;
 	}
 }

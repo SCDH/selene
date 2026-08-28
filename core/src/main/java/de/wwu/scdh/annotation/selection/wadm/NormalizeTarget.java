@@ -79,12 +79,17 @@ public class NormalizeTarget implements Consumer<Resource> {
 			error = Optional.of(e);
 		} catch (IOException e) {
 			LOG.error("failed to load URI: {}", e.getMessage());
+			if (normalizerConfig.writesBackErrorMessages()) {
+				Statement errorStmt = model.createLiteralStatement(target, SEL.error, e.getMessage());
+				model.add(errorStmt);
+			}
 			error = Optional.of(e);
-		} catch (SaxonApiException e) {
+		} catch (SaxonApiException | ModelException e) {
 			LOG.error(e.getMessage());
-			error = Optional.of(e);
-		} catch (ModelException e) {
-			LOG.error(e.getMessage());
+			if (normalizerConfig.writesBackErrorMessages()) {
+				Statement errorStmt = model.createLiteralStatement(target, SEL.error, e.getMessage());
+				model.add(errorStmt);
+			}
 			error = Optional.of(e);
 		}
 	}

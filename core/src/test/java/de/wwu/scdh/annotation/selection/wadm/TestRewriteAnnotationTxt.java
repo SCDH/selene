@@ -77,17 +77,19 @@ public class TestRewriteAnnotationTxt {
 	}
 
 	private static RewriterConfig forwardConfig(String xpath) {
-		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+		return new RewriterConfig(
+				null, false, xpath, true, true, RewriterConfig.forwardDOMToTextPointClassMap(), false);
 	}
 
 	private static RewriterConfig backwardConfig(String xpath) {
-		return new RewriterConfig(null, false, xpath, true, true, RewriterConfig.backwardDOMToTextPointClassMap());
+		return new RewriterConfig(
+				null, false, xpath, true, true, RewriterConfig.backwardDOMToTextPointClassMap(), false);
 	}
 
 	@Test
 	public void testForwardInImage() {
-		RewriterConfig config =
-				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+		RewriterConfig config = new RewriterConfig(
+				null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap(), false);
 		;
 		model = NormalizeAnnotation.rewrite(
 				songImage, songIri, songIriImage, forwardFactory, config, SONG_FW_IN_IMAGE_JSON, Optional.of("jsonld"));
@@ -199,8 +201,8 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testBackwardInPreimage() {
-		RewriterConfig config =
-				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap());
+		RewriterConfig config = new RewriterConfig(
+				null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap(), false);
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,
@@ -345,8 +347,8 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testForwardNotInImage() {
-		RewriterConfig config =
-				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap());
+		RewriterConfig config = new RewriterConfig(
+				null, false, "path(.)", true, true, RewriterConfig.forwardDOMToTextPointClassMap(), false);
 		;
 		model = NormalizeAnnotation.rewrite(
 				songImage,
@@ -486,8 +488,8 @@ public class TestRewriteAnnotationTxt {
 
 	@Test
 	public void testBackwardNotInPreimage() {
-		RewriterConfig config =
-				new RewriterConfig(null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap());
+		RewriterConfig config = new RewriterConfig(
+				null, false, "path(.)", true, true, RewriterConfig.backwardDOMToTextPointClassMap(), false);
 		model = NormalizeAnnotation.rewrite(
 				songImage,
 				songIriImage,

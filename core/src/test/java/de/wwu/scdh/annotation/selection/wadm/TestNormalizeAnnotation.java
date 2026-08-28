@@ -12,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 import net.sf.saxon.s9api.Processor;
 import org.apache.jena.rdf.model.Model;
@@ -187,5 +188,19 @@ public class TestNormalizeAnnotation {
 						.getObject()
 						.asResource()
 						.toString());
+	}
+
+	@Test
+	public void testAcceptP11WithBadPath() {
+		// xpath generated with root(.) does not select a node
+		normalizerConfig = new RewriterConfig(null, false, "root(.)", false, true, Map.of(), true);
+		model = NormalizeAnnotation.normalize(
+				resource42, iri42, normalizerFactory, normalizerConfig, P1_1_JSON, Optional.of("jsonld"));
+		assertEquals(
+				2,
+				model.listStatements((Resource) null, SEL.error, (Resource) null)
+						.toSet()
+						.size(),
+				"model contains two properties with error messages");
 	}
 }

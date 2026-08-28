@@ -67,11 +67,11 @@ public class NormalizeRFC5147CharScheme implements Consumer<Resource> {
 	public void accept(Resource selector) {
 		try {
 			acceptThrows(selector);
-		} catch (ModelException e) {
-			error = Optional.of(e);
-		} catch (NumberFormatException e) {
-			error = Optional.of(e);
-		} catch (SelectorException e) {
+		} catch (ModelException | NumberFormatException | SelectorException e) {
+			if (normalizerConfig.writesBackErrorMessages()) {
+				Statement errorStmt = model.createLiteralStatement(selector, SEL.error, e.getMessage());
+				model.add(errorStmt);
+			}
 			error = Optional.of(e);
 		}
 	}

@@ -1,6 +1,8 @@
 package de.wwu.scdh.annotation.selection;
 
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 
 /**
@@ -24,4 +26,9 @@ public class SEL {
 	 * an application can assign this RDF class to a selector, the processing of which would throw an exception.
 	 */
 	public static final Resource BadSelector = new ResourceImpl(NAMESPACE, "BadSelector");
+
+	/**
+	 * This property may be added when an error occurred when processing a selector.
+	 */
+	public static final Property error = new PropertyImpl(NAMESPACE, "error");
 }
