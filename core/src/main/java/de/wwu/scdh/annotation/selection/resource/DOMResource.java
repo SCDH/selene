@@ -12,7 +12,7 @@ import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XdmNode;
-import nu.validator.htmlparser.sax.HtmlParser;
+import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -72,7 +72,7 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 
 	/**
 	 * Make a {@link DOMResource} from HTML input given as an {@link
-	 * InputStream}. This uses the {@link HtmlParser} for parsing the
+	 * InputStream}. This uses the Cowan's {@link Parser} for parsing the
 	 * HTML input, which may be tag soup.
 	 *
 	 * @param uri - a {@link URI} identifying the resource in a linked open data context
@@ -88,7 +88,7 @@ public class DOMResource implements S9ApiResource<XdmNode> {
 		InputSource inputSource = new InputSource(inputStream);
 		inputSource.setSystemId(systemId);
 		// use HTML parser
-		Source source = new SAXSource(new HtmlParser(), inputSource);
+		Source source = new SAXSource(new Parser(), inputSource);
 		// hand over to just DOM handling
 		return new DOMResource(uri, source, processor);
 	}

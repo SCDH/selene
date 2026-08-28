@@ -31,8 +31,8 @@ public class TestDOMResource {
 
 	@Test
 	void testFromHTMLonGesangXml() throws IOException, SaxonApiException {
-		// HTML parser is not suitable for XML
-		assertThrows(Exception.class, () -> DOMResource.fromHTML(GESANG_XML, PROC));
+		// Cowan's HTML parser is also not suitable for XML
+		assertDoesNotThrow(() -> DOMResource.fromHTML(GESANG_XML, PROC));
 	}
 
 	@Test
